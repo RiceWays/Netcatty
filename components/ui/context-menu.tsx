@@ -5,6 +5,25 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 import { cn } from "../../lib/utils"
 
 const menuCollisionPadding = { top: 36, bottom: 12, left: 12, right: 12 }
+const CONTEXT_MENU_PORTAL_ID = "nebula-context-menu-root"
+
+// Dedicated portal root so context menus always sit above every other layer (dialogs, titlebar, overlays)
+const getContextMenuPortalEl = () => {
+  if (typeof document === "undefined") return null
+  let portal = document.getElementById(CONTEXT_MENU_PORTAL_ID)
+  if (!portal) {
+    portal = document.createElement("div")
+    portal.id = CONTEXT_MENU_PORTAL_ID
+    Object.assign(portal.style, {
+      position: "fixed",
+      inset: "0px",
+      zIndex: "2147483647", // max safe z-index to avoid being covered
+      pointerEvents: "none",
+    })
+    document.body.appendChild(portal)
+  }
+  return portal
+}
 
 const ContextMenu = ContextMenuPrimitive.Root
 
@@ -42,37 +61,45 @@ ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName
 const ContextMenuSubContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubContent>
->(({ className, ...props }, ref) => (
-  <ContextMenuPrimitive.SubContent
-    ref={ref}
-    sideOffset={6}
-    collisionPadding={menuCollisionPadding}
-    className={cn(
-      "z-[200000] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg app-no-drag pointer-events-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className
-    )}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  const portalContainer = React.useMemo(() => getContextMenuPortalEl() ?? undefined, [])
+  return (
+    <ContextMenuPrimitive.Portal container={portalContainer}>
+      <ContextMenuPrimitive.SubContent
+        ref={ref}
+        sideOffset={6}
+        collisionPadding={menuCollisionPadding}
+        className={cn(
+          "z-[200000] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg app-no-drag pointer-events-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          className
+        )}
+        {...props}
+      />
+    </ContextMenuPrimitive.Portal>
+  )
+})
 ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName
 
 const ContextMenuContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <ContextMenuPrimitive.Portal>
-    <ContextMenuPrimitive.Content
-      ref={ref}
-      sideOffset={6}
-      collisionPadding={menuCollisionPadding}
-      className={cn(
-        "z-[200000] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 app-no-drag pointer-events-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        className
-      )}
-      {...props}
-    />
-  </ContextMenuPrimitive.Portal>
-))
+>(({ className, ...props }, ref) => {
+  const portalContainer = React.useMemo(() => getContextMenuPortalEl() ?? undefined, [])
+  return (
+    <ContextMenuPrimitive.Portal container={portalContainer}>
+      <ContextMenuPrimitive.Content
+        ref={ref}
+        sideOffset={6}
+        collisionPadding={menuCollisionPadding}
+        className={cn(
+          "z-[200000] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 app-no-drag pointer-events-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          className
+        )}
+        {...props}
+      />
+    </ContextMenuPrimitive.Portal>
+  )
+})
 ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName
 
 const ContextMenuItem = React.forwardRef<
