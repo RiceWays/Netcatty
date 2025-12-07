@@ -371,20 +371,72 @@ function App() {
     });
   };
 
+  const pruneWorkspaceNode = (node: WorkspaceNode, targetSessionId: string): WorkspaceNode | null => {
+    if (node.type === 'pane') {
+      return node.sessionId === targetSessionId ? null : node;
+    }
+    const nextChildren: WorkspaceNode[] = [];
+    const nextSizes: number[] = [];
+    const sizeList = node.sizes && node.sizes.length === node.children.length ? node.sizes : node.children.map(() => 1);
+
+    node.children.forEach((child, idx) => {
+      const pruned = pruneWorkspaceNode(child, targetSessionId);
+      if (pruned) {
+        nextChildren.push(pruned);
+        nextSizes.push(sizeList[idx] ?? 1);
+      }
+    });
+
+    if (nextChildren.length === 0) return null;
+    if (nextChildren.length === 1) return nextChildren[0];
+
+    const total = nextSizes.reduce((acc, n) => acc + n, 0) || 1;
+    const normalized = nextSizes.map(n => n / total);
+    return { ...node, children: nextChildren, sizes: normalized };
+  };
+
   const closeSession = (sessionId: string, e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      setSessions(prev => {
-          const newSessions = prev.filter(s => s.id !== sessionId);
-          if (activeTabId === sessionId) {
-              // If we closed the active tab, switch to the last one, or vault
-              if (newSessions.length > 0) {
-                  setActiveTabId(newSessions[newSessions.length - 1].id);
-              } else {
-                  setActiveTabId('vault');
-              }
+    e?.stopPropagation();
+    const targetSession = sessions.find(s => s.id === sessionId);
+    const workspaceId = targetSession?.workspaceId;
+    let removedWorkspaceId: string | null = null;
+
+    let nextWorkspaces = workspaces;
+    if (workspaceId) {
+      nextWorkspaces = workspaces
+        .map(ws => {
+          if (ws.id !== workspaceId) return ws;
+          const pruned = pruneWorkspaceNode(ws.root, sessionId);
+          if (!pruned) {
+            removedWorkspaceId = ws.id;
+            return null;
           }
-          return newSessions;
-      });
+          return { ...ws, root: pruned };
+        })
+        .filter((ws): ws is Workspace => Boolean(ws));
+    }
+
+    const remainingSessions = sessions.filter(s => s.id !== sessionId);
+    setWorkspaces(nextWorkspaces);
+    setSessions(remainingSessions);
+
+    const fallbackWorkspace = nextWorkspaces[nextWorkspaces.length - 1];
+    const fallbackSolo = remainingSessions.filter(s => !s.workspaceId).slice(-1)[0];
+
+    const setFallback = () => {
+      if (fallbackWorkspace) setActiveTabId(fallbackWorkspace.id);
+      else if (fallbackSolo) setActiveTabId(fallbackSolo.id);
+      else setActiveTabId('vault');
+    };
+
+    if (activeTabId === sessionId) {
+      if (fallbackSolo) setActiveTabId(fallbackSolo.id);
+      else setFallback();
+    } else if (removedWorkspaceId && activeTabId === removedWorkspaceId) {
+      setFallback();
+    } else if (workspaceId && activeTabId === workspaceId && !nextWorkspaces.find(w => w.id === workspaceId)) {
+      setFallback();
+    }
   };
 
   const closeWorkspace = (workspaceId: string) => {
@@ -413,6 +465,8 @@ function App() {
     setWorkspaces(prev => prev.map(w => w.id === workspaceId ? { ...w, title: name.trim() } : w));
   };
 
+  type WorkspaceRect = { x: number; y: number; w: number; h: number };
+
   const computeSplitHint = (e: React.DragEvent): {
     direction: 'horizontal' | 'vertical';
     position: 'left' | 'right' | 'top' | 'bottom';
@@ -427,8 +481,9 @@ function App() {
     if (localX < 0 || localX > rect.width || localY < 0 || localY > rect.height) return null;
 
     let targetSessionId: string | undefined;
-    let targetRect: { x: number; y: number; w: number; h: number } | undefined;
-    Object.entries(activeWorkspaceRects).forEach(([sessionId, area]) => {
+    let targetRect: WorkspaceRect | undefined;
+    const workspaceEntries = Object.entries(activeWorkspaceRects) as Array<[string, WorkspaceRect]>;
+    workspaceEntries.forEach(([sessionId, area]) => {
       if (targetSessionId) return;
       if (
         localX >= area.x &&
@@ -441,7 +496,7 @@ function App() {
       }
     });
 
-    const baseRect = targetRect || { x: 0, y: 0, w: rect.width, h: rect.height };
+    const baseRect: WorkspaceRect = targetRect || { x: 0, y: 0, w: rect.width, h: rect.height };
     const relX = (localX - baseRect.x) / baseRect.w;
     const relY = (localY - baseRect.y) / baseRect.h;
 
@@ -451,7 +506,7 @@ function App() {
       ? (relX < 0.5 ? 'left' : 'right')
       : (relY < 0.5 ? 'top' : 'bottom');
 
-    const previewRect = { ...baseRect };
+    const previewRect: WorkspaceRect = { ...baseRect };
     if (direction === 'vertical') {
       previewRect.w = baseRect.w / 2;
       previewRect.x = position === 'left' ? baseRect.x : baseRect.x + baseRect.w / 2;
@@ -577,12 +632,12 @@ function App() {
     }
   };
 
-  const computeWorkspaceRects = (workspace?: Workspace, size?: { width: number; height: number }) => {
-    if (!workspace) return {} as Record<string, { x: number; y: number; w: number; h: number }>;
+  const computeWorkspaceRects = (workspace?: Workspace, size?: { width: number; height: number }): Record<string, WorkspaceRect> => {
+    if (!workspace) return {} as Record<string, WorkspaceRect>;
     const wTotal = size?.width || 1;
     const hTotal = size?.height || 1;
-    const rects: Record<string, { x: number; y: number; w: number; h: number }> = {};
-    const walk = (node: WorkspaceNode, area: { x: number; y: number; w: number; h: number }) => {
+    const rects: Record<string, WorkspaceRect> = {};
+    const walk = (node: WorkspaceNode, area: WorkspaceRect) => {
       if (node.type === 'pane') {
         rects[node.sessionId] = area;
         return;
@@ -758,7 +813,10 @@ function App() {
   const activeWorkspace = useMemo(() => workspaces.find(w => w.id === activeTabId), [workspaces, activeTabId]);
   const activeSession = useMemo(() => sessions.find(s => s.id === activeTabId), [sessions, activeTabId]);
   const orphanSessions = useMemo(() => sessions.filter(s => !s.workspaceId), [sessions]);
-  const activeWorkspaceRects = useMemo(() => computeWorkspaceRects(activeWorkspace, workspaceArea), [activeWorkspace, workspaceArea]);
+  const activeWorkspaceRects = useMemo<Record<string, WorkspaceRect>>(
+    () => computeWorkspaceRects(activeWorkspace, workspaceArea),
+    [activeWorkspace, workspaceArea]
+  );
 
   useEffect(() => {
     if (!workspaceInnerRef.current) return;
@@ -882,6 +940,15 @@ function App() {
     };
   }, [resizing]);
 
+  const sessionStatusDot = (status: TerminalSession['status']) => {
+    const tone = status === 'connected'
+      ? "bg-emerald-400"
+      : status === 'connecting'
+        ? "bg-amber-400"
+        : "bg-rose-500";
+    return <span className={cn("inline-block h-2 w-2 rounded-full shadow-[0_0_0_2px_rgba(0,0,0,0.35)]", tone)} />;
+  };
+
   const topTabs = (
     <div className="w-full bg-secondary/90 border-b border-border/60 backdrop-blur app-drag">
       <div 
@@ -923,6 +990,7 @@ function App() {
             <div className="flex items-center gap-2 truncate">
               <TerminalSquare size={14} className={cn("shrink-0", activeTabId === session.id ? "text-primary" : "text-muted-foreground")} />
               <span className="truncate">{session.hostLabel}</span>
+              {sessionStatusDot(session.status)}
             </div>
             <button
               onClick={(e) => closeSession(session.id, e)}
@@ -1343,6 +1411,7 @@ function App() {
                     fontSize={14}
                     terminalTheme={currentTerminalTheme}
                     sessionId={session.id}
+                    onCloseSession={() => closeSession(session.id)}
                     onStatusChange={(next) => updateSessionStatus(session.id, next)}
                     onSessionExit={() => updateSessionStatus(session.id, 'disconnected')}
                     onOsDetected={(hid, distro) => updateHostDistro(hid, distro)}

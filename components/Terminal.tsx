@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Ghostty, Terminal as GhosttyTerminal, FitAddon } from 'ghostty-web';
 import { Host, SSHKey, Snippet, TerminalSession, TerminalTheme } from '../types';
-import { Zap, FolderInput, Activity, Loader2, AlertCircle, ShieldCheck, Clock, Play } from 'lucide-react';
+import { Zap, FolderInput, Loader2, AlertCircle, ShieldCheck, Clock, Play, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -20,6 +20,7 @@ interface TerminalProps {
   onStatusChange?: (status: TerminalSession['status']) => void;
   onSessionExit?: (sessionId: string) => void;
   onOsDetected?: (hostId: string, distro: string) => void;
+  onCloseSession?: () => void;
 }
 
 let ghosttyPromise: Promise<Ghostty> | null = null;
@@ -42,6 +43,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
   onStatusChange,
   onSessionExit,
   onOsDetected,
+  onCloseSession,
 }) => {
   const CONNECTION_TIMEOUT = 12000;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -365,7 +367,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     startSSH(termRef.current);
   };
 
-  const renderControls = (variant: 'default' | 'compact') => {
+  const renderControls = (variant: 'default' | 'compact', opts?: { showClose?: boolean }) => {
     const isCompact = variant === 'compact';
     const buttonBase = isCompact
       ? "h-7 px-2 text-[11px] bg-white/5 hover:bg-white/10 text-white shadow-none border-none"
@@ -373,15 +375,6 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     const scriptsButtonBase = isCompact
       ? "h-7 px-2 text-[11px] bg-white/5 hover:bg-white/10 text-white shadow-none border-none"
       : "h-8 px-3 text-xs bg-muted/20 hover:bg-muted/80 backdrop-blur-md border border-white/10 text-white shadow-lg";
-    const statusBase = isCompact
-      ? "px-2 h-7 rounded-md text-[10px] flex items-center gap-1.5 font-semibold shadow-sm"
-      : "px-3 h-8 rounded-md border border-white/10 text-[11px] flex items-center gap-2 shadow";
-    const statusTone =
-      status === 'connected'
-        ? "bg-emerald-500/20 text-emerald-100"
-        : status === 'connecting'
-          ? "bg-amber-500/20 text-amber-100"
-          : "bg-muted/40 text-muted-foreground";
 
     return (
       <>
@@ -435,13 +428,29 @@ const TerminalComponent: React.FC<TerminalProps> = ({
           </PopoverContent>
         </Popover>
 
-        <div className={cn(statusBase, statusTone)}>
-          <Activity size={12} />
-          <span className="capitalize">{status}</span>
-        </div>
+        {opts?.showClose && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-white/80 hover:text-white hover:bg-white/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCloseSession?.();
+            }}
+            title="Close session"
+          >
+            <X size={12} />
+          </Button>
+        )}
       </>
     );
   };
+
+  const statusDotTone = status === 'connected'
+    ? "bg-emerald-400"
+    : status === 'connecting'
+      ? "bg-amber-400"
+      : "bg-rose-500";
 
   return (
     <div className="relative h-full w-full flex overflow-hidden bg-gradient-to-br from-[#050910] via-[#06101a] to-[#0b1220] border-l border-border/70">
@@ -456,12 +465,13 @@ const TerminalComponent: React.FC<TerminalProps> = ({
           <div className="flex items-center gap-2 px-2 py-1 bg-black/55 text-white backdrop-blur-md pointer-events-auto">
             <div className="flex-1 min-w-0 flex items-center gap-2 text-[11px] font-semibold truncate">
               <span className="truncate">{host.label}</span>
+              <span className={cn("inline-block h-2 w-2 rounded-full", statusDotTone)} />
               <span className="text-white/80 font-mono text-[10px] font-normal truncate">
                 {host.username}@{host.hostname}:{host.port || 22}
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              {renderControls('compact')}
+              {renderControls('compact', { showClose: true })}
             </div>
           </div>
         </div>
