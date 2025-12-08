@@ -93,6 +93,48 @@ body {
   color: hsl(var(--foreground));
 }
 
+/* Port Forwarding Traffic Animation */
+@keyframes traffic-flow {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes traffic-flow-reverse {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 24;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.traffic-line {
+  stroke-dasharray: 8 4;
+  animation: traffic-flow 0.8s linear infinite;
+}
+
+.traffic-line-reverse {
+  stroke-dasharray: 8 4;
+  animation: traffic-flow-reverse 0.8s linear infinite;
+}
+
+.traffic-glow {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
 /* Custom titlebar drag regions for Electron */
 .app-drag {
   -webkit-app-region: drag;

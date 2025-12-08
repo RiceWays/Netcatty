@@ -161,9 +161,14 @@ const KeyManager: React.FC<KeyManagerProps> = ({ keys, onSave, onDelete }) => {
 
         <div className="space-y-3">
           {filteredKeys.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
-              <Shield size={48} className="mb-3 opacity-60" />
-              <p className="text-sm">No keys found. Import or generate to get started.</p>
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+              <div className="h-16 w-16 rounded-2xl bg-secondary/80 flex items-center justify-center mb-4">
+                <Shield size={32} className="opacity-60" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Set up your keys</h3>
+              <p className="text-sm text-center max-w-sm">
+                Import or generate SSH keys for secure authentication.
+              </p>
             </div>
           )}
 

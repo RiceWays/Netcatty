@@ -8,3 +8,4 @@ export const STORAGE_KEY_THEME = 'nebula_theme_v1';
 export const STORAGE_KEY_COLOR = 'nebula_color_v1';
 export const STORAGE_KEY_SYNC = 'nebula_sync_v1';
 export const STORAGE_KEY_TERM_THEME = 'nebula_term_theme_v1';
+export const STORAGE_KEY_PORT_FORWARDING = 'nebula_port_forwarding_v1';

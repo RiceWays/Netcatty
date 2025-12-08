@@ -23,7 +23,7 @@ import { Host, SSHKey, Snippet, GroupNode, TerminalSession } from '../types';
 import { DistroAvatar } from './DistroAvatar';
 import SnippetsManager from './SnippetsManager';
 import KeyManager from './KeyManager';
-import PortForwarding from './PortForwarding';
+import PortForwarding from './PortForwardingNew';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -290,6 +290,7 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
           </header>
         )}
 
+        {currentSection !== 'port' && (
         <div className="flex-1 overflow-auto px-4 py-4 space-y-6">
           {currentSection === 'hosts' && (
             <>
@@ -419,20 +420,14 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
                     );
                   })}
                   {displayedHosts.length === 0 && (
-                    <div className="col-span-full flex items-center justify-center py-16">
-                      <div className="max-w-sm w-full rounded-2xl bg-secondary/60 px-6 py-8 text-center shadow-lg">
-                        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-background text-muted-foreground shadow-sm">
-                          <Search size={20} />
-                        </div>
-                        <div className="text-sm font-semibold text-foreground">No results found</div>
-                        <div className="text-xs text-muted-foreground mt-1">Adjust your search or create a new host.</div>
-                        <div className="mt-4 flex items-center justify-center gap-2">
-                          <Button size="sm" variant="secondary" onClick={onNewHost}>
-                            <Plus size={14} className="mr-1" /> New Host
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setSearch('')}>Clear search</Button>
-                        </div>
+                    <div className="col-span-full flex flex-col items-center justify-center py-24 text-muted-foreground">
+                      <div className="h-16 w-16 rounded-2xl bg-secondary/80 flex items-center justify-center mb-4">
+                        <LayoutGrid size={32} className="opacity-60" />
                       </div>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">Set up your hosts</h3>
+                      <p className="text-sm text-center max-w-sm">
+                        Save hosts to quickly connect to your servers, VMs, and containers.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -453,8 +448,9 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
               onDelete={id => onUpdateSnippets(snippets.filter(s => s.id !== id))}
             />
           )}
-          {currentSection === 'port' && <PortForwarding />}
         </div>
+        )}
+        {currentSection === 'port' && <PortForwarding hosts={hosts} customGroups={customGroups} onNewHost={onNewHost} />}
       </div>
 
       <Dialog open={isNewFolderOpen} onOpenChange={setIsNewFolderOpen}>
