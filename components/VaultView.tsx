@@ -456,11 +456,11 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
           </div>
         )}
         {currentSection === 'keys' && (
-          <KeychainManager 
-            keys={keys} 
-            onSave={k => onUpdateKeys([...keys, k])} 
+          <KeychainManager
+            keys={keys}
+            onSave={k => onUpdateKeys([...keys, k])}
             onUpdate={k => onUpdateKeys(keys.map(existing => existing.id === k.id ? k : existing))}
-            onDelete={id => onUpdateKeys(keys.filter(k => k.id !== id))} 
+            onDelete={id => onUpdateKeys(keys.filter(k => k.id !== id))}
           />
         )}
         {currentSection === 'port' && <PortForwarding hosts={hosts} keys={keys} customGroups={customGroups} onNewHost={onNewHost} />}
@@ -473,7 +473,7 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
             onDelete={id => onUpdateKnownHosts(knownHosts.filter(kh => kh.id !== id))}
             onConvertToHost={onConvertKnownHost}
             onImportFromFile={(newHosts) => onUpdateKnownHosts([...knownHosts, ...newHosts])}
-            onRefresh={() => {/* Placeholder for system scan */}}
+            onRefresh={() => {/* Placeholder for system scan */ }}
           />
         )}
       </div>

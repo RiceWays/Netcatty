@@ -68,7 +68,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
   const [isCancelling, setIsCancelling] = useState(false);
   const [showSFTP, setShowSFTP] = useState(false);
   const [progressValue, setProgressValue] = useState(15);
-  
+
   // Auth dialog state for hosts without credentials
   const [needsAuth, setNeedsAuth] = useState(false);
   const [authUsername, setAuthUsername] = useState(host.username || 'root');
@@ -77,7 +77,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
   const [authKeyId, setAuthKeyId] = useState<string | null>(null);
   const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [saveCredentials, setSaveCredentials] = useState(true);
-  
+
   // Pending connection credentials (set after auth dialog submit)
   const pendingAuthRef = useRef<{
     username: string;
@@ -191,14 +191,14 @@ const TerminalComponent: React.FC<TerminalProps> = ({
           const hasPassword = host.authMethod === 'password' && host.password;
           const hasKey = host.authMethod === 'key' && host.identityFileId;
           const hasPendingAuth = pendingAuthRef.current;
-          
+
           if (!hasPassword && !hasKey && !hasPendingAuth && !host.username) {
             // No auth info available - show auth dialog
             setNeedsAuth(true);
             setStatus('connecting');
             return;
           }
-          
+
           await startSSH(term);
         }
       } catch (err) {
@@ -353,7 +353,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     const effectiveUsername = pendingAuth?.username || host.username || 'root';
     const effectivePassword = pendingAuth?.password || (host.authMethod !== 'key' ? host.password : undefined);
     const effectiveKeyId = pendingAuth?.keyId || host.identityFileId;
-    
+
     const key = effectiveKeyId
       ? keys.find((k) => k.id === effectiveKeyId)
       : undefined;
@@ -524,7 +524,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
   const handleAuthSubmit = () => {
     if (!isAuthValid()) return;
-    
+
     // Set pending auth credentials
     pendingAuthRef.current = {
       username: authUsername,
@@ -547,7 +547,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     // Hide auth dialog and start connection
     setNeedsAuth(false);
     setProgressLogs(['Authenticating with provided credentials...']);
-    
+
     if (termRef.current) {
       startSSH(termRef.current);
     }
