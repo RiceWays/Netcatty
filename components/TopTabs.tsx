@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
-import { TerminalSquare, Shield, Folder, LayoutGrid, Plus, Bell, User, Sun, Moon, X, Minus, Square, Copy } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, memo, useLayoutEffect } from 'react';
+import { TerminalSquare, Shield, Folder, LayoutGrid, Plus, Bell, User, Sun, Moon, X, Minus, Square, Copy, MoreHorizontal } from 'lucide-react';
 import { TerminalSession, Workspace } from '../types';
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
@@ -123,6 +123,61 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
   const [dropIndicator, setDropIndicator] = useState<{ tabId: string; position: 'before' | 'after' } | null>(null);
   const [isDraggingForReorder, setIsDraggingForReorder] = useState(false);
   const draggedTabIdRef = useRef<string | null>(null);
+
+  // Refs for scrollable tab container
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+
+  // Check scroll state
+  const updateScrollState = useCallback(() => {
+    const container = tabsContainerRef.current;
+    if (container) {
+      const hasScroll = container.scrollWidth > container.clientWidth;
+      setHasOverflow(hasScroll);
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth - 1);
+    }
+  }, []);
+
+  // Update scroll state on mount and resize
+  useEffect(() => {
+    updateScrollState();
+    const container = tabsContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateScrollState);
+      const resizeObserver = new ResizeObserver(updateScrollState);
+      resizeObserver.observe(container);
+      return () => {
+        container.removeEventListener('scroll', updateScrollState);
+        resizeObserver.disconnect();
+      };
+    }
+  }, [updateScrollState, orderedTabs]);
+
+  // Scroll to active tab when it changes
+  useLayoutEffect(() => {
+    if (!activeTabId || activeTabId === 'vault' || activeTabId === 'sftp') return;
+    const container = tabsContainerRef.current;
+    if (!container) return;
+    
+    // Find the active tab element
+    const activeTabElement = container.querySelector(`[data-tab-id="${activeTabId}"]`) as HTMLElement | null;
+    if (activeTabElement) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = activeTabElement.getBoundingClientRect();
+      
+      // Check if tab is outside visible area
+      if (tabRect.left < containerRect.left) {
+        container.scrollLeft -= (containerRect.left - tabRect.left + 8);
+      } else if (tabRect.right > containerRect.right) {
+        container.scrollLeft += (tabRect.right - containerRect.right + 8);
+      }
+    }
+    // Update scroll indicators after scroll
+    setTimeout(updateScrollState, 100);
+  }, [activeTabId, updateScrollState]);
 
   // Pre-compute lookup maps for O(1) access instead of O(n) find operations
   const orphanSessionMap = useMemo(() => {
@@ -265,6 +320,7 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
         return (
           <div
             key={session.id}
+            data-tab-id={session.id}
             onClick={() => onSelectTab(session.id)}
             draggable
             onDragStart={(e) => handleTabDragStart(e, session.id)}
@@ -273,7 +329,7 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
             onDragLeave={handleTabDragLeave}
             onDrop={(e) => handleTabDrop(e, session.id)}
             className={cn(
-              "relative h-8 pl-3 pr-2 min-w-[140px] max-w-[240px] rounded-md border text-xs font-semibold cursor-pointer flex items-center justify-between gap-2 app-no-drag",
+              "relative h-8 pl-3 pr-2 min-w-[140px] max-w-[240px] rounded-md border text-xs font-semibold cursor-pointer flex items-center justify-between gap-2 app-no-drag flex-shrink-0",
               "transition-all duration-200 ease-out",
               activeTabId === session.id ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
               isBeingDragged && isDraggingForReorder ? "opacity-40 scale-95" : ""
@@ -317,6 +373,7 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
           <ContextMenu key={workspace.id}>
             <ContextMenuTrigger asChild>
               <div
+                data-tab-id={workspace.id}
                 onClick={() => onSelectTab(workspace.id)}
                 draggable
                 onDragStart={(e) => handleTabDragStart(e, workspace.id)}
@@ -325,7 +382,7 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
                 onDragLeave={handleTabDragLeave}
                 onDrop={(e) => handleTabDrop(e, workspace.id)}
                 className={cn(
-                  "relative h-8 pl-3 pr-2 min-w-[150px] max-w-[260px] rounded-md border text-xs font-semibold cursor-pointer flex items-center justify-between gap-2 app-no-drag",
+                  "relative h-8 pl-3 pr-2 min-w-[150px] max-w-[260px] rounded-md border text-xs font-semibold cursor-pointer flex items-center justify-between gap-2 app-no-drag flex-shrink-0",
                   "transition-all duration-200 ease-out",
                   isActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
                   isBeingDragged && isDraggingForReorder ? "opacity-40 scale-95" : ""
@@ -371,35 +428,69 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
         className="h-10 px-3 flex items-center gap-2"
         style={{ paddingLeft: isMacClient ? 76 : 12 }}
       >
-        <div
-          onClick={() => onSelectTab('vault')}
-          className={cn(
-            "h-8 px-3 rounded-md border text-xs font-semibold cursor-pointer flex items-center gap-2 app-no-drag",
-            isVaultActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-          )}
-        >
-          <Shield size={14} /> Vaults
+        {/* Fixed left tabs: Vaults and SFTP */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div
+            onClick={() => onSelectTab('vault')}
+            className={cn(
+              "h-8 px-3 rounded-md border text-xs font-semibold cursor-pointer flex items-center gap-2 app-no-drag",
+              isVaultActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            )}
+          >
+            <Shield size={14} /> Vaults
+          </div>
+          <div
+            onClick={() => onSelectTab('sftp')}
+            className={cn(
+              "h-8 px-3 rounded-md border text-xs font-semibold cursor-pointer flex items-center gap-2 app-no-drag",
+              isSftpActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            )}
+          >
+            <Folder size={14} /> SFTP
+          </div>
         </div>
-        <div
-          onClick={() => onSelectTab('sftp')}
-          className={cn(
-            "h-8 px-3 rounded-md border text-xs font-semibold cursor-pointer flex items-center gap-2 app-no-drag",
-            isSftpActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+
+        {/* Scrollable tabs container with fade masks */}
+        <div className="relative min-w-0 flex-1">
+          {/* Left fade mask */}
+          {canScrollLeft && (
+            <div 
+              className="absolute left-0 top-0 bottom-0 w-8 pointer-events-none z-10"
+              style={{ background: 'linear-gradient(to right, hsl(var(--secondary) / 0.9), transparent)' }}
+            />
           )}
-        >
-          <Folder size={14} /> SFTP
+          
+          {/* Scrollable container */}
+          <div
+            ref={tabsContainerRef}
+            className="flex items-center gap-2 overflow-x-auto scrollbar-none"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {renderOrderedTabs()}
+          </div>
+          
+          {/* Right fade mask */}
+          {canScrollRight && (
+            <div 
+              className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none z-10"
+              style={{ background: 'linear-gradient(to left, hsl(var(--secondary) / 0.9), transparent)' }}
+            />
+          )}
         </div>
-        {renderOrderedTabs()}
+
+        {/* Add new tab / more button */}
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 app-no-drag"
+          className="h-8 w-8 flex-shrink-0 app-no-drag"
           onClick={onOpenQuickSwitcher}
-          title="Open quick switcher"
+          title={hasOverflow ? "More tabs" : "Open quick switcher"}
         >
-          <Plus size={14} />
+          {hasOverflow ? <MoreHorizontal size={14} /> : <Plus size={14} />}
         </Button>
-        <div className="ml-auto flex items-center gap-2 app-no-drag">
+
+        {/* Fixed right controls */}
+        <div className="flex-shrink-0 flex items-center gap-2 app-no-drag">
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
             <Bell size={16} />
           </Button>
