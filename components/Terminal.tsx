@@ -714,7 +714,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         )}
         style={{ backgroundColor: terminalTheme.colors.background }}
       >
-        <div ref={containerRef} className="absolute inset-0" style={inWorkspace ? { top: '32px', display: 'flex', justifyContent: 'center' } : { display: 'flex', justifyContent: 'center' }} />
+        <div ref={containerRef} className="absolute inset-x-0 bottom-0 top-3" style={inWorkspace ? { top: '40px', display: 'flex', justifyContent: 'center' } : { display: 'flex', justifyContent: 'center' }} />
         {error && (
           <div className="absolute bottom-3 left-3 text-xs text-destructive bg-background/80 border border-destructive/40 rounded px-3 py-2 shadow-lg">
             {error}
