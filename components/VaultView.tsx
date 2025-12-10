@@ -269,19 +269,19 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
         </div>
 
         <div className="px-3 space-y-1">
-          <Button variant={currentSection === 'hosts' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'hosts' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 border border-black/10 dark:border-white/10")} onClick={() => { setCurrentSection('hosts'); setSelectedGroupPath(null); }}>
+          <Button variant={currentSection === 'hosts' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'hosts' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 dark:border-white/10")} onClick={() => { setCurrentSection('hosts'); setSelectedGroupPath(null); }}>
             <LayoutGrid size={16} /> Hosts
           </Button>
-          <Button variant={currentSection === 'keys' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'keys' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 border border-black/10 dark:border-white/10")} onClick={() => { setCurrentSection('keys'); }}>
+          <Button variant={currentSection === 'keys' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'keys' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 dark:border-white/10")} onClick={() => { setCurrentSection('keys'); }}>
             <Key size={16} /> Keychain
           </Button>
-          <Button variant={currentSection === 'port' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'port' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 border border-black/10 dark:border-white/10")} onClick={() => setCurrentSection('port')}>
+          <Button variant={currentSection === 'port' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'port' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 dark:border-white/10")} onClick={() => setCurrentSection('port')}>
             <Plug size={16} /> Port Forwarding
           </Button>
-          <Button variant={currentSection === 'snippets' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'snippets' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 border border-black/10 dark:border-white/10")} onClick={() => { setCurrentSection('snippets'); }}>
+          <Button variant={currentSection === 'snippets' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'snippets' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 dark:border-white/10")} onClick={() => { setCurrentSection('snippets'); }}>
             <FileCode size={16} /> Snippets
           </Button>
-          <Button variant={currentSection === 'knownhosts' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'knownhosts' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 border border-black/10 dark:border-white/10")} onClick={() => setCurrentSection('knownhosts')}>
+          <Button variant={currentSection === 'knownhosts' ? 'secondary' : 'ghost'} className={cn("w-full justify-start gap-3 h-10", currentSection === 'knownhosts' && "bg-black/5 dark:bg-white/10 text-foreground hover:bg-black/10 dark:hover:bg-white/15 dark:border-white/10")} onClick={() => setCurrentSection('knownhosts')}>
             <BookMarked size={16} /> Known Hosts
           </Button>
           <Button variant="ghost" className="w-full justify-start gap-3 h-10">
