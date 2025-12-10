@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Host, Snippet, ShellHistoryEntry, SSHKey } from '../types';
-import { FileCode, Plus, Trash2, Edit2, Copy, Clock, List as ListIcon, FolderPlus, Grid, Play, ArrowLeft, X, Check, ChevronDown, Loader2 } from 'lucide-react';
+import { FileCode, Plus, Trash2, Edit2, Copy, Clock, List as ListIcon, FolderPlus, Grid, Play, ArrowLeft, X, Check, ChevronDown, Loader2, Package } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -12,6 +12,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { DistroAvatar } from './DistroAvatar';
 import SelectHostPanel from './SelectHostPanel';
 import { AsidePanel, AsidePanelContent } from './ui/aside-panel';
+import { Combobox, ComboboxOption } from './ui/combobox';
 
 interface SnippetsManagerProps {
   snippets: Snippet[];
@@ -210,6 +211,15 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
     onSave({ ...sn, package: pkg || '' });
   };
 
+  // Package options for Combobox
+  const packageOptions: ComboboxOption[] = useMemo(() => {
+    return packages.map(p => ({
+      value: p,
+      label: p.includes('/') ? p.split('/').pop()! : p,
+      sublabel: p.includes('/') ? p : undefined,
+    }));
+  }, [packages]);
+
   // Shell history lazy loading
   const visibleHistory = useMemo(() => {
     return shellHistory.slice(0, historyVisibleCount);
@@ -308,11 +318,20 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
             {/* Package */}
             <Card className="p-3 space-y-2 bg-card border-border/80">
               <p className="text-xs font-semibold text-muted-foreground">Add a Package</p>
-              <Input
-                placeholder="e.g. infra/ops"
+              <Combobox
+                options={packageOptions}
                 value={editingSnippet.package || selectedPackage || ''}
-                onChange={(e) => setEditingSnippet({ ...editingSnippet, package: e.target.value })}
-                className="h-10"
+                onValueChange={(val) => setEditingSnippet({ ...editingSnippet, package: val })}
+                placeholder="Select or create package"
+                allowCreate={true}
+                onCreateNew={(val) => {
+                  if (!packages.includes(val)) {
+                    onPackagesChange([...packages, val]);
+                  }
+                }}
+                createText="Create Package"
+                icon={<Package size={16} />}
+                triggerClassName="h-10"
               />
             </Card>
 

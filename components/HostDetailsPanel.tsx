@@ -5,33 +5,40 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { cn } from "../lib/utils";
-import { Network, KeyRound, Lock, Share2, Server, Shield, Zap, TerminalSquare, Tag, ChevronLeft, Navigation, PhoneCall, Plus, FolderPlus, ArrowLeft, Link2, Trash2, GripVertical, Globe, HelpCircle, X, ArrowDown, ArrowRight, Check, Variable } from "lucide-react";
+import { Network, KeyRound, Lock, Share2, Server, Shield, Zap, TerminalSquare, Tag, ChevronLeft, Navigation, PhoneCall, Plus, FolderPlus, ArrowLeft, Link2, Trash2, GripVertical, Globe, HelpCircle, X, ArrowDown, ArrowRight, Check, Variable, Key, Fingerprint } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { DistroAvatar } from "./DistroAvatar";
 import { AsidePanel, AsidePanelContent, AsidePanelFooter } from "./ui/aside-panel";
+import { Combobox, MultiCombobox, ComboboxOption } from "./ui/combobox";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 type Protocol = "ssh" | "telnet";
 type AuthMethod = "password" | "key" | "certificate" | "fido2";
+type CredentialType = "sshid" | "key" | "certificate" | "fido2" | null;
 type SubPanel = "none" | "create-group" | "proxy" | "chain" | "env-vars";
 
 interface HostDetailsPanelProps {
   initialData?: Host | null;
   availableKeys: SSHKey[];
   groups: string[];
+  allTags?: string[]; // All available tags for autocomplete
   allHosts?: Host[]; // All hosts for chain selection
   onSave: (host: Host) => void;
   onCancel: () => void;
   onCreateGroup?: (groupPath: string) => void; // Callback to create a new group
+  onCreateTag?: (tag: string) => void; // Callback to create a new tag
 }
 
 const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
   initialData,
   availableKeys,
   groups,
+  allTags = [],
   allHosts = [],
   onSave,
   onCancel,
-  onCreateGroup
+  onCreateGroup,
+  onCreateTag
 }) => {
   const [form, setForm] = useState<Host>(() => initialData || ({
     id: crypto.randomUUID(),
@@ -50,6 +57,10 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
 
   // Sub-panel state
   const [activeSubPanel, setActiveSubPanel] = useState<SubPanel>("none");
+
+  // Credential selection state
+  const [credentialPopoverOpen, setCredentialPopoverOpen] = useState(false);
+  const [selectedCredentialType, setSelectedCredentialType] = useState<CredentialType>(null);
 
   // New group creation state
   const [newGroupName, setNewGroupName] = useState("");
@@ -228,6 +239,30 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
     const ids = form.hostChain?.hostIds || [];
     return ids.map(id => allHosts.find(h => h.id === id)).filter(Boolean) as Host[];
   }, [allHosts, form.hostChain?.hostIds]);
+
+  // Compute group options for Combobox
+  const groupOptions: ComboboxOption[] = useMemo(() => {
+    return groups.map(g => ({
+      value: g,
+      label: g.includes('/') ? g.split('/').pop()! : g,
+      sublabel: g.includes('/') ? g : undefined,
+    }));
+  }, [groups]);
+
+  // Compute tag options for MultiCombobox
+  const tagOptions: ComboboxOption[] = useMemo(() => {
+    const allTagSet = new Set([...allTags, ...(form.tags || [])]);
+    return Array.from(allTagSet).map(t => ({ value: t, label: t }));
+  }, [allTags, form.tags]);
+
+  // Available keys by category
+  const keysByCategory = useMemo(() => {
+    return {
+      key: availableKeys.filter(k => k.category === 'key'),
+      certificate: availableKeys.filter(k => k.category === 'certificate'),
+      identity: availableKeys.filter(k => k.category === 'identity'),
+    };
+  }, [availableKeys]);
 
   // Render sub-panels
   if (activeSubPanel === "create-group") {
@@ -438,9 +473,11 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
 
             {/* Target host (current) */}
             <div className="flex items-center gap-2 p-2 rounded-lg border-2 border-primary/30 bg-primary/5">
-              <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Server size={14} className="text-primary" />
-              </div>
+              <DistroAvatar
+                host={form as Host}
+                fallback={form.label?.slice(0, 2).toUpperCase() || form.hostname?.slice(0, 2).toUpperCase() || "H"}
+                className="h-8 w-8"
+              />
               <span className="text-sm font-medium text-primary">{form.label || form.hostname || "Target"}</span>
             </div>
           </div>
@@ -589,9 +626,11 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
         <Card className="p-3 space-y-2 bg-card border-border/80">
           <p className="text-xs font-semibold">Address</p>
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center">
-              <Server size={18} className="text-primary" />
-            </div>
+            <DistroAvatar
+              host={form as Host}
+              fallback={form.label?.slice(0, 2).toUpperCase() || form.hostname?.slice(0, 2).toUpperCase() || "H"}
+              className="h-10 w-10"
+            />
             <Input
               placeholder="IP or Hostname"
               value={form.hostname}
@@ -610,112 +649,41 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
             className="h-10"
           />
 
-          {/* Group input with inline create suggestion */}
-          <div className="relative">
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center">
-                <FolderPlus size={16} className="text-muted-foreground" />
-              </div>
-              <Input
-                placeholder="Group"
-                value={groupInputValue}
-                onChange={(e) => handleGroupInputChange(e.target.value)}
-                onFocus={() => setShowCreateGroupSuggestion(true)}
-                onBlur={() => setTimeout(() => setShowCreateGroupSuggestion(false), 150)}
-                list="group-options"
-                className="h-10 flex-1"
-              />
+          {/* Group selection with Combobox */}
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center shrink-0">
+              <FolderPlus size={16} className="text-muted-foreground" />
             </div>
-            {showCreateGroupSuggestion && isNewGroup && (
-              <button
-                className="absolute left-12 right-0 top-full mt-1 z-10 flex items-center gap-2 px-3 py-2 rounded-md bg-card border border-border/80 shadow-lg hover:bg-secondary transition-colors text-left"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={handleCreateGroupFromInput}
-              >
-                <Plus size={14} className="text-primary" />
-                <span className="text-sm">Create Group</span>
-                <span className="text-sm font-medium text-primary">{groupInputValue}</span>
-              </button>
-            )}
-            <datalist id="group-options">
-              {groups.map((g) => <option key={g} value={g} />)}
-            </datalist>
+            <Combobox
+              options={groupOptions}
+              value={form.group || ""}
+              onValueChange={(val) => update("group", val)}
+              placeholder="Parent Group"
+              allowCreate={true}
+              onCreateNew={(val) => {
+                onCreateGroup?.(val);
+                update("group", val);
+              }}
+              createText="Create Group"
+              triggerClassName="flex-1 h-10"
+            />
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center shrink-0">
-                <Tag size={16} className="text-muted-foreground" />
-              </div>
-              <div
-                className="flex-1 flex items-center gap-1 bg-secondary/50 rounded-md border border-border/60 px-2 min-h-10 py-1.5 cursor-pointer hover:bg-secondary/70 transition-colors"
-                onClick={() => setShowTagInput(true)}
-              >
-                {form.tags && form.tags.length > 0 ? (
-                  <div className="flex flex-wrap gap-1">
-                    {form.tags.map(tag => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveTag(tag);
-                          }}
-                          className="hover:bg-primary/20 rounded-full p-0.5"
-                        >
-                          <X size={10} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Click to add tags...</span>
-                )}
-              </div>
+          {/* Tag selection with MultiCombobox */}
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center shrink-0">
+              <Tag size={16} className="text-muted-foreground" />
             </div>
-            {showTagInput && (
-              <div className="flex items-center gap-2 ml-12">
-                <Input
-                  autoFocus
-                  placeholder="Enter tag name..."
-                  value={tagInputValue}
-                  onChange={(e) => setTagInputValue(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  onBlur={() => {
-                    if (!tagInputValue.trim()) {
-                      setShowTagInput(false);
-                    }
-                  }}
-                  className="h-8 flex-1"
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleAddTag}
-                  disabled={!tagInputValue.trim()}
-                  className="h-8"
-                >
-                  <Plus size={14} />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowTagInput(false);
-                    setTagInputValue("");
-                  }}
-                  className="h-8"
-                >
-                  <X size={14} />
-                </Button>
-              </div>
-            )}
+            <MultiCombobox
+              options={tagOptions}
+              values={form.tags || []}
+              onValuesChange={(vals) => update("tags", vals)}
+              placeholder="Add tags..."
+              allowCreate={true}
+              onCreateNew={(val) => onCreateTag?.(val)}
+              createText="Create Tag"
+              triggerClassName="flex-1 min-h-10"
+            />
           </div>
         </Card>
 
@@ -736,13 +704,170 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
           <p className="text-xs font-semibold">Credentials</p>
           <div className="grid gap-2">
             <Input placeholder="Username" value={form.username} onChange={(e) => update("username", e.target.value)} className="h-10" />
-            {form.authMethod !== "key" && (
-              <Input placeholder="Password" type="password" value={form.password || ""} onChange={(e) => update("password", e.target.value)} className="h-10" />
+            <Input placeholder="Password" type="password" value={form.password || ""} onChange={(e) => update("password", e.target.value)} className="h-10" />
+
+            {/* Selected credential display */}
+            {form.identityFileId && (
+              <div className="flex items-center gap-2 p-2 rounded-md bg-secondary/50 border border-border/60">
+                <Key size={14} className="text-primary" />
+                <span className="text-sm flex-1 truncate">
+                  {availableKeys.find(k => k.id === form.identityFileId)?.label || "Key"}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => {
+                    update("identityFileId", undefined);
+                    setSelectedCredentialType(null);
+                  }}
+                >
+                  <X size={12} />
+                </Button>
+              </div>
             )}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Plus size={12} />
-              <span>SSH.id, Key, Certificate, FIDO2</span>
-            </div>
+
+            {/* FIDO2 selected display */}
+            {form.authMethod === "fido2" && !form.identityFileId && (
+              <div className="flex items-center gap-2 p-2 rounded-md bg-secondary/50 border border-border/60">
+                <Fingerprint size={14} className="text-primary" />
+                <span className="text-sm flex-1 truncate">FIDO2</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => {
+                    update("authMethod", "password");
+                    setSelectedCredentialType(null);
+                  }}
+                >
+                  <X size={12} />
+                </Button>
+              </div>
+            )}
+
+            {/* Credential type selection with inline popover - hidden when credential is selected */}
+            {!form.identityFileId && form.authMethod !== "fido2" && !selectedCredentialType && (
+              <Popover open={credentialPopoverOpen} onOpenChange={setCredentialPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+                  >
+                    <Plus size={12} />
+                    <span>Key, Certificate, FIDO2</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[200px] p-1"
+                  align="start"
+                  sideOffset={4}
+                >
+                  <div className="space-y-0.5">
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-secondary/80 transition-colors text-left"
+                      onClick={() => {
+                        setSelectedCredentialType("key");
+                        setCredentialPopoverOpen(false);
+                      }}
+                    >
+                      <Key size={16} className="text-muted-foreground" />
+                      <span className="text-sm font-medium">Key</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-secondary/80 transition-colors text-left"
+                      onClick={() => {
+                        setSelectedCredentialType("certificate");
+                        setCredentialPopoverOpen(false);
+                      }}
+                    >
+                      <Shield size={16} className="text-muted-foreground" />
+                      <span className="text-sm font-medium">Certificate</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-secondary/80 transition-colors text-left"
+                      onClick={() => {
+                        update("authMethod", "fido2");
+                        update("identityFileId", undefined);
+                        setCredentialPopoverOpen(false);
+                        setSelectedCredentialType(null);
+                      }}
+                    >
+                      <Fingerprint size={16} className="text-muted-foreground" />
+                      <span className="text-sm font-medium">FIDO2</span>
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+
+            {/* Key selection combobox - appears after selecting "Key" type */}
+            {selectedCredentialType === "key" && !form.identityFileId && (
+              <div className="flex items-center gap-1">
+                <Combobox
+                  options={keysByCategory.key.map(k => ({
+                    value: k.id,
+                    label: k.label,
+                    sublabel: `${k.type}${k.keySize ? ` ${k.keySize}` : ''}`,
+                    icon: <Key size={14} className="text-muted-foreground" />
+                  }))}
+                  value={form.identityFileId}
+                  onValueChange={(val) => {
+                    update("identityFileId", val);
+                    update("authMethod", "key");
+                    setSelectedCredentialType(null);
+                  }}
+                  placeholder="Search keys..."
+                  emptyText="No keys available"
+                  icon={<Key size={14} className="text-muted-foreground" />}
+                  className="flex-1"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => setSelectedCredentialType(null)}
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            )}
+
+            {/* Certificate selection combobox - appears after selecting "Certificate" type */}
+            {selectedCredentialType === "certificate" && !form.identityFileId && (
+              <div className="flex items-center gap-1">
+                <Combobox
+                  options={keysByCategory.certificate.map(k => ({
+                    value: k.id,
+                    label: k.label,
+                    icon: <Shield size={14} className="text-muted-foreground" />
+                  }))}
+                  value={form.identityFileId}
+                  onValueChange={(val) => {
+                    update("identityFileId", val);
+                    update("authMethod", "certificate");
+                    setSelectedCredentialType(null);
+                  }}
+                  placeholder="Search certificates..."
+                  emptyText="No certificates available"
+                  icon={<Shield size={14} className="text-muted-foreground" />}
+                  className="flex-1"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => setSelectedCredentialType(null)}
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            )}
           </div>
         </Card>
 

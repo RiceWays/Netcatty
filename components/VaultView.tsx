@@ -154,6 +154,13 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
     return filtered;
   }, [hosts, selectedGroupPath, search]);
 
+  // Compute all unique tags across all hosts
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    hosts.forEach(h => h.tags?.forEach(t => tagSet.add(t)));
+    return Array.from(tagSet).sort();
+  }, [hosts]);
+
   const displayedGroups = useMemo(() => {
     if (!selectedGroupPath) {
       return (Object.values(buildGroupTree) as GroupNode[]).sort((a, b) => a.name.localeCompare(b.name));
@@ -540,6 +547,7 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
           initialData={editingHost}
           availableKeys={keys}
           groups={Array.from(new Set([...customGroups, ...hosts.map(h => h.group || 'General')]))}
+          allTags={allTags}
           allHosts={hosts}
           onSave={host => {
             onUpdateHosts(editingHost ? hosts.map(h => h.id === host.id ? host : h) : [...hosts, host]);
