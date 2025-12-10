@@ -20,7 +20,7 @@ interface SortDropdownProps {
 
 export const SortDropdown: React.FC<SortDropdownProps> = ({ value, onChange, className }) => {
     const [open, setOpen] = React.useState(false);
-    
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>

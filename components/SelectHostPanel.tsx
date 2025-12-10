@@ -129,7 +129,7 @@ const SelectHostPanel: React.FC<SelectHostPanelProps> = ({
 
         // Filter by tags
         if (selectedTags.length > 0) {
-            result = result.filter(h => 
+            result = result.filter(h =>
                 h.tags && selectedTags.some(tag => h.tags.includes(tag))
             );
         }
@@ -245,7 +245,7 @@ const SelectHostPanel: React.FC<SelectHostPanelProps> = ({
                     {/* Breadcrumbs */}
                     {currentPath && (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <button 
+                            <button
                                 onClick={() => setCurrentPath(null)}
                                 className="text-primary hover:underline"
                             >
@@ -314,8 +314,8 @@ const SelectHostPanel: React.FC<SelectHostPanelProps> = ({
                                             {multiSelect && (
                                                 <div className={cn(
                                                     "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                                                    isSelected 
-                                                        ? "bg-primary border-primary" 
+                                                    isSelected
+                                                        ? "bg-primary border-primary"
                                                         : "border-muted-foreground/50"
                                                 )}>
                                                     {isSelected && <Check size={12} className="text-primary-foreground" />}

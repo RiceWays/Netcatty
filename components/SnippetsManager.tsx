@@ -287,72 +287,72 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
           }
         >
           <AsidePanelContent>
-              {/* Action Description */}
-              <Card className="p-3 space-y-2 bg-card border-border/80">
-                <p className="text-xs font-semibold text-muted-foreground">Action description</p>
-                <Input
-                  placeholder="Example: check network load"
-                  value={editingSnippet.label || ''}
-                  onChange={(e) => setEditingSnippet({ ...editingSnippet, label: e.target.value })}
-                  className="h-10"
-                />
-              </Card>
+            {/* Action Description */}
+            <Card className="p-3 space-y-2 bg-card border-border/80">
+              <p className="text-xs font-semibold text-muted-foreground">Action description</p>
+              <Input
+                placeholder="Example: check network load"
+                value={editingSnippet.label || ''}
+                onChange={(e) => setEditingSnippet({ ...editingSnippet, label: e.target.value })}
+                className="h-10"
+              />
+            </Card>
 
-              {/* Package */}
-              <Card className="p-3 space-y-2 bg-card border-border/80">
-                <p className="text-xs font-semibold text-muted-foreground">Add a Package</p>
-                <Input
-                  placeholder="e.g. infra/ops"
-                  value={editingSnippet.package || selectedPackage || ''}
-                  onChange={(e) => setEditingSnippet({ ...editingSnippet, package: e.target.value })}
-                  className="h-10"
-                />
-              </Card>
+            {/* Package */}
+            <Card className="p-3 space-y-2 bg-card border-border/80">
+              <p className="text-xs font-semibold text-muted-foreground">Add a Package</p>
+              <Input
+                placeholder="e.g. infra/ops"
+                value={editingSnippet.package || selectedPackage || ''}
+                onChange={(e) => setEditingSnippet({ ...editingSnippet, package: e.target.value })}
+                className="h-10"
+              />
+            </Card>
 
-              {/* Script */}
-              <Card className="p-3 space-y-2 bg-card border-border/80">
-                <p className="text-xs font-semibold text-muted-foreground">Script *</p>
-                <Textarea
-                  placeholder="ls -l"
-                  className="min-h-[120px] font-mono text-xs"
-                  value={editingSnippet.command || ''}
-                  onChange={(e) => setEditingSnippet({ ...editingSnippet, command: e.target.value })}
-                />
-              </Card>
+            {/* Script */}
+            <Card className="p-3 space-y-2 bg-card border-border/80">
+              <p className="text-xs font-semibold text-muted-foreground">Script *</p>
+              <Textarea
+                placeholder="ls -l"
+                className="min-h-[120px] font-mono text-xs"
+                value={editingSnippet.command || ''}
+                onChange={(e) => setEditingSnippet({ ...editingSnippet, command: e.target.value })}
+              />
+            </Card>
 
-              {/* Targets */}
-              <Card className="p-3 space-y-3 bg-card border-border/80">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-muted-foreground">Targets</p>
-                  <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary" onClick={openTargetPicker}>
-                    Edit
-                  </Button>
-                </div>
+            {/* Targets */}
+            <Card className="p-3 space-y-3 bg-card border-border/80">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground">Targets</p>
+                <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary" onClick={openTargetPicker}>
+                  Edit
+                </Button>
+              </div>
 
-                {targetHosts.length === 0 ? (
-                  <Button
-                    variant="secondary"
-                    className="w-full h-10"
-                    onClick={openTargetPicker}
-                  >
-                    Add targets
-                  </Button>
-                ) : (
-                  <div className="space-y-2">
-                    {targetHosts.map((h) => (
-                      <div key={h.id} className="flex items-center gap-3 px-3 py-2 bg-background/60 border border-border/70 rounded-lg">
-                        <DistroAvatar host={h} fallback={h.os[0].toUpperCase()} className="h-10 w-10" />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-semibold truncate">{h.hostname}</div>
-                          <div className="text-[11px] text-muted-foreground truncate">
-                            {h.protocol || 'ssh'}, {h.username}
-                          </div>
+              {targetHosts.length === 0 ? (
+                <Button
+                  variant="secondary"
+                  className="w-full h-10"
+                  onClick={openTargetPicker}
+                >
+                  Add targets
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  {targetHosts.map((h) => (
+                    <div key={h.id} className="flex items-center gap-3 px-3 py-2 bg-background/60 border border-border/70 rounded-lg">
+                      <DistroAvatar host={h} fallback={h.os[0].toUpperCase()} className="h-10 w-10" />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold truncate">{h.hostname}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">
+                          {h.protocol || 'ssh'}, {h.username}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
           </AsidePanelContent>
 
           {/* Footer */}

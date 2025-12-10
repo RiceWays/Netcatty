@@ -37,9 +37,9 @@ export const TagFilterDropdown: React.FC<TagFilterDropdownProps> = ({
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
+                <Button
+                    variant="ghost"
+                    size="icon"
                     className={cn(
                         className || "h-8 w-8",
                         hasFilters && "text-primary"
@@ -76,7 +76,7 @@ export const TagFilterDropdown: React.FC<TagFilterDropdownProps> = ({
                                             className="w-full justify-start gap-2 h-8"
                                             onClick={() => toggleTag(tag)}
                                         >
-                                            <div 
+                                            <div
                                                 className={cn(
                                                     "h-3 w-3 rounded-full border",
                                                     isSelected ? "bg-primary border-primary" : "border-muted-foreground"

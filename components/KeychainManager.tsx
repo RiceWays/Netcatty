@@ -1212,719 +1212,719 @@ echo $3 >> "$FILE"`);
                     {/* Panel Content - Scrollable */}
                     <ScrollArea className="flex-1">
                         <div className="p-4 space-y-4">
-                        {/* Error Display */}
-                        {error && (
-                            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-sm text-destructive">
-                                {error}
-                            </div>
-                        )}
+                            {/* Error Display */}
+                            {error && (
+                                <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-sm text-destructive">
+                                    {error}
+                                </div>
+                            )}
 
-                        {/* Generate Biometric Key */}
-                        {panel.type === 'generate' && panel.keyType === 'biometric' && (
-                            <>
-                                {/* Keyboard illustration */}
-                                <div className="bg-card border border-border/80 rounded-lg p-3 flex items-center justify-center overflow-hidden">
-                                    <div className="text-center w-full">
-                                        <div className="flex justify-center items-center gap-0.5 mb-1.5">
-                                            {['9', '0', ')', '-', '+', '='].map((k, i) => (
-                                                <div key={i} className="w-6 h-6 bg-secondary border border-border/60 rounded text-[10px] flex items-center justify-center flex-shrink-0">
-                                                    {k}
+                            {/* Generate Biometric Key */}
+                            {panel.type === 'generate' && panel.keyType === 'biometric' && (
+                                <>
+                                    {/* Keyboard illustration */}
+                                    <div className="bg-card border border-border/80 rounded-lg p-3 flex items-center justify-center overflow-hidden">
+                                        <div className="text-center w-full">
+                                            <div className="flex justify-center items-center gap-0.5 mb-1.5">
+                                                {['9', '0', ')', '-', '+', '='].map((k, i) => (
+                                                    <div key={i} className="w-6 h-6 bg-secondary border border-border/60 rounded text-[10px] flex items-center justify-center flex-shrink-0">
+                                                        {k}
+                                                    </div>
+                                                ))}
+                                                <div className="w-12 h-6 bg-secondary border border-border/60 rounded text-[9px] flex items-center justify-center flex-shrink-0">
+                                                    back
                                                 </div>
-                                            ))}
-                                            <div className="w-12 h-6 bg-secondary border border-border/60 rounded text-[9px] flex items-center justify-center flex-shrink-0">
-                                                back
-                                            </div>
-                                            <div className="w-8 h-8 bg-blue-500/20 border border-blue-500/40 rounded-lg flex items-center justify-center ml-1.5 flex-shrink-0">
-                                                <Fingerprint size={16} className="text-blue-500" />
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-center gap-0.5">
-                                            {['I', 'O', 'P', '[', ']', '{', '}'].map((k, i) => (
-                                                <div key={i} className="w-6 h-6 bg-secondary border border-border/60 rounded text-[10px] flex items-center justify-center flex-shrink-0">
-                                                    {k}
+                                                <div className="w-8 h-8 bg-blue-500/20 border border-blue-500/40 rounded-lg flex items-center justify-center ml-1.5 flex-shrink-0">
+                                                    <Fingerprint size={16} className="text-blue-500" />
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <p className="text-sm text-muted-foreground text-center">
-                                    Biometric Key based on Secure Enclave Process built-in into your {isMac ? 'mac' : 'system'}. This key is not possible to copy or steal.
-                                </p>
-
-                                <div className="space-y-2">
-                                    <Label>Label</Label>
-                                    <Input
-                                        value={draftKey.label || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
-                                        placeholder={isMac ? 'Touch ID' : 'Windows Hello'}
-                                    />
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-muted-foreground">Type</Label>
-                                    <p className="text-sm">ECDSA</p>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-muted-foreground">Key Size</Label>
-                                    <p className="text-sm">256</p>
-                                </div>
-
-                                <Button
-                                    className="w-full h-11"
-                                    onClick={handleGenerateBiometric}
-                                    disabled={isGenerating || !draftKey.label?.trim()}
-                                >
-                                    {isGenerating ? (
-                                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    ) : (
-                                        'Generate'
-                                    )}
-                                </Button>
-                            </>
-                        )}
-
-                        {/* Register FIDO2 Hardware Key */}
-                        {panel.type === 'generate' && panel.keyType === 'fido2' && (
-                            <>
-                                {/* Security key illustration */}
-                                <div className="bg-card border border-border/80 rounded-lg p-4 flex items-center justify-center">
-                                    <div className="text-center">
-                                        <div className="flex justify-center mb-3">
-                                            <div className="w-20 h-12 bg-gradient-to-b from-zinc-600 to-zinc-800 rounded-lg flex items-center justify-center border border-zinc-500/50 shadow-lg">
-                                                <div className="w-4 h-6 bg-amber-500/80 rounded-sm" />
+                                            </div>
+                                            <div className="flex justify-center gap-0.5">
+                                                {['I', 'O', 'P', '[', ']', '{', '}'].map((k, i) => (
+                                                    <div key={i} className="w-6 h-6 bg-secondary border border-border/60 rounded text-[10px] flex items-center justify-center flex-shrink-0">
+                                                        {k}
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                        <p className="text-xs text-muted-foreground">YubiKey or compatible device</p>
                                     </div>
-                                </div>
 
-                                <p className="text-sm text-muted-foreground text-center">
-                                    Connect your hardware security key (YubiKey, Titan, etc.) and touch it when prompted. The private key never leaves the device.
-                                </p>
+                                    <p className="text-sm text-muted-foreground text-center">
+                                        Biometric Key based on Secure Enclave Process built-in into your {isMac ? 'mac' : 'system'}. This key is not possible to copy or steal.
+                                    </p>
 
-                                <div className="space-y-2">
-                                    <Label>Label</Label>
-                                    <Input
-                                        value={draftKey.label || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
-                                        placeholder="My YubiKey"
-                                    />
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-muted-foreground">Type</Label>
-                                    <p className="text-sm">ECDSA (Hardware-backed)</p>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-muted-foreground">Key Size</Label>
-                                    <p className="text-sm">P-256</p>
-                                </div>
-
-                                <Button
-                                    className="w-full h-11"
-                                    onClick={handleGenerateFido2}
-                                    disabled={isGenerating || !draftKey.label?.trim()}
-                                >
-                                    {isGenerating ? (
-                                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    ) : (
-                                        <>
-                                            <Shield size={14} className="mr-2" />
-                                            Register Security Key
-                                        </>
-                                    )}
-                                </Button>
-                            </>
-                        )}
-
-                        {/* Generate Standard Key */}
-                        {panel.type === 'generate' && panel.keyType === 'standard' && (
-                            <>
-                                <div className="space-y-2">
-                                    <Label>Label</Label>
-                                    <Input
-                                        value={draftKey.label || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
-                                        placeholder="My SSH Key"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Key type</Label>
-                                    <div className="flex gap-2">
-                                        {(['ED25519', 'ECDSA', 'RSA'] as KeyType[]).map((t) => (
-                                            <Button
-                                                key={t}
-                                                variant={draftKey.type === t ? 'secondary' : 'ghost'}
-                                                className={cn(
-                                                    "flex-1 h-10",
-                                                    draftKey.type === t && "bg-primary/15 text-primary"
-                                                )}
-                                                onClick={() => {
-                                                    // Set default keySize based on type
-                                                    const defaultSize = t === 'ED25519' ? undefined : (t === 'RSA' ? 4096 : 256);
-                                                    setDraftKey({ ...draftKey, type: t, keySize: defaultSize });
-                                                }}
-                                            >
-                                                {t}
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Key Size selector - only for RSA and ECDSA */}
-                                {(draftKey.type === 'RSA' || draftKey.type === 'ECDSA') && (
                                     <div className="space-y-2">
-                                        <Label>Key size</Label>
-                                        <div className="flex gap-2">
-                                            {(draftKey.type === 'RSA'
-                                                ? [4096, 2048, 1024]
-                                                : [256, 384, 521]
-                                            ).map((size) => (
-                                                <Button
-                                                    key={size}
-                                                    variant={draftKey.keySize === size ? 'secondary' : 'ghost'}
-                                                    className={cn(
-                                                        "flex-1 h-10",
-                                                        draftKey.keySize === size && "bg-primary/15 text-primary"
-                                                    )}
-                                                    onClick={() => setDraftKey({ ...draftKey, keySize: size })}
-                                                >
-                                                    {draftKey.type === 'RSA' ? `${size} bits` : `P-${size}`}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="space-y-2">
-                                    <Label>Passphrase</Label>
-                                    <div className="relative">
+                                        <Label>Label</Label>
                                         <Input
-                                            type={showPassphrase ? 'text' : 'password'}
-                                            value={draftKey.passphrase || ''}
-                                            onChange={e => setDraftKey({ ...draftKey, passphrase: e.target.value })}
-                                            placeholder="Optional passphrase"
-                                            className="pr-10"
+                                            value={draftKey.label || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
+                                            placeholder={isMac ? 'Touch ID' : 'Windows Hello'}
                                         />
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                                            onClick={() => setShowPassphrase(!showPassphrase)}
-                                        >
-                                            {showPassphrase ? <EyeOff size={14} /> : <Eye size={14} />}
-                                        </Button>
                                     </div>
-                                </div>
 
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        id="savePassphrase"
-                                        checked={draftKey.savePassphrase || false}
-                                        onChange={e => setDraftKey({ ...draftKey, savePassphrase: e.target.checked })}
-                                        className="h-4 w-4 rounded border-border"
-                                    />
-                                    <Label htmlFor="savePassphrase" className="text-sm font-normal cursor-pointer">
-                                        Save passphrase
-                                    </Label>
-                                </div>
-
-                                <Button
-                                    className="w-full h-11"
-                                    onClick={handleGenerateStandard}
-                                    disabled={isGenerating || !draftKey.label?.trim()}
-                                >
-                                    {isGenerating ? (
-                                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    ) : (
-                                        'Generate & save'
-                                    )}
-                                </Button>
-                            </>
-                        )}
-
-                        {/* Import Key */}
-                        {panel.type === 'import' && (
-                            <>
-                                <div className="space-y-2">
-                                    <Label>Label</Label>
-                                    <Input
-                                        value={draftKey.label || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
-                                        placeholder="Key label"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Private key *</Label>
-                                    <Textarea
-                                        value={draftKey.privateKey || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, privateKey: e.target.value })}
-                                        placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
-                                        className="min-h-[120px] font-mono text-xs"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Public key</Label>
-                                    <Textarea
-                                        value={draftKey.publicKey || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, publicKey: e.target.value })}
-                                        placeholder="ssh-ed25519 AAAAC3... user@host"
-                                        className="min-h-[80px] font-mono text-xs"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="flex items-center gap-2">
-                                        Certificate
-                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                                            Optional
-                                        </span>
-                                    </Label>
-                                    <Textarea
-                                        value={draftKey.certificate || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, certificate: e.target.value })}
-                                        placeholder="Paste certificate..."
-                                        className="min-h-[80px] font-mono text-xs"
-                                    />
-                                </div>
-
-                                <div
-                                    className="border border-dashed border-border/80 rounded-xl p-4 text-center space-y-2 bg-background/60 transition-colors hover:border-primary/50"
-                                    onDrop={handleDrop}
-                                    onDragOver={handleDragOver}
-                                >
-                                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                                        <Upload size={16} />
-                                        <span className="text-sm">Drag and drop a private key file to import</span>
+                                    <div className="space-y-1">
+                                        <Label className="text-muted-foreground">Type</Label>
+                                        <p className="text-sm">ECDSA</p>
                                     </div>
-                                    <Button
-                                        variant="secondary"
-                                        className="w-full"
-                                        onClick={() => fileInputRef.current?.click()}
-                                    >
-                                        Import from key file
-                                    </Button>
-                                </div>
 
-                                <Button
-                                    className="w-full h-11"
-                                    onClick={handleImport}
-                                    disabled={!draftKey.label?.trim() || !draftKey.privateKey?.trim()}
-                                >
-                                    Save Key
-                                </Button>
-                            </>
-                        )}
-
-                        {/* View Key */}
-                        {panel.type === 'view' && (
-                            <>
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Label</Label>
-                                    <p className="text-sm">{panel.key.label}</p>
-                                </div>
-
-                                {panel.key.publicKey && (
-                                    <div className="space-y-2">
-                                        <Label className="text-muted-foreground">Public Key</Label>
-                                        <div className="relative">
-                                            <div className="p-3 bg-card border border-border/80 rounded-lg font-mono text-xs break-all max-h-32 overflow-y-auto">
-                                                {panel.key.publicKey}
-                                            </div>
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="absolute top-2 right-2 h-7 w-7"
-                                                onClick={() => copyToClipboard(panel.key.publicKey || '')}
-                                            >
-                                                <Copy size={12} />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="space-y-1">
-                                    <Label className="text-muted-foreground">Type</Label>
-                                    <p className="text-sm">{panel.key.type}</p>
-                                </div>
-
-                                {panel.key.source === 'biometric' && (
                                     <div className="space-y-1">
                                         <Label className="text-muted-foreground">Key Size</Label>
                                         <p className="text-sm">256</p>
                                     </div>
-                                )}
 
-                                {/* Key Export section */}
-                                <div className="pt-4 mt-4 border-t border-border/60">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <span className="text-sm font-medium">Key export</span>
-                                        <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
-                                            <Info size={10} className="text-muted-foreground" />
-                                        </div>
-                                    </div>
                                     <Button
                                         className="w-full h-11"
-                                        onClick={() => openKeyExport(panel.key)}
+                                        onClick={handleGenerateBiometric}
+                                        disabled={isGenerating || !draftKey.label?.trim()}
                                     >
-                                        Export to host
+                                        {isGenerating ? (
+                                            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            'Generate'
+                                        )}
                                     </Button>
-                                </div>
-                            </>
-                        )}
+                                </>
+                            )}
 
-                        {/* Identity Panel */}
-                        {panel.type === 'identity' && (
-                            <>
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="h-10 w-10 rounded-lg bg-green-500/15 text-green-500 flex items-center justify-center">
-                                        <User size={20} />
+                            {/* Register FIDO2 Hardware Key */}
+                            {panel.type === 'generate' && panel.keyType === 'fido2' && (
+                                <>
+                                    {/* Security key illustration */}
+                                    <div className="bg-card border border-border/80 rounded-lg p-4 flex items-center justify-center">
+                                        <div className="text-center">
+                                            <div className="flex justify-center mb-3">
+                                                <div className="w-20 h-12 bg-gradient-to-b from-zinc-600 to-zinc-800 rounded-lg flex items-center justify-center border border-zinc-500/50 shadow-lg">
+                                                    <div className="w-4 h-6 bg-amber-500/80 rounded-sm" />
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">YubiKey or compatible device</p>
+                                        </div>
                                     </div>
-                                    <Input
-                                        value={draftIdentity.label || ''}
-                                        onChange={e => setDraftIdentity({ ...draftIdentity, label: e.target.value })}
-                                        placeholder="Label"
-                                        className="flex-1"
-                                    />
-                                </div>
 
-                                <div className="space-y-2">
-                                    <Label>Username *</Label>
-                                    <div className="relative">
-                                        <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                                        <Input
-                                            value={draftIdentity.username || ''}
-                                            onChange={e => setDraftIdentity({ ...draftIdentity, username: e.target.value })}
-                                            placeholder="Username"
-                                            className="pl-9"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Password</Label>
-                                    <div className="relative">
-                                        <Input
-                                            type={showPassphrase ? 'text' : 'password'}
-                                            value={draftIdentity.password || ''}
-                                            onChange={e => setDraftIdentity({ ...draftIdentity, password: e.target.value })}
-                                            placeholder="Password"
-                                            className="pr-10"
-                                        />
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                                            onClick={() => setShowPassphrase(!showPassphrase)}
-                                        >
-                                            {showPassphrase ? <EyeOff size={14} /> : <Eye size={14} />}
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Authentication Method</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="secondary" className="w-full justify-between h-10">
-                                                <span className="flex items-center gap-2">
-                                                    {draftIdentity.authMethod === 'key' && <><Key size={14} /> Key</>}
-                                                    {draftIdentity.authMethod === 'certificate' && <><BadgeCheck size={14} /> Certificate</>}
-                                                    {draftIdentity.authMethod === 'fido2' && <><Shield size={14} /> FIDO2</>}
-                                                    {(!draftIdentity.authMethod || draftIdentity.authMethod === 'password') && 'None (Password only)'}
-                                                </span>
-                                                <ChevronDown size={14} />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-56 p-1">
-                                            <Button
-                                                variant="ghost"
-                                                className="w-full justify-start gap-2"
-                                                onClick={() => setDraftIdentity({ ...draftIdentity, authMethod: 'key', keyId: undefined })}
-                                            >
-                                                <Key size={14} /> Key
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                className="w-full justify-start gap-2"
-                                                onClick={() => setDraftIdentity({ ...draftIdentity, authMethod: 'certificate', keyId: undefined })}
-                                            >
-                                                <BadgeCheck size={14} /> Certificate
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                className="w-full justify-start gap-2"
-                                                onClick={() => setDraftIdentity({ ...draftIdentity, authMethod: 'fido2', keyId: undefined })}
-                                            >
-                                                <Shield size={14} /> FIDO2
-                                            </Button>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-
-                                {(draftIdentity.authMethod === 'key' || draftIdentity.authMethod === 'certificate') && (
-                                    <div className="space-y-2">
-                                        <Label>Select {draftIdentity.authMethod === 'key' ? 'Key' : 'Certificate'}</Label>
-                                        <select
-                                            value={draftIdentity.keyId || ''}
-                                            onChange={e => setDraftIdentity({ ...draftIdentity, keyId: e.target.value || undefined })}
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                        >
-                                            <option value="">Select...</option>
-                                            {keys
-                                                .filter(k => draftIdentity.authMethod === 'certificate' ? k.certificate : !k.certificate)
-                                                .map(k => (
-                                                    <option key={k.id} value={k.id}>{k.label}</option>
-                                                ))
-                                            }
-                                        </select>
-                                    </div>
-                                )}
-
-                                <Button
-                                    className="w-full h-11"
-                                    onClick={handleSaveIdentity}
-                                    disabled={!draftIdentity.label?.trim() || !draftIdentity.username?.trim()}
-                                >
-                                    {panel.identity ? 'Update Identity' : 'Save Identity'}
-                                </Button>
-                            </>
-                        )}
-
-                        {/* Key Export Panel */}
-                        {panel.type === 'export' && !showHostSelector && (
-                            <>
-                                {/* Key info card */}
-                                <div className="flex items-center gap-3 p-3 bg-card border border-border/80 rounded-lg">
-                                    <div className={cn(
-                                        "h-10 w-10 rounded-md flex items-center justify-center",
-                                        panel.key.source === 'biometric'
-                                            ? "bg-blue-500/15 text-blue-500"
-                                            : panel.key.source === 'fido2'
-                                                ? "bg-amber-500/15 text-amber-500"
-                                                : "bg-primary/15 text-primary"
-                                    )}>
-                                        {getKeyIcon(panel.key)}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-semibold truncate">{panel.key.label}</p>
-                                        <p className="text-xs text-muted-foreground">Type {getKeyTypeDisplay(panel.key)}</p>
-                                    </div>
-                                </div>
-
-                                {/* Export to field */}
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-muted-foreground">Export to *</Label>
-                                        <Button
-                                            variant="link"
-                                            className="h-auto p-0 text-primary text-sm"
-                                            onClick={() => setShowHostSelector(true)}
-                                        >
-                                            Select Host
-                                        </Button>
-                                    </div>
-                                    <Input
-                                        value={exportHost?.label || ''}
-                                        readOnly
-                                        placeholder="Select a host..."
-                                        className="bg-muted/50 cursor-pointer"
-                                        onClick={() => setShowHostSelector(true)}
-                                    />
-                                </div>
-
-                                {/* Location field */}
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Location ~ $1 *</Label>
-                                    <Input
-                                        value={exportLocation}
-                                        onChange={e => setExportLocation(e.target.value)}
-                                        placeholder=".ssh"
-                                    />
-                                </div>
-
-                                {/* Filename field */}
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Filename ~ $2 *</Label>
-                                    <Input
-                                        value={exportFilename}
-                                        onChange={e => setExportFilename(e.target.value)}
-                                        placeholder="authorized_keys"
-                                    />
-                                </div>
-
-                                {/* Info note */}
-                                <div className="flex items-start gap-2 p-3 bg-muted/50 border border-border/60 rounded-lg">
-                                    <Info size={14} className="mt-0.5 text-muted-foreground shrink-0" />
-                                    <p className="text-xs text-muted-foreground">
-                                        Key export currently supports only <span className="font-semibold text-foreground">UNIX</span> systems.
-                                        Use <span className="font-semibold text-foreground">Advanced</span> section to customize the export script.
+                                    <p className="text-sm text-muted-foreground text-center">
+                                        Connect your hardware security key (YubiKey, Titan, etc.) and touch it when prompted. The private key never leaves the device.
                                     </p>
-                                </div>
 
-                                {/* Advanced collapsible */}
-                                <Collapsible open={exportAdvancedOpen} onOpenChange={setExportAdvancedOpen}>
-                                    <CollapsibleTrigger asChild>
-                                        <Button variant="ghost" className="w-full justify-between px-0 h-10 hover:bg-transparent hover:text-current">
-                                            <span className="font-medium">Advanced</span>
-                                            <ChevronRight size={16} className={cn(
-                                                "transition-transform",
-                                                exportAdvancedOpen && "rotate-90"
-                                            )} />
-                                        </Button>
-                                    </CollapsibleTrigger>
-                                    <CollapsibleContent className="space-y-2 pt-2">
-                                        <Label className="text-muted-foreground">Script *</Label>
-                                        <Textarea
-                                            value={exportScript}
-                                            onChange={e => setExportScript(e.target.value)}
-                                            className="min-h-[180px] font-mono text-xs"
-                                            placeholder="Export script..."
+                                    <div className="space-y-2">
+                                        <Label>Label</Label>
+                                        <Input
+                                            value={draftKey.label || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
+                                            placeholder="My YubiKey"
                                         />
-                                    </CollapsibleContent>
-                                </Collapsible>
-
-                                {/* Export button */}
-                                <Button
-                                    className="w-full h-11"
-                                    disabled={!exportHost || !exportLocation || !exportFilename || isExporting}
-                                    onClick={async () => {
-                                        if (!exportHost || !panel.key.publicKey) return;
-
-                                        setIsExporting(true);
-                                        setError('');
-
-                                        try {
-                                            // Get private key for authentication if host uses key auth
-                                            const hostPrivateKey = exportHost.identityFileId
-                                                ? keys.find(k => k.id === exportHost.identityFileId)?.privateKey
-                                                : undefined;
-
-                                            // Escape the public key for shell (single quotes, escape existing quotes)
-                                            const escapedPublicKey = panel.key.publicKey.replace(/'/g, "'\\''");
-
-                                            // Build the command by replacing $1, $2, $3
-                                            const command = exportScript
-                                                .replace(/\$1/g, exportLocation)
-                                                .replace(/\$2/g, exportFilename)
-                                                .replace(/\$3/g, `'${escapedPublicKey}'`);
-
-                                            // Execute via SSH
-                                            const result = await window.nebula?.execCommand({
-                                                hostname: exportHost.hostname,
-                                                username: exportHost.username,
-                                                port: exportHost.port || 22,
-                                                password: exportHost.password,
-                                                privateKey: hostPrivateKey,
-                                                command,
-                                                timeout: 30000,
-                                            });
-
-                                            if (result?.code === 0) {
-                                                toast.success(`Public key exported to ${exportHost.label}`, 'Export Successful');
-                                                closePanel();
-                                            } else {
-                                                const errorMsg = result?.stderr || result?.stdout || 'Unknown error';
-                                                toast.error(`Failed to export key: ${errorMsg}`, 'Export Failed');
-                                            }
-                                        } catch (err) {
-                                            const message = err instanceof Error ? err.message : 'Unknown error';
-                                            toast.error(message, 'Export Failed');
-                                        } finally {
-                                            setIsExporting(false);
-                                        }
-                                    }}
-                                >
-                                    {isExporting ? 'Exporting...' : 'Export and Attach'}
-                                </Button>
-                            </>
-                        )}
-
-                        {/* Edit Key Panel */}
-                        {panel.type === 'edit' && (
-                            <>
-                                <div className="space-y-2">
-                                    <Label>Label *</Label>
-                                    <Input
-                                        value={draftKey.label || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
-                                        placeholder="Key label"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-destructive">Private key *</Label>
-                                    <Textarea
-                                        value={draftKey.privateKey || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, privateKey: e.target.value })}
-                                        placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
-                                        className="min-h-[180px] font-mono text-xs"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Public key</Label>
-                                    <Textarea
-                                        value={draftKey.publicKey || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, publicKey: e.target.value })}
-                                        placeholder="ssh-ed25519 AAAA..."
-                                        className="min-h-[80px] font-mono text-xs"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Certificate</Label>
-                                    <Textarea
-                                        value={draftKey.certificate || ''}
-                                        onChange={e => setDraftKey({ ...draftKey, certificate: e.target.value })}
-                                        placeholder="Certificate content (optional)"
-                                        className="min-h-[60px] font-mono text-xs"
-                                    />
-                                </div>
-
-                                {/* Key Export section */}
-                                <div className="pt-4 mt-4 border-t border-border/60">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <span className="text-sm font-medium">Key export</span>
-                                        <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
-                                            <Info size={10} className="text-muted-foreground" />
-                                        </div>
                                     </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-muted-foreground">Type</Label>
+                                        <p className="text-sm">ECDSA (Hardware-backed)</p>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-muted-foreground">Key Size</Label>
+                                        <p className="text-sm">P-256</p>
+                                    </div>
+
                                     <Button
                                         className="w-full h-11"
-                                        onClick={() => openKeyExport(panel.key)}
+                                        onClick={handleGenerateFido2}
+                                        disabled={isGenerating || !draftKey.label?.trim()}
                                     >
-                                        Export to host
+                                        {isGenerating ? (
+                                            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <>
+                                                <Shield size={14} className="mr-2" />
+                                                Register Security Key
+                                            </>
+                                        )}
                                     </Button>
-                                </div>
+                                </>
+                            )}
 
-                                {/* Save button */}
-                                <Button
-                                    className="w-full h-11 mt-4"
-                                    disabled={!draftKey.label?.trim() || !draftKey.privateKey?.trim()}
-                                    onClick={() => {
-                                        if (draftKey.id) {
-                                            onUpdate({
-                                                ...panel.key,
-                                                ...draftKey as SSHKey,
-                                            });
-                                            closePanel();
-                                        }
-                                    }}
-                                >
-                                    Save Changes
-                                </Button>
-                            </>
-                        )}
+                            {/* Generate Standard Key */}
+                            {panel.type === 'generate' && panel.keyType === 'standard' && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label>Label</Label>
+                                        <Input
+                                            value={draftKey.label || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
+                                            placeholder="My SSH Key"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Key type</Label>
+                                        <div className="flex gap-2">
+                                            {(['ED25519', 'ECDSA', 'RSA'] as KeyType[]).map((t) => (
+                                                <Button
+                                                    key={t}
+                                                    variant={draftKey.type === t ? 'secondary' : 'ghost'}
+                                                    className={cn(
+                                                        "flex-1 h-10",
+                                                        draftKey.type === t && "bg-primary/15 text-primary"
+                                                    )}
+                                                    onClick={() => {
+                                                        // Set default keySize based on type
+                                                        const defaultSize = t === 'ED25519' ? undefined : (t === 'RSA' ? 4096 : 256);
+                                                        setDraftKey({ ...draftKey, type: t, keySize: defaultSize });
+                                                    }}
+                                                >
+                                                    {t}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Key Size selector - only for RSA and ECDSA */}
+                                    {(draftKey.type === 'RSA' || draftKey.type === 'ECDSA') && (
+                                        <div className="space-y-2">
+                                            <Label>Key size</Label>
+                                            <div className="flex gap-2">
+                                                {(draftKey.type === 'RSA'
+                                                    ? [4096, 2048, 1024]
+                                                    : [256, 384, 521]
+                                                ).map((size) => (
+                                                    <Button
+                                                        key={size}
+                                                        variant={draftKey.keySize === size ? 'secondary' : 'ghost'}
+                                                        className={cn(
+                                                            "flex-1 h-10",
+                                                            draftKey.keySize === size && "bg-primary/15 text-primary"
+                                                        )}
+                                                        onClick={() => setDraftKey({ ...draftKey, keySize: size })}
+                                                    >
+                                                        {draftKey.type === 'RSA' ? `${size} bits` : `P-${size}`}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        <Label>Passphrase</Label>
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassphrase ? 'text' : 'password'}
+                                                value={draftKey.passphrase || ''}
+                                                onChange={e => setDraftKey({ ...draftKey, passphrase: e.target.value })}
+                                                placeholder="Optional passphrase"
+                                                className="pr-10"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                                                onClick={() => setShowPassphrase(!showPassphrase)}
+                                            >
+                                                {showPassphrase ? <EyeOff size={14} /> : <Eye size={14} />}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="savePassphrase"
+                                            checked={draftKey.savePassphrase || false}
+                                            onChange={e => setDraftKey({ ...draftKey, savePassphrase: e.target.checked })}
+                                            className="h-4 w-4 rounded border-border"
+                                        />
+                                        <Label htmlFor="savePassphrase" className="text-sm font-normal cursor-pointer">
+                                            Save passphrase
+                                        </Label>
+                                    </div>
+
+                                    <Button
+                                        className="w-full h-11"
+                                        onClick={handleGenerateStandard}
+                                        disabled={isGenerating || !draftKey.label?.trim()}
+                                    >
+                                        {isGenerating ? (
+                                            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            'Generate & save'
+                                        )}
+                                    </Button>
+                                </>
+                            )}
+
+                            {/* Import Key */}
+                            {panel.type === 'import' && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label>Label</Label>
+                                        <Input
+                                            value={draftKey.label || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
+                                            placeholder="Key label"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Private key *</Label>
+                                        <Textarea
+                                            value={draftKey.privateKey || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, privateKey: e.target.value })}
+                                            placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
+                                            className="min-h-[120px] font-mono text-xs"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Public key</Label>
+                                        <Textarea
+                                            value={draftKey.publicKey || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, publicKey: e.target.value })}
+                                            placeholder="ssh-ed25519 AAAAC3... user@host"
+                                            className="min-h-[80px] font-mono text-xs"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="flex items-center gap-2">
+                                            Certificate
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                                Optional
+                                            </span>
+                                        </Label>
+                                        <Textarea
+                                            value={draftKey.certificate || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, certificate: e.target.value })}
+                                            placeholder="Paste certificate..."
+                                            className="min-h-[80px] font-mono text-xs"
+                                        />
+                                    </div>
+
+                                    <div
+                                        className="border border-dashed border-border/80 rounded-xl p-4 text-center space-y-2 bg-background/60 transition-colors hover:border-primary/50"
+                                        onDrop={handleDrop}
+                                        onDragOver={handleDragOver}
+                                    >
+                                        <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                                            <Upload size={16} />
+                                            <span className="text-sm">Drag and drop a private key file to import</span>
+                                        </div>
+                                        <Button
+                                            variant="secondary"
+                                            className="w-full"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            Import from key file
+                                        </Button>
+                                    </div>
+
+                                    <Button
+                                        className="w-full h-11"
+                                        onClick={handleImport}
+                                        disabled={!draftKey.label?.trim() || !draftKey.privateKey?.trim()}
+                                    >
+                                        Save Key
+                                    </Button>
+                                </>
+                            )}
+
+                            {/* View Key */}
+                            {panel.type === 'view' && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Label</Label>
+                                        <p className="text-sm">{panel.key.label}</p>
+                                    </div>
+
+                                    {panel.key.publicKey && (
+                                        <div className="space-y-2">
+                                            <Label className="text-muted-foreground">Public Key</Label>
+                                            <div className="relative">
+                                                <div className="p-3 bg-card border border-border/80 rounded-lg font-mono text-xs break-all max-h-32 overflow-y-auto">
+                                                    {panel.key.publicKey}
+                                                </div>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="absolute top-2 right-2 h-7 w-7"
+                                                    onClick={() => copyToClipboard(panel.key.publicKey || '')}
+                                                >
+                                                    <Copy size={12} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-1">
+                                        <Label className="text-muted-foreground">Type</Label>
+                                        <p className="text-sm">{panel.key.type}</p>
+                                    </div>
+
+                                    {panel.key.source === 'biometric' && (
+                                        <div className="space-y-1">
+                                            <Label className="text-muted-foreground">Key Size</Label>
+                                            <p className="text-sm">256</p>
+                                        </div>
+                                    )}
+
+                                    {/* Key Export section */}
+                                    <div className="pt-4 mt-4 border-t border-border/60">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-sm font-medium">Key export</span>
+                                            <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
+                                                <Info size={10} className="text-muted-foreground" />
+                                            </div>
+                                        </div>
+                                        <Button
+                                            className="w-full h-11"
+                                            onClick={() => openKeyExport(panel.key)}
+                                        >
+                                            Export to host
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Identity Panel */}
+                            {panel.type === 'identity' && (
+                                <>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="h-10 w-10 rounded-lg bg-green-500/15 text-green-500 flex items-center justify-center">
+                                            <User size={20} />
+                                        </div>
+                                        <Input
+                                            value={draftIdentity.label || ''}
+                                            onChange={e => setDraftIdentity({ ...draftIdentity, label: e.target.value })}
+                                            placeholder="Label"
+                                            className="flex-1"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Username *</Label>
+                                        <div className="relative">
+                                            <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                            <Input
+                                                value={draftIdentity.username || ''}
+                                                onChange={e => setDraftIdentity({ ...draftIdentity, username: e.target.value })}
+                                                placeholder="Username"
+                                                className="pl-9"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Password</Label>
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassphrase ? 'text' : 'password'}
+                                                value={draftIdentity.password || ''}
+                                                onChange={e => setDraftIdentity({ ...draftIdentity, password: e.target.value })}
+                                                placeholder="Password"
+                                                className="pr-10"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                                                onClick={() => setShowPassphrase(!showPassphrase)}
+                                            >
+                                                {showPassphrase ? <EyeOff size={14} /> : <Eye size={14} />}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Authentication Method</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="secondary" className="w-full justify-between h-10">
+                                                    <span className="flex items-center gap-2">
+                                                        {draftIdentity.authMethod === 'key' && <><Key size={14} /> Key</>}
+                                                        {draftIdentity.authMethod === 'certificate' && <><BadgeCheck size={14} /> Certificate</>}
+                                                        {draftIdentity.authMethod === 'fido2' && <><Shield size={14} /> FIDO2</>}
+                                                        {(!draftIdentity.authMethod || draftIdentity.authMethod === 'password') && 'None (Password only)'}
+                                                    </span>
+                                                    <ChevronDown size={14} />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-56 p-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full justify-start gap-2"
+                                                    onClick={() => setDraftIdentity({ ...draftIdentity, authMethod: 'key', keyId: undefined })}
+                                                >
+                                                    <Key size={14} /> Key
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full justify-start gap-2"
+                                                    onClick={() => setDraftIdentity({ ...draftIdentity, authMethod: 'certificate', keyId: undefined })}
+                                                >
+                                                    <BadgeCheck size={14} /> Certificate
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full justify-start gap-2"
+                                                    onClick={() => setDraftIdentity({ ...draftIdentity, authMethod: 'fido2', keyId: undefined })}
+                                                >
+                                                    <Shield size={14} /> FIDO2
+                                                </Button>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+
+                                    {(draftIdentity.authMethod === 'key' || draftIdentity.authMethod === 'certificate') && (
+                                        <div className="space-y-2">
+                                            <Label>Select {draftIdentity.authMethod === 'key' ? 'Key' : 'Certificate'}</Label>
+                                            <select
+                                                value={draftIdentity.keyId || ''}
+                                                onChange={e => setDraftIdentity({ ...draftIdentity, keyId: e.target.value || undefined })}
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                            >
+                                                <option value="">Select...</option>
+                                                {keys
+                                                    .filter(k => draftIdentity.authMethod === 'certificate' ? k.certificate : !k.certificate)
+                                                    .map(k => (
+                                                        <option key={k.id} value={k.id}>{k.label}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <Button
+                                        className="w-full h-11"
+                                        onClick={handleSaveIdentity}
+                                        disabled={!draftIdentity.label?.trim() || !draftIdentity.username?.trim()}
+                                    >
+                                        {panel.identity ? 'Update Identity' : 'Save Identity'}
+                                    </Button>
+                                </>
+                            )}
+
+                            {/* Key Export Panel */}
+                            {panel.type === 'export' && !showHostSelector && (
+                                <>
+                                    {/* Key info card */}
+                                    <div className="flex items-center gap-3 p-3 bg-card border border-border/80 rounded-lg">
+                                        <div className={cn(
+                                            "h-10 w-10 rounded-md flex items-center justify-center",
+                                            panel.key.source === 'biometric'
+                                                ? "bg-blue-500/15 text-blue-500"
+                                                : panel.key.source === 'fido2'
+                                                    ? "bg-amber-500/15 text-amber-500"
+                                                    : "bg-primary/15 text-primary"
+                                        )}>
+                                            {getKeyIcon(panel.key)}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-semibold truncate">{panel.key.label}</p>
+                                            <p className="text-xs text-muted-foreground">Type {getKeyTypeDisplay(panel.key)}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Export to field */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-muted-foreground">Export to *</Label>
+                                            <Button
+                                                variant="link"
+                                                className="h-auto p-0 text-primary text-sm"
+                                                onClick={() => setShowHostSelector(true)}
+                                            >
+                                                Select Host
+                                            </Button>
+                                        </div>
+                                        <Input
+                                            value={exportHost?.label || ''}
+                                            readOnly
+                                            placeholder="Select a host..."
+                                            className="bg-muted/50 cursor-pointer"
+                                            onClick={() => setShowHostSelector(true)}
+                                        />
+                                    </div>
+
+                                    {/* Location field */}
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Location ~ $1 *</Label>
+                                        <Input
+                                            value={exportLocation}
+                                            onChange={e => setExportLocation(e.target.value)}
+                                            placeholder=".ssh"
+                                        />
+                                    </div>
+
+                                    {/* Filename field */}
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Filename ~ $2 *</Label>
+                                        <Input
+                                            value={exportFilename}
+                                            onChange={e => setExportFilename(e.target.value)}
+                                            placeholder="authorized_keys"
+                                        />
+                                    </div>
+
+                                    {/* Info note */}
+                                    <div className="flex items-start gap-2 p-3 bg-muted/50 border border-border/60 rounded-lg">
+                                        <Info size={14} className="mt-0.5 text-muted-foreground shrink-0" />
+                                        <p className="text-xs text-muted-foreground">
+                                            Key export currently supports only <span className="font-semibold text-foreground">UNIX</span> systems.
+                                            Use <span className="font-semibold text-foreground">Advanced</span> section to customize the export script.
+                                        </p>
+                                    </div>
+
+                                    {/* Advanced collapsible */}
+                                    <Collapsible open={exportAdvancedOpen} onOpenChange={setExportAdvancedOpen}>
+                                        <CollapsibleTrigger asChild>
+                                            <Button variant="ghost" className="w-full justify-between px-0 h-10 hover:bg-transparent hover:text-current">
+                                                <span className="font-medium">Advanced</span>
+                                                <ChevronRight size={16} className={cn(
+                                                    "transition-transform",
+                                                    exportAdvancedOpen && "rotate-90"
+                                                )} />
+                                            </Button>
+                                        </CollapsibleTrigger>
+                                        <CollapsibleContent className="space-y-2 pt-2">
+                                            <Label className="text-muted-foreground">Script *</Label>
+                                            <Textarea
+                                                value={exportScript}
+                                                onChange={e => setExportScript(e.target.value)}
+                                                className="min-h-[180px] font-mono text-xs"
+                                                placeholder="Export script..."
+                                            />
+                                        </CollapsibleContent>
+                                    </Collapsible>
+
+                                    {/* Export button */}
+                                    <Button
+                                        className="w-full h-11"
+                                        disabled={!exportHost || !exportLocation || !exportFilename || isExporting}
+                                        onClick={async () => {
+                                            if (!exportHost || !panel.key.publicKey) return;
+
+                                            setIsExporting(true);
+                                            setError('');
+
+                                            try {
+                                                // Get private key for authentication if host uses key auth
+                                                const hostPrivateKey = exportHost.identityFileId
+                                                    ? keys.find(k => k.id === exportHost.identityFileId)?.privateKey
+                                                    : undefined;
+
+                                                // Escape the public key for shell (single quotes, escape existing quotes)
+                                                const escapedPublicKey = panel.key.publicKey.replace(/'/g, "'\\''");
+
+                                                // Build the command by replacing $1, $2, $3
+                                                const command = exportScript
+                                                    .replace(/\$1/g, exportLocation)
+                                                    .replace(/\$2/g, exportFilename)
+                                                    .replace(/\$3/g, `'${escapedPublicKey}'`);
+
+                                                // Execute via SSH
+                                                const result = await window.nebula?.execCommand({
+                                                    hostname: exportHost.hostname,
+                                                    username: exportHost.username,
+                                                    port: exportHost.port || 22,
+                                                    password: exportHost.password,
+                                                    privateKey: hostPrivateKey,
+                                                    command,
+                                                    timeout: 30000,
+                                                });
+
+                                                if (result?.code === 0) {
+                                                    toast.success(`Public key exported to ${exportHost.label}`, 'Export Successful');
+                                                    closePanel();
+                                                } else {
+                                                    const errorMsg = result?.stderr || result?.stdout || 'Unknown error';
+                                                    toast.error(`Failed to export key: ${errorMsg}`, 'Export Failed');
+                                                }
+                                            } catch (err) {
+                                                const message = err instanceof Error ? err.message : 'Unknown error';
+                                                toast.error(message, 'Export Failed');
+                                            } finally {
+                                                setIsExporting(false);
+                                            }
+                                        }}
+                                    >
+                                        {isExporting ? 'Exporting...' : 'Export and Attach'}
+                                    </Button>
+                                </>
+                            )}
+
+                            {/* Edit Key Panel */}
+                            {panel.type === 'edit' && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label>Label *</Label>
+                                        <Input
+                                            value={draftKey.label || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, label: e.target.value })}
+                                            placeholder="Key label"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-destructive">Private key *</Label>
+                                        <Textarea
+                                            value={draftKey.privateKey || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, privateKey: e.target.value })}
+                                            placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
+                                            className="min-h-[180px] font-mono text-xs"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Public key</Label>
+                                        <Textarea
+                                            value={draftKey.publicKey || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, publicKey: e.target.value })}
+                                            placeholder="ssh-ed25519 AAAA..."
+                                            className="min-h-[80px] font-mono text-xs"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Certificate</Label>
+                                        <Textarea
+                                            value={draftKey.certificate || ''}
+                                            onChange={e => setDraftKey({ ...draftKey, certificate: e.target.value })}
+                                            placeholder="Certificate content (optional)"
+                                            className="min-h-[60px] font-mono text-xs"
+                                        />
+                                    </div>
+
+                                    {/* Key Export section */}
+                                    <div className="pt-4 mt-4 border-t border-border/60">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-sm font-medium">Key export</span>
+                                            <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
+                                                <Info size={10} className="text-muted-foreground" />
+                                            </div>
+                                        </div>
+                                        <Button
+                                            className="w-full h-11"
+                                            onClick={() => openKeyExport(panel.key)}
+                                        >
+                                            Export to host
+                                        </Button>
+                                    </div>
+
+                                    {/* Save button */}
+                                    <Button
+                                        className="w-full h-11 mt-4"
+                                        disabled={!draftKey.label?.trim() || !draftKey.privateKey?.trim()}
+                                        onClick={() => {
+                                            if (draftKey.id) {
+                                                onUpdate({
+                                                    ...panel.key,
+                                                    ...draftKey as SSHKey,
+                                                });
+                                                closePanel();
+                                            }
+                                        }}
+                                    >
+                                        Save Changes
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </ScrollArea>
 

@@ -1035,96 +1035,96 @@ const PortForwarding: React.FC<PortForwardingProps> = ({ hosts, keys, customGrou
                     }
                 >
                     <AsidePanelContent>
-                            {/* Traffic Diagram */}
-                            <div className="-my-1">
-                                <TrafficDiagram type={editDraft.type || editingRule.type} isAnimating={true} />
-                            </div>
+                        {/* Traffic Diagram */}
+                        <div className="-my-1">
+                            <TrafficDiagram type={editDraft.type || editingRule.type} isAnimating={true} />
+                        </div>
 
-                            {/* Label */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Label</Label>
-                                <Input
-                                    placeholder="Rule label"
-                                    className="h-10"
-                                    value={editDraft.label || ''}
-                                    onChange={e => setEditDraft(prev => ({ ...prev, label: e.target.value }))}
-                                />
-                            </div>
+                        {/* Label */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Label</Label>
+                            <Input
+                                placeholder="Rule label"
+                                className="h-10"
+                                value={editDraft.label || ''}
+                                onChange={e => setEditDraft(prev => ({ ...prev, label: e.target.value }))}
+                            />
+                        </div>
 
-                            {/* Local Port */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Local port number *</Label>
-                                <Input
-                                    type="number"
-                                    placeholder="e.g. 8080"
-                                    className="h-10"
-                                    value={editDraft.localPort || ''}
-                                    onChange={e => setEditDraft(prev => ({ ...prev, localPort: parseInt(e.target.value) || undefined }))}
-                                />
-                            </div>
+                        {/* Local Port */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Local port number *</Label>
+                            <Input
+                                type="number"
+                                placeholder="e.g. 8080"
+                                className="h-10"
+                                value={editDraft.localPort || ''}
+                                onChange={e => setEditDraft(prev => ({ ...prev, localPort: parseInt(e.target.value) || undefined }))}
+                            />
+                        </div>
 
-                            {/* Bind Address */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Bind address</Label>
-                                <Input
-                                    placeholder="127.0.0.1"
-                                    className="h-10"
-                                    value={editDraft.bindAddress || ''}
-                                    onChange={e => setEditDraft(prev => ({ ...prev, bindAddress: e.target.value }))}
-                                />
-                            </div>
+                        {/* Bind Address */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Bind address</Label>
+                            <Input
+                                placeholder="127.0.0.1"
+                                className="h-10"
+                                value={editDraft.bindAddress || ''}
+                                onChange={e => setEditDraft(prev => ({ ...prev, bindAddress: e.target.value }))}
+                            />
+                        </div>
 
-                            {/* Intermediate Host - for all types */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Intermediate host *</Label>
-                                <Button
-                                    variant="secondary"
-                                    className="w-full h-10 justify-between"
-                                    onClick={() => {
-                                        setShowHostSelector(true);
-                                    }}
-                                >
-                                    {hosts.find(h => h.id === editDraft.hostId) ? (
-                                        <div className="flex items-center gap-2">
-                                            <DistroAvatar
-                                                host={hosts.find(h => h.id === editDraft.hostId)!}
-                                                fallback={hosts.find(h => h.id === editDraft.hostId)!.os[0].toUpperCase()}
-                                                className="h-6 w-6"
-                                            />
-                                            <span>{hosts.find(h => h.id === editDraft.hostId)?.label}</span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-muted-foreground">Select a host</span>
-                                    )}
-                                    <ChevronDown size={14} />
-                                </Button>
-                            </div>
-
-                            {/* Destination - for local/remote only */}
-                            {(editDraft.type === 'local' || editDraft.type === 'remote') && (
-                                <>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">Destination address *</Label>
-                                        <Input
-                                            placeholder="e.g. localhost or 192.168.1.100"
-                                            className="h-10"
-                                            value={editDraft.remoteHost || ''}
-                                            onChange={e => setEditDraft(prev => ({ ...prev, remoteHost: e.target.value }))}
+                        {/* Intermediate Host - for all types */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Intermediate host *</Label>
+                            <Button
+                                variant="secondary"
+                                className="w-full h-10 justify-between"
+                                onClick={() => {
+                                    setShowHostSelector(true);
+                                }}
+                            >
+                                {hosts.find(h => h.id === editDraft.hostId) ? (
+                                    <div className="flex items-center gap-2">
+                                        <DistroAvatar
+                                            host={hosts.find(h => h.id === editDraft.hostId)!}
+                                            fallback={hosts.find(h => h.id === editDraft.hostId)!.os[0].toUpperCase()}
+                                            className="h-6 w-6"
                                         />
+                                        <span>{hosts.find(h => h.id === editDraft.hostId)?.label}</span>
                                     </div>
+                                ) : (
+                                    <span className="text-muted-foreground">Select a host</span>
+                                )}
+                                <ChevronDown size={14} />
+                            </Button>
+                        </div>
 
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">Destination port number *</Label>
-                                        <Input
-                                            type="number"
-                                            placeholder="e.g. 3306"
-                                            className="h-10"
-                                            value={editDraft.remotePort || ''}
-                                            onChange={e => setEditDraft(prev => ({ ...prev, remotePort: parseInt(e.target.value) || undefined }))}
-                                        />
-                                    </div>
-                                </>
-                            )}
+                        {/* Destination - for local/remote only */}
+                        {(editDraft.type === 'local' || editDraft.type === 'remote') && (
+                            <>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] text-muted-foreground">Destination address *</Label>
+                                    <Input
+                                        placeholder="e.g. localhost or 192.168.1.100"
+                                        className="h-10"
+                                        value={editDraft.remoteHost || ''}
+                                        onChange={e => setEditDraft(prev => ({ ...prev, remoteHost: e.target.value }))}
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] text-muted-foreground">Destination port number *</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="e.g. 3306"
+                                        className="h-10"
+                                        value={editDraft.remotePort || ''}
+                                        onChange={e => setEditDraft(prev => ({ ...prev, remotePort: parseInt(e.target.value) || undefined }))}
+                                    />
+                                </div>
+                            </>
+                        )}
                     </AsidePanelContent>
                     <AsidePanelFooter className="space-y-2">
                         <Button
@@ -1236,112 +1236,112 @@ const PortForwarding: React.FC<PortForwardingProps> = ({ hosts, keys, customGrou
                     width="w-[360px]"
                 >
                     <AsidePanelContent>
-                            {/* Type Selector */}
-                            <div className="flex gap-1 p-1 bg-secondary/80 rounded-lg border border-border/60">
-                                {(['local', 'remote', 'dynamic'] as PortForwardingType[]).map((type) => (
-                                    <Button
-                                        key={type}
-                                        variant={newFormDraft.type === type ? 'default' : 'ghost'}
-                                        size="sm"
-                                        className={cn(
-                                            "flex-1 h-9",
-                                            newFormDraft.type === type ? "bg-primary text-primary-foreground" : ""
-                                        )}
-                                        onClick={() => setNewFormDraft(prev => ({ ...prev, type }))}
-                                    >
-                                        {type[0].toUpperCase() + type.slice(1)}
-                                    </Button>
-                                ))}
-                            </div>
-
-                            {/* Traffic Diagram */}
-                            <div className="-my-1">
-                                <TrafficDiagram type={newFormDraft.type || 'local'} isAnimating={true} />
-                            </div>
-
-                            {/* Label */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Label</Label>
-                                <Input
-                                    placeholder="Rule label"
-                                    className="h-10"
-                                    value={newFormDraft.label || ''}
-                                    onChange={e => setNewFormDraft(prev => ({ ...prev, label: e.target.value }))}
-                                />
-                            </div>
-
-                            {/* Local Port */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Local port number *</Label>
-                                <Input
-                                    type="number"
-                                    placeholder="e.g. 8080"
-                                    className="h-10"
-                                    value={newFormDraft.localPort || ''}
-                                    onChange={e => setNewFormDraft(prev => ({ ...prev, localPort: parseInt(e.target.value) || undefined }))}
-                                />
-                            </div>
-
-                            {/* Bind Address */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Bind address</Label>
-                                <Input
-                                    placeholder="127.0.0.1"
-                                    className="h-10"
-                                    value={newFormDraft.bindAddress || ''}
-                                    onChange={e => setNewFormDraft(prev => ({ ...prev, bindAddress: e.target.value }))}
-                                />
-                            </div>
-
-                            {/* Intermediate Host */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-muted-foreground">Intermediate host *</Label>
+                        {/* Type Selector */}
+                        <div className="flex gap-1 p-1 bg-secondary/80 rounded-lg border border-border/60">
+                            {(['local', 'remote', 'dynamic'] as PortForwardingType[]).map((type) => (
                                 <Button
-                                    variant="secondary"
-                                    className="w-full h-10 justify-between"
-                                    onClick={() => setShowHostSelector(true)}
-                                >
-                                    {hosts.find(h => h.id === newFormDraft.hostId) ? (
-                                        <div className="flex items-center gap-2">
-                                            <DistroAvatar
-                                                host={hosts.find(h => h.id === newFormDraft.hostId)!}
-                                                fallback={hosts.find(h => h.id === newFormDraft.hostId)!.os[0].toUpperCase()}
-                                                className="h-6 w-6"
-                                            />
-                                            <span>{hosts.find(h => h.id === newFormDraft.hostId)?.label}</span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-muted-foreground">Select a host</span>
+                                    key={type}
+                                    variant={newFormDraft.type === type ? 'default' : 'ghost'}
+                                    size="sm"
+                                    className={cn(
+                                        "flex-1 h-9",
+                                        newFormDraft.type === type ? "bg-primary text-primary-foreground" : ""
                                     )}
-                                    <ChevronDown size={14} />
+                                    onClick={() => setNewFormDraft(prev => ({ ...prev, type }))}
+                                >
+                                    {type[0].toUpperCase() + type.slice(1)}
                                 </Button>
-                            </div>
+                            ))}
+                        </div>
 
-                            {/* Destination - for local/remote only */}
-                            {(newFormDraft.type === 'local' || newFormDraft.type === 'remote') && (
-                                <>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">Destination address *</Label>
-                                        <Input
-                                            placeholder="e.g. localhost or 192.168.1.100"
-                                            className="h-10"
-                                            value={newFormDraft.remoteHost || ''}
-                                            onChange={e => setNewFormDraft(prev => ({ ...prev, remoteHost: e.target.value }))}
-                                        />
-                                    </div>
+                        {/* Traffic Diagram */}
+                        <div className="-my-1">
+                            <TrafficDiagram type={newFormDraft.type || 'local'} isAnimating={true} />
+                        </div>
 
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">Destination port number *</Label>
-                                        <Input
-                                            type="number"
-                                            placeholder="e.g. 3306"
-                                            className="h-10"
-                                            value={newFormDraft.remotePort || ''}
-                                            onChange={e => setNewFormDraft(prev => ({ ...prev, remotePort: parseInt(e.target.value) || undefined }))}
+                        {/* Label */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Label</Label>
+                            <Input
+                                placeholder="Rule label"
+                                className="h-10"
+                                value={newFormDraft.label || ''}
+                                onChange={e => setNewFormDraft(prev => ({ ...prev, label: e.target.value }))}
+                            />
+                        </div>
+
+                        {/* Local Port */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Local port number *</Label>
+                            <Input
+                                type="number"
+                                placeholder="e.g. 8080"
+                                className="h-10"
+                                value={newFormDraft.localPort || ''}
+                                onChange={e => setNewFormDraft(prev => ({ ...prev, localPort: parseInt(e.target.value) || undefined }))}
+                            />
+                        </div>
+
+                        {/* Bind Address */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Bind address</Label>
+                            <Input
+                                placeholder="127.0.0.1"
+                                className="h-10"
+                                value={newFormDraft.bindAddress || ''}
+                                onChange={e => setNewFormDraft(prev => ({ ...prev, bindAddress: e.target.value }))}
+                            />
+                        </div>
+
+                        {/* Intermediate Host */}
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-muted-foreground">Intermediate host *</Label>
+                            <Button
+                                variant="secondary"
+                                className="w-full h-10 justify-between"
+                                onClick={() => setShowHostSelector(true)}
+                            >
+                                {hosts.find(h => h.id === newFormDraft.hostId) ? (
+                                    <div className="flex items-center gap-2">
+                                        <DistroAvatar
+                                            host={hosts.find(h => h.id === newFormDraft.hostId)!}
+                                            fallback={hosts.find(h => h.id === newFormDraft.hostId)!.os[0].toUpperCase()}
+                                            className="h-6 w-6"
                                         />
+                                        <span>{hosts.find(h => h.id === newFormDraft.hostId)?.label}</span>
                                     </div>
-                                </>
-                            )}
+                                ) : (
+                                    <span className="text-muted-foreground">Select a host</span>
+                                )}
+                                <ChevronDown size={14} />
+                            </Button>
+                        </div>
+
+                        {/* Destination - for local/remote only */}
+                        {(newFormDraft.type === 'local' || newFormDraft.type === 'remote') && (
+                            <>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] text-muted-foreground">Destination address *</Label>
+                                    <Input
+                                        placeholder="e.g. localhost or 192.168.1.100"
+                                        className="h-10"
+                                        value={newFormDraft.remoteHost || ''}
+                                        onChange={e => setNewFormDraft(prev => ({ ...prev, remoteHost: e.target.value }))}
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] text-muted-foreground">Destination port number *</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="e.g. 3306"
+                                        className="h-10"
+                                        value={newFormDraft.remotePort || ''}
+                                        onChange={e => setNewFormDraft(prev => ({ ...prev, remotePort: parseInt(e.target.value) || undefined }))}
+                                    />
+                                </div>
+                            </>
+                        )}
                     </AsidePanelContent>
                     <AsidePanelFooter className="space-y-2">
                         <Button

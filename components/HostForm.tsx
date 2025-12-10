@@ -58,10 +58,10 @@ const HostForm: React.FC<HostFormProps> = ({ initialData, availableKeys, groups,
   // Effect to ensure we have a valid auth state if switching back and forth
   useEffect(() => {
     if (authType === 'password') {
-        setFormData(prev => ({ ...prev, identityFileId: '' }));
+      setFormData(prev => ({ ...prev, identityFileId: '' }));
     } else if (authType === 'key' && !formData.identityFileId && availableKeys.length > 0) {
-        // Default to first key if none selected
-        setFormData(prev => ({ ...prev, identityFileId: availableKeys[0].id }));
+      // Default to first key if none selected
+      setFormData(prev => ({ ...prev, identityFileId: availableKeys[0].id }));
     }
   }, [authType, availableKeys, formData.identityFileId]);
 
@@ -91,7 +91,7 @@ const HostForm: React.FC<HostFormProps> = ({ initialData, availableKeys, groups,
             {initialData ? 'Update connection details for this host' : 'Create a new SSH host entry'}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="label">Label</Label>
@@ -99,7 +99,7 @@ const HostForm: React.FC<HostFormProps> = ({ initialData, availableKeys, groups,
               id="label"
               placeholder="My Production Server"
               value={formData.label}
-              onChange={e => setFormData({...formData, label: e.target.value})}
+              onChange={e => setFormData({ ...formData, label: e.target.value })}
               required
             />
           </div>
@@ -111,7 +111,7 @@ const HostForm: React.FC<HostFormProps> = ({ initialData, availableKeys, groups,
                 id="hostname"
                 placeholder="192.168.1.1"
                 value={formData.hostname}
-                onChange={e => setFormData({...formData, hostname: e.target.value})}
+                onChange={e => setFormData({ ...formData, hostname: e.target.value })}
                 required
               />
             </div>
@@ -121,141 +121,141 @@ const HostForm: React.FC<HostFormProps> = ({ initialData, availableKeys, groups,
                 id="port"
                 type="number"
                 value={formData.port}
-                onChange={e => setFormData({...formData, port: parseInt(e.target.value)})}
+                onChange={e => setFormData({ ...formData, port: parseInt(e.target.value) })}
                 required
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={formData.username}
-                  onChange={e => setFormData({...formData, username: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="os">OS Type</Label>
-                <Select value={formData.os} onValueChange={(val: any) => setFormData({...formData, os: val})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select OS" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="linux">Linux</SelectItem>
-                    <SelectItem value="windows">Windows</SelectItem>
-                    <SelectItem value="macos">macOS</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-          </div>
-
-          <div className="grid gap-2">
-              <Label htmlFor="group">Group</Label>
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="group"
-                placeholder="e.g. AWS, DigitalOcean"
-                value={formData.group}
-                onChange={e => setFormData({...formData, group: e.target.value})}
-                list="group-suggestions"
-                autoComplete="off"
+                id="username"
+                value={formData.username}
+                onChange={e => setFormData({ ...formData, username: e.target.value })}
+                required
               />
-              <datalist id="group-suggestions">
-                  {groups.map(g => (
-                      <option key={g} value={g} />
-                  ))}
-              </datalist>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="os">OS Type</Label>
+              <Select value={formData.os} onValueChange={(val: any) => setFormData({ ...formData, os: val })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select OS" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="linux">Linux</SelectItem>
+                  <SelectItem value="windows">Windows</SelectItem>
+                  <SelectItem value="macos">macOS</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid gap-2">
-              <Label htmlFor="tags">Tags</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="tags"
-                  placeholder="Add a tag..."
-                  value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  onClick={handleAddTag}
-                  disabled={!tagInput.trim()}
-                >
-                  <Plus size={16} />
-                </Button>
-              </div>
-              {formData.tags && formData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {formData.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
+            <Label htmlFor="group">Group</Label>
+            <Input
+              id="group"
+              placeholder="e.g. AWS, DigitalOcean"
+              value={formData.group}
+              onChange={e => setFormData({ ...formData, group: e.target.value })}
+              list="group-suggestions"
+              autoComplete="off"
+            />
+            <datalist id="group-suggestions">
+              {groups.map(g => (
+                <option key={g} value={g} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="tags">Tags</Label>
+            <div className="flex gap-2">
+              <Input
+                id="tags"
+                placeholder="Add a tag..."
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                onClick={handleAddTag}
+                disabled={!tagInput.trim()}
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
+            {formData.tags && formData.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {formData.tags.map(tag => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="hover:bg-primary/20 rounded-full p-0.5"
                     >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="hover:bg-primary/20 rounded-full p-0.5"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-3 pt-2">
-             <Label>Authentication Method</Label>
-             <div className="grid grid-cols-2 gap-4">
-                <div 
-                    className={cn(
-                        "border rounded-md p-3 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-accent/50",
-                        authType === 'password' ? "border-primary bg-primary/5 text-primary ring-1 ring-primary" : "text-muted-foreground"
-                    )} 
-                    onClick={() => setAuthType('password')}
-                >
-                    <Lock size={20} />
-                    <span className="text-xs font-medium">Password</span>
-                </div>
-                <div 
-                    className={cn(
-                        "border rounded-md p-3 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-accent/50",
-                        authType === 'key' ? "border-primary bg-primary/5 text-primary ring-1 ring-primary" : "text-muted-foreground"
-                    )} 
-                    onClick={() => setAuthType('key')}
-                >
-                    <Key size={20} />
-                    <span className="text-xs font-medium">SSH Key</span>
-                </div>
-             </div>
-             
-             {authType === 'key' && (
-                 <div className="animate-in fade-in zoom-in-95 duration-200">
-                     <Select value={formData.identityFileId || ""} onValueChange={(val) => setFormData({...formData, identityFileId: val})}>
-                        <SelectTrigger>
-                           <SelectValue placeholder="Select an SSH Key" />
-                        </SelectTrigger>
-                        <SelectContent>
-                           {availableKeys.map(key => (
-                              <SelectItem key={key.id} value={key.id}>{key.label} ({key.type})</SelectItem>
-                           ))}
-                           {availableKeys.length === 0 && <SelectItem value="none" disabled>No keys available</SelectItem>}
-                        </SelectContent>
-                     </Select>
-                     {availableKeys.length === 0 && (
-                         <p className="text-[10px] text-destructive mt-1">
-                             No SSH keys found in Keychain. Please create one first.
-                         </p>
-                     )}
-                 </div>
-             )}
+            <Label>Authentication Method</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div
+                className={cn(
+                  "border rounded-md p-3 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-accent/50",
+                  authType === 'password' ? "border-primary bg-primary/5 text-primary ring-1 ring-primary" : "text-muted-foreground"
+                )}
+                onClick={() => setAuthType('password')}
+              >
+                <Lock size={20} />
+                <span className="text-xs font-medium">Password</span>
+              </div>
+              <div
+                className={cn(
+                  "border rounded-md p-3 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-accent/50",
+                  authType === 'key' ? "border-primary bg-primary/5 text-primary ring-1 ring-primary" : "text-muted-foreground"
+                )}
+                onClick={() => setAuthType('key')}
+              >
+                <Key size={20} />
+                <span className="text-xs font-medium">SSH Key</span>
+              </div>
+            </div>
+
+            {authType === 'key' && (
+              <div className="animate-in fade-in zoom-in-95 duration-200">
+                <Select value={formData.identityFileId || ""} onValueChange={(val) => setFormData({ ...formData, identityFileId: val })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an SSH Key" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableKeys.map(key => (
+                      <SelectItem key={key.id} value={key.id}>{key.label} ({key.type})</SelectItem>
+                    ))}
+                    {availableKeys.length === 0 && <SelectItem value="none" disabled>No keys available</SelectItem>}
+                  </SelectContent>
+                </Select>
+                {availableKeys.length === 0 && (
+                  <p className="text-[10px] text-destructive mt-1">
+                    No SSH keys found in Keychain. Please create one first.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <DialogFooter>
