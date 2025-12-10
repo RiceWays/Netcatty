@@ -58,7 +58,7 @@ body {
 .soft-card {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.8);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 12px 36px rgba(0, 0, 0, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .card-highlight {
@@ -80,12 +80,11 @@ body {
 }
 
 .elevate {
-  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  transition: transform 140ms ease, border-color 140ms ease;
 }
 
 .elevate:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
 }
 
 ::selection {

@@ -502,18 +502,20 @@ const PortForwarding: React.FC<PortForwardingProps> = ({ hosts, keys, customGrou
         return (
             <ContextMenu key={rule.id}>
                 <ContextMenuTrigger>
-                    <Card
+                    <div
                         className={cn(
-                            "cursor-pointer soft-card rounded-xl border transition-all group",
-                            isSelected ? "border-primary/70 ring-2 ring-primary/20" : "border-border/60 hover:border-primary/40",
-                            viewMode === 'list' ? "w-full" : ""
+                            "group cursor-pointer",
+                            viewMode === 'grid'
+                                ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
+                                : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors",
+                            isSelected && "ring-2 ring-primary"
                         )}
                         onClick={() => {
                             setSelectedRuleId(rule.id);
                             startEditRule(rule);
                         }}
                     >
-                        <CardContent className={cn("p-4 flex items-center gap-3", viewMode === 'list' ? "py-3" : "")}>
+                        <div className="flex items-center gap-3 h-full">
                             <div className={cn(
                                 "h-11 w-11 rounded-xl flex items-center justify-center text-sm font-bold transition-colors",
                                 rule.status === 'active' ? (
@@ -587,8 +589,8 @@ const PortForwarding: React.FC<PortForwardingProps> = ({ hosts, keys, customGrou
                                     </Button>
                                 ) : null}
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                     <ContextMenuItem onClick={() => startEditRule(rule)}>

@@ -172,14 +172,13 @@ const KeyManager: React.FC<KeyManagerProps> = ({ keys, onSave, onDelete }) => {
             </div>
           )}
 
-          <div className={viewMode === 'grid' ? "grid gap-2.5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-2"}>
+          <div className={viewMode === 'grid' ? "grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-0"}>
             {filteredKeys.map((key) => (
               <Card
                 key={key.id}
                 className={cn(
-                  "group relative overflow-hidden bg-secondary/60 border transition-shadow cursor-pointer",
-                  viewMode === 'grid' ? "h-[72px] px-3 py-2" : "h-[72px] px-3 py-2 w-full",
-                  "border-border/60 shadow-sm hover:shadow-[0_0_0_2px_var(--ring)]"
+                  "group cursor-pointer soft-card elevate rounded-xl",
+                  viewMode === 'grid' ? "h-[68px] px-3 py-2" : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
                 )}
                 onClick={() => openPanelForKey(key)}
               >

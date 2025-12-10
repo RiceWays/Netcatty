@@ -477,9 +477,9 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
   };
 
   return (
-    <div className="px-2.5 py-2.5 lg:px-3 lg:py-3 h-full overflow-hidden flex gap-3 relative">
-      <div className="flex-1 flex flex-col min-h-0 space-y-3">
-        <div className="flex items-center gap-2">
+    <div className="h-full flex gap-3 relative">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex items-center gap-2 px-3 pt-3 pb-2">
           {/* Search box */}
           <div className="relative w-64">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -545,7 +545,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
             />
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground px-3">
           <button className="text-primary hover:underline" onClick={() => setSelectedPackage(null)}>All packages</button>
           {breadcrumb.map((b) => (
             <span key={b.path} className="flex items-center gap-1">
@@ -556,7 +556,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
         </div>
 
         {!snippets.length && displayedPackages.length === 0 && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center px-3">
             <div className="max-w-md w-full text-center space-y-3 py-12 rounded-2xl bg-secondary/60 border border-border/60 shadow-lg">
               <div className="mx-auto h-12 w-12 rounded-xl bg-muted text-muted-foreground flex items-center justify-center">
                 <FileCode size={22} />
@@ -567,7 +567,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
           </div>
         )}
 
-        <div className="space-y-3 overflow-y-auto pr-1">
+        <div className="flex-1 space-y-3 overflow-y-auto px-3 pb-3">
           {displayedPackages.length > 0 && (
             <>
               <div className="flex items-center justify-between">
@@ -575,7 +575,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
               </div>
               <div className={cn(
                 viewMode === 'grid'
-                  ? "grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                  ? "grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
                   : "flex flex-col gap-0"
               )}>
                 {displayedPackages.map((pkg) => (
@@ -583,10 +583,10 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
                     <ContextMenuTrigger>
                       <div
                         className={cn(
-                          "cursor-pointer",
+                          "group cursor-pointer",
                           viewMode === 'grid'
-                            ? "bg-secondary/70 border border-border/70 hover:border-primary/60 transition-colors h-[72px] px-3 py-2 rounded-lg"
-                            : "group h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
+                            ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
+                            : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
                         )}
                         draggable
                         onDragStart={(e) => {
@@ -639,7 +639,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
                         className={cn(
                           "group cursor-pointer",
                           viewMode === 'grid'
-                            ? "bg-secondary/70 border border-border/70 hover:border-primary/60 transition-colors h-[72px] px-3 py-2 rounded-lg"
+                            ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
                             : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
                         )}
                         draggable

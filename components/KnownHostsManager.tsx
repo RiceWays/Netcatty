@@ -125,7 +125,7 @@ const HostItem = React.memo<HostItemProps>(({ knownHost, converted, viewMode, on
         return (
             <div
                 className={cn(
-                    "group relative flex items-center gap-3 p-2.5 rounded-lg border border-border/50 bg-background hover:bg-secondary/50 transition-colors cursor-pointer",
+                    "group cursor-pointer soft-card elevate rounded-xl h-[68px] px-3 py-2",
                     converted && "opacity-60"
                 )}
             >
@@ -148,29 +148,26 @@ const HostItem = React.memo<HostItemProps>(({ knownHost, converted, viewMode, on
                         <Trash2 size={12} />
                     </button>
                 </div>
-                <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                    <Server size={18} />
-                </div>
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold truncate">
-                            {knownHost.hostname}
-                        </span>
-                        {knownHost.port !== 22 && (
-                            <span className="text-xs text-muted-foreground">
-                                :{knownHost.port}
-                            </span>
-                        )}
+                <div className="flex items-center gap-3 h-full">
+                    <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                        <Server size={18} />
                     </div>
-                    <div className="flex flex-col gap-0 text-xs text-muted-foreground">
-                        <span className={cn("flex items-center gap-1", getKeyTypeColorFn(knownHost.keyType))}>
-                            <Key size={10} />
-                            {knownHost.keyType}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <Clock size={10} />
-                            {formatDateFn(knownHost.discoveredAt)}
-                        </span>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold truncate">
+                                {knownHost.hostname}
+                            </span>
+                            {knownHost.port !== 22 && (
+                                <span className="text-xs text-muted-foreground">
+                                    :{knownHost.port}
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground truncate">
+                            <span className={cn(getKeyTypeColorFn(knownHost.keyType))}>
+                                {knownHost.keyType}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

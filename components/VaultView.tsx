@@ -609,9 +609,9 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
                         <ContextMenuTrigger asChild>
                           <div
                             className={cn(
-                              "cursor-pointer",
+                              "group cursor-pointer",
                               viewMode === 'grid'
-                                ? "soft-card elevate rounded-lg p-4"
+                                ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
                                 : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
                             )}
                             draggable
@@ -675,7 +675,7 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
                               className={cn(
                                 "group cursor-pointer",
                                 viewMode === 'grid'
-                                  ? "soft-card elevate rounded-xl h-[72px] px-3 py-2"
+                                  ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
                                   : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
                               )}
                               draggable

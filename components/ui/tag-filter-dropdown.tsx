@@ -199,7 +199,7 @@ export const TagFilterDropdown: React.FC<TagFilterDropdownProps> = ({
                                                 key={tag}
                                                 className={cn(
                                                     "flex items-center gap-2 h-8 px-2 rounded-md cursor-pointer group",
-                                                    isSelected ? "bg-secondary" : "hover:bg-accent"
+                                                    isSelected ? "bg-secondary" : "hover:bg-muted/60"
                                                 )}
                                                 onClick={() => toggleTag(tag)}
                                             >

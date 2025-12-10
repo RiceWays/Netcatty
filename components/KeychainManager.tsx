@@ -1034,7 +1034,7 @@ echo $3 >> "$FILE"`);
                         </div>
                     ) : (
                         <div className={viewMode === 'grid'
-                            ? "grid gap-2.5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                            ? "grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                             : "flex flex-col gap-0"
                         }>
                             {filteredKeys.map((key) => (
@@ -1044,7 +1044,7 @@ echo $3 >> "$FILE"`);
                                             className={cn(
                                                 "group cursor-pointer",
                                                 viewMode === 'grid'
-                                                    ? "bg-secondary/60 border border-border/60 shadow-sm hover:shadow-[0_0_0_2px_var(--ring)] rounded-lg h-[72px] px-3 py-2"
+                                                    ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
                                                     : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors",
                                                 (panel.type === 'view' && panel.key.id === key.id) && "ring-2 ring-primary",
                                                 (panel.type === 'export' && panel.key.id === key.id) && "ring-2 ring-primary"
@@ -1125,7 +1125,7 @@ echo $3 >> "$FILE"`);
                             <span className="text-xs text-muted-foreground">{filteredIdentities.length} items</span>
                         </div>
                         <div className={viewMode === 'grid'
-                            ? "grid gap-2.5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                            ? "grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                             : "flex flex-col gap-0"
                         }>
                             {filteredIdentities.map((identity) => (
@@ -1134,7 +1134,7 @@ echo $3 >> "$FILE"`);
                                     className={cn(
                                         "group cursor-pointer",
                                         viewMode === 'grid'
-                                            ? "bg-secondary/60 border border-border/60 shadow-sm hover:shadow-[0_0_0_2px_var(--ring)] rounded-lg h-[72px] px-3 py-2"
+                                            ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
                                             : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors",
                                         panel.type === 'identity' && panel.identity?.id === identity.id && "ring-2 ring-primary"
                                     )}
