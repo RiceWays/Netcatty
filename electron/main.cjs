@@ -707,7 +707,149 @@ const registerSSHBridge = (win) => {
     sessions.delete(payload.sessionId);
   };
 
+  // Telnet session using node-pty to spawn system telnet
+  const startTelnet = async (event, options) => {
+    const sessionId =
+      options.sessionId ||
+      `telnet-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const cols = options.cols || 80;
+    const rows = options.rows || 24;
+
+    // Find telnet executable
+    let telnetCmd = 'telnet';
+    if (process.platform === 'win32') {
+      telnetCmd = findExecutable('telnet') || 'telnet.exe';
+    }
+
+    const args = [options.hostname];
+    if (options.port && options.port !== 23) {
+      args.push(String(options.port));
+    }
+
+    const env = {
+      ...process.env,
+      ...(options.env || {}),
+      TERM: 'xterm-256color',
+      LANG: options.charset || 'en_US.UTF-8',
+    };
+
+    try {
+      const proc = pty.spawn(telnetCmd, args, {
+        cols,
+        rows,
+        env,
+        cwd: os.homedir(),
+      });
+
+      const session = {
+        proc,
+        type: 'telnet',
+        webContentsId: event.sender.id,
+      };
+      sessions.set(sessionId, session);
+
+      proc.onData((data) => {
+        const contents = electronModule.webContents.fromId(session.webContentsId);
+        contents?.send("nebula:data", { sessionId, data });
+      });
+
+      proc.onExit((evt) => {
+        sessions.delete(sessionId);
+        const contents = electronModule.webContents.fromId(session.webContentsId);
+        contents?.send("nebula:exit", { sessionId, ...evt });
+      });
+
+      return { sessionId };
+    } catch (err) {
+      console.error("[Telnet] Failed to start telnet session:", err.message);
+      throw err;
+    }
+  };
+
+  // Mosh session using node-pty to spawn system mosh-client
+  const startMosh = async (event, options) => {
+    const sessionId =
+      options.sessionId ||
+      `mosh-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const cols = options.cols || 80;
+    const rows = options.rows || 24;
+
+    // Find mosh executable
+    let moshCmd = 'mosh';
+    if (process.platform === 'win32') {
+      // Mosh is less common on Windows, try to find it
+      moshCmd = findExecutable('mosh') || 'mosh.exe';
+    }
+
+    // Build mosh command arguments
+    const args = [];
+    
+    // SSH port (for initial connection)
+    if (options.port && options.port !== 22) {
+      args.push('--ssh=ssh -p ' + options.port);
+    }
+
+    // Mosh server path if specified
+    if (options.moshServerPath) {
+      args.push('--server=' + options.moshServerPath);
+    }
+
+    // Add user@host
+    const userHost = options.username 
+      ? `${options.username}@${options.hostname}`
+      : options.hostname;
+    args.push(userHost);
+
+    const env = {
+      ...process.env,
+      ...(options.env || {}),
+      TERM: 'xterm-256color',
+      LANG: options.charset || 'en_US.UTF-8',
+    };
+
+    // For key-based auth, set SSH_AUTH_SOCK if available
+    if (options.agentForwarding && process.env.SSH_AUTH_SOCK) {
+      env.SSH_AUTH_SOCK = process.env.SSH_AUTH_SOCK;
+    }
+
+    try {
+      const proc = pty.spawn(moshCmd, args, {
+        cols,
+        rows,
+        env,
+        cwd: os.homedir(),
+      });
+
+      const session = {
+        proc,
+        type: 'mosh',
+        webContentsId: event.sender.id,
+      };
+      sessions.set(sessionId, session);
+
+      proc.onData((data) => {
+        const contents = electronModule.webContents.fromId(session.webContentsId);
+        contents?.send("nebula:data", { sessionId, data });
+      });
+
+      proc.onExit((evt) => {
+        sessions.delete(sessionId);
+        const contents = electronModule.webContents.fromId(session.webContentsId);
+        contents?.send("nebula:exit", { sessionId, ...evt });
+      });
+
+      return { sessionId };
+    } catch (err) {
+      console.error("[Mosh] Failed to start mosh session:", err.message);
+      throw err;
+    }
+  };
+
   electronModule.ipcMain.handle("nebula:start", start);
+  electronModule.ipcMain.handle("nebula:telnet:start", startTelnet);
+  electronModule.ipcMain.handle("nebula:mosh:start", startMosh);
   electronModule.ipcMain.handle("nebula:local:start", (event, payload) => {
     const sessionId =
       payload?.sessionId ||

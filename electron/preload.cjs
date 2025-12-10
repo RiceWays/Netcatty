@@ -179,6 +179,14 @@ const api = {
     const result = await ipcRenderer.invoke("nebula:start", options);
     return result.sessionId;
   },
+  startTelnetSession: async (options) => {
+    const result = await ipcRenderer.invoke("nebula:telnet:start", options);
+    return result.sessionId;
+  },
+  startMoshSession: async (options) => {
+    const result = await ipcRenderer.invoke("nebula:mosh:start", options);
+    return result.sessionId;
+  },
   startLocalSession: async (options) => {
     const result = await ipcRenderer.invoke("nebula:local:start", options || {});
     return result.sessionId;

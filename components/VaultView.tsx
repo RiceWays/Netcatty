@@ -136,12 +136,14 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
   // Check if host has multiple protocols enabled
   const hasMultipleProtocols = useCallback((host: Host) => {
     let count = 0;
+    // SSH is always available as base protocol (unless explicitly set to something else)
     if (host.protocol === 'ssh' || !host.protocol) count++;
+    // Mosh adds another option
     if (host.moshEnabled) count++;
-    if (host.telnetEnabled || host.protocol === 'telnet') count++;
-    if (host.protocols?.length) {
-      count = host.protocols.filter(p => p.enabled).length;
-    }
+    // Telnet adds another option
+    if (host.telnetEnabled) count++;
+    // If protocol is explicitly telnet (not ssh), count it
+    if (host.protocol === 'telnet' && !host.telnetEnabled) count++;
     return count > 1;
   }, []);
 

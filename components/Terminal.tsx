@@ -255,9 +255,18 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
         if (host.protocol === 'local' || host.hostname === 'localhost') {
           setStatus('connecting');
-          setProgressLogs(['Initializing secure channel...']);
+          setProgressLogs(['Initializing local shell...']);
           await startLocal(term);
+        } else if (host.protocol === 'telnet') {
+          setStatus('connecting');
+          setProgressLogs(['Initializing Telnet connection...']);
+          await startTelnet(term);
+        } else if (host.moshEnabled) {
+          setStatus('connecting');
+          setProgressLogs(['Initializing Mosh connection...']);
+          await startMosh(term);
         } else {
+          // SSH connection (default)
           // Check if host needs authentication info
           const hasPassword = host.authMethod === 'password' && host.password;
           const hasKey = host.authMethod === 'key' && host.identityFileId;
@@ -674,6 +683,153 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
     // Trigger distro detection once connected (hidden exec, no terminal output)
     setTimeout(() => runDistroDetection(key), 600);
+  };
+
+  const startTelnet = async (term: GhosttyTerminal) => {
+    try {
+      term.clear?.();
+    } catch (err) {
+      console.warn("Failed to clear terminal before connect", err);
+    }
+
+    const startTelnetSession = window.nebula?.startTelnetSession;
+    if (!startTelnetSession) {
+      setError("Telnet bridge unavailable. Please run the desktop build.");
+      term.writeln("\r\n[Telnet bridge unavailable. Please run the desktop build.]");
+      updateStatus('disconnected');
+      return;
+    }
+
+    try {
+      const id = await startTelnetSession({
+        sessionId,
+        hostname: host.hostname,
+        port: host.telnetPort || host.port || 23,
+        cols: term.cols,
+        rows: term.rows,
+        charset: host.charset,
+        env: host.environmentVariables?.reduce((acc, { name, value }) => {
+          if (name) acc[name] = value;
+          return acc;
+        }, {} as Record<string, string>),
+      });
+
+      sessionRef.current = id;
+
+      disposeDataRef.current = window.nebula?.onSessionData(id, (chunk) => {
+        term.write(chunk);
+        if (!hasConnectedRef.current) {
+          updateStatus('connected');
+          setTimeout(() => {
+            if (fitAddonRef.current) {
+              try {
+                fitAddonRef.current.fit();
+                if (sessionRef.current && window.nebula?.resizeSession) {
+                  window.nebula.resizeSession(sessionRef.current, term.cols, term.rows);
+                }
+              } catch (err) {
+                console.warn("Post-connect fit failed", err);
+              }
+            }
+          }, 100);
+        }
+      });
+
+      disposeExitRef.current = window.nebula?.onSessionExit(id, (evt) => {
+        updateStatus('disconnected');
+        term.writeln(
+          `\r\n[Telnet session closed${evt?.exitCode !== undefined ? ` (code ${evt.exitCode})` : ""}]`
+        );
+        onSessionExit?.(sessionId);
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      term.writeln(`\r\n[Failed to start Telnet: ${message}]`);
+      updateStatus('disconnected');
+    }
+  };
+
+  const startMosh = async (term: GhosttyTerminal) => {
+    try {
+      term.clear?.();
+    } catch (err) {
+      console.warn("Failed to clear terminal before connect", err);
+    }
+
+    const startMoshSession = window.nebula?.startMoshSession;
+    if (!startMoshSession) {
+      setError("Mosh bridge unavailable. Please run the desktop build.");
+      term.writeln("\r\n[Mosh bridge unavailable. Please run the desktop build.]");
+      updateStatus('disconnected');
+      return;
+    }
+
+    try {
+      const id = await startMoshSession({
+        sessionId,
+        hostname: host.hostname,
+        username: host.username || 'root',
+        port: host.port || 22,
+        moshServerPath: host.moshServerPath,
+        agentForwarding: host.agentForwarding,
+        cols: term.cols,
+        rows: term.rows,
+        charset: host.charset,
+        env: host.environmentVariables?.reduce((acc, { name, value }) => {
+          if (name) acc[name] = value;
+          return acc;
+        }, {} as Record<string, string>),
+      });
+
+      sessionRef.current = id;
+
+      disposeDataRef.current = window.nebula?.onSessionData(id, (chunk) => {
+        term.write(chunk);
+        if (!hasConnectedRef.current) {
+          updateStatus('connected');
+          setTimeout(() => {
+            if (fitAddonRef.current) {
+              try {
+                fitAddonRef.current.fit();
+                if (sessionRef.current && window.nebula?.resizeSession) {
+                  window.nebula.resizeSession(sessionRef.current, term.cols, term.rows);
+                }
+              } catch (err) {
+                console.warn("Post-connect fit failed", err);
+              }
+            }
+          }, 100);
+        }
+      });
+
+      disposeExitRef.current = window.nebula?.onSessionExit(id, (evt) => {
+        updateStatus('disconnected');
+        term.writeln(
+          `\r\n[Mosh session closed${evt?.exitCode !== undefined ? ` (code ${evt.exitCode})` : ""}]`
+        );
+        onSessionExit?.(sessionId);
+      });
+
+      // Run startup command if specified
+      const commandToRun = startupCommand || host.startupCommand;
+      if (commandToRun && !hasRunStartupCommandRef.current) {
+        hasRunStartupCommandRef.current = true;
+        setTimeout(() => {
+          if (sessionRef.current) {
+            window.nebula?.writeToSession(sessionRef.current, `${commandToRun}\r`);
+            if (onCommandExecuted) {
+              onCommandExecuted(commandToRun, host.id, host.label, sessionId);
+            }
+          }
+        }, 600);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      term.writeln(`\r\n[Failed to start Mosh: ${message}]`);
+      updateStatus('disconnected');
+    }
   };
 
   const startLocal = async (term: GhosttyTerminal) => {

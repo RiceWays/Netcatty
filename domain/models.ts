@@ -57,12 +57,15 @@ export interface Host {
   environmentVariables?: EnvVar[]; // Structured environment variables
   charset?: string;
   moshEnabled?: boolean;
+  moshServerPath?: string; // Custom mosh-server path (e.g., /usr/local/bin/mosh-server)
   theme?: string;
   distro?: string; // detected distro id (e.g., ubuntu, debian)
   // Multi-protocol support
   protocols?: ProtocolConfig[]; // Multiple protocol configurations
   telnetPort?: number; // Telnet-specific port (for quick access)
   telnetEnabled?: boolean; // Is Telnet enabled for this host
+  telnetUsername?: string; // Telnet-specific username
+  telnetPassword?: string; // Telnet-specific password
 }
 
 export type KeyType = 'RSA' | 'ECDSA' | 'ED25519';

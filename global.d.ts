@@ -101,6 +101,27 @@ type PortForwardStatusCallback = (status: 'inactive' | 'connecting' | 'active' |
 
 interface NebulaBridge {
   startSSHSession(options: NebulaSSHOptions): Promise<string>;
+  startTelnetSession?(options: {
+    sessionId?: string;
+    hostname: string;
+    port?: number;
+    cols?: number;
+    rows?: number;
+    charset?: string;
+    env?: Record<string, string>;
+  }): Promise<string>;
+  startMoshSession?(options: {
+    sessionId?: string;
+    hostname: string;
+    username?: string;
+    port?: number;
+    moshServerPath?: string;
+    agentForwarding?: boolean;
+    cols?: number;
+    rows?: number;
+    charset?: string;
+    env?: Record<string, string>;
+  }): Promise<string>;
   startLocalSession?(options: { sessionId?: string; cols?: number; rows?: number; shell?: string; env?: Record<string, string> }): Promise<string>;
   generateKeyPair?(options: {
     type: 'RSA' | 'ECDSA' | 'ED25519';
