@@ -72,9 +72,9 @@ const PortForwarding: React.FC<PortForwardingProps> = ({ initialRules }) => {
           <Button variant="secondary" className="h-9 px-3 rounded-md shadow-sm">
             NEW FORWARDING
           </Button>
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Badge variant="secondary" className="rounded-full px-2">Port Forwarding</Badge>
-            </div>
+          </div>
         </div>
 
         <div className="space-y-2">

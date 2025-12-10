@@ -284,603 +284,603 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
           <Button variant="ghost" className="w-full h-10 gap-2">
             <Plus size={16} /> Add protocol
           </Button>
-      </AsidePanelContent>
+        </AsidePanelContent>
       </AsidePanel>
     );
   }
 
-if (activeSubPanel === "proxy") {
-  return (
-    <AsidePanel
-      open={true}
-      onClose={onCancel}
-      title="New Proxy"
-      showBackButton={true}
-      onBack={() => setActiveSubPanel("none")}
-      actions={
-        <Button size="sm" onClick={() => setActiveSubPanel("none")} disabled={!form.proxyConfig?.host}>
-          Save
-        </Button>
-      }
-    >
-      <AsidePanelContent>
-        <Card className="p-3 space-y-3 bg-card border-border/80">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold">Type</p>
+  if (activeSubPanel === "proxy") {
+    return (
+      <AsidePanel
+        open={true}
+        onClose={onCancel}
+        title="New Proxy"
+        showBackButton={true}
+        onBack={() => setActiveSubPanel("none")}
+        actions={
+          <Button size="sm" onClick={() => setActiveSubPanel("none")} disabled={!form.proxyConfig?.host}>
+            Save
+          </Button>
+        }
+      >
+        <AsidePanelContent>
+          <Card className="p-3 space-y-3 bg-card border-border/80">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold">Type</p>
+              <div className="flex gap-2">
+                <Button
+                  variant={form.proxyConfig?.type === 'http' ? "secondary" : "ghost"}
+                  size="sm"
+                  className={cn("h-8", form.proxyConfig?.type === 'http' && "bg-primary/15")}
+                  onClick={() => updateProxyConfig('type', 'http')}
+                >
+                  <Check size={14} className={cn("mr-1", form.proxyConfig?.type !== 'http' && "opacity-0")} />
+                  HTTP
+                </Button>
+                <Button
+                  variant={form.proxyConfig?.type === 'socks5' ? "secondary" : "ghost"}
+                  size="sm"
+                  className={cn("h-8", form.proxyConfig?.type === 'socks5' && "bg-primary/15")}
+                  onClick={() => updateProxyConfig('type', 'socks5')}
+                >
+                  <Check size={14} className={cn("mr-1", form.proxyConfig?.type !== 'socks5' && "opacity-0")} />
+                  SOCKS5
+                </Button>
+              </div>
+            </div>
+
             <div className="flex gap-2">
-              <Button
-                variant={form.proxyConfig?.type === 'http' ? "secondary" : "ghost"}
-                size="sm"
-                className={cn("h-8", form.proxyConfig?.type === 'http' && "bg-primary/15")}
-                onClick={() => updateProxyConfig('type', 'http')}
-              >
-                <Check size={14} className={cn("mr-1", form.proxyConfig?.type !== 'http' && "opacity-0")} />
-                HTTP
-              </Button>
-              <Button
-                variant={form.proxyConfig?.type === 'socks5' ? "secondary" : "ghost"}
-                size="sm"
-                className={cn("h-8", form.proxyConfig?.type === 'socks5' && "bg-primary/15")}
-                onClick={() => updateProxyConfig('type', 'socks5')}
-              >
-                <Check size={14} className={cn("mr-1", form.proxyConfig?.type !== 'socks5' && "opacity-0")} />
-                SOCKS5
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              placeholder="Proxy Host"
-              value={form.proxyConfig?.host || ""}
-              onChange={(e) => updateProxyConfig('host', e.target.value)}
-              className="h-10 flex-1"
-            />
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground">Port</span>
               <Input
-                type="number"
-                placeholder="3128"
-                value={form.proxyConfig?.port || ""}
-                onChange={(e) => updateProxyConfig('port', parseInt(e.target.value) || 0)}
-                className="h-10 w-20 text-center"
+                placeholder="Proxy Host"
+                value={form.proxyConfig?.host || ""}
+                onChange={(e) => updateProxyConfig('host', e.target.value)}
+                className="h-10 flex-1"
               />
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground">Port</span>
+                <Input
+                  type="number"
+                  placeholder="3128"
+                  value={form.proxyConfig?.port || ""}
+                  onChange={(e) => updateProxyConfig('port', parseInt(e.target.value) || 0)}
+                  className="h-10 w-20 text-center"
+                />
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-3 space-y-3 bg-card border-border/80">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold">Credentials</p>
-            <Badge variant="secondary" className="text-xs">Optional</Badge>
-          </div>
-          <Input
-            placeholder="Proxy Username"
-            value={form.proxyConfig?.username || ""}
-            onChange={(e) => updateProxyConfig('username', e.target.value)}
-            className="h-10"
-          />
-          <Input
-            placeholder="Proxy Password"
-            type="password"
-            value={form.proxyConfig?.password || ""}
-            onChange={(e) => updateProxyConfig('password', e.target.value)}
-            className="h-10"
-          />
-          <Button variant="ghost" size="sm" className="text-primary" onClick={() => { }}>
-            Identities
-          </Button>
-        </Card>
+          <Card className="p-3 space-y-3 bg-card border-border/80">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold">Credentials</p>
+              <Badge variant="secondary" className="text-xs">Optional</Badge>
+            </div>
+            <Input
+              placeholder="Proxy Username"
+              value={form.proxyConfig?.username || ""}
+              onChange={(e) => updateProxyConfig('username', e.target.value)}
+              className="h-10"
+            />
+            <Input
+              placeholder="Proxy Password"
+              type="password"
+              value={form.proxyConfig?.password || ""}
+              onChange={(e) => updateProxyConfig('password', e.target.value)}
+              className="h-10"
+            />
+            <Button variant="ghost" size="sm" className="text-primary" onClick={() => { }}>
+              Identities
+            </Button>
+          </Card>
 
-        {form.proxyConfig?.host && (
-          <Button variant="ghost" className="w-full h-10 text-destructive" onClick={clearProxyConfig}>
-            <Trash2 size={14} className="mr-2" /> Remove Proxy
-          </Button>
-        )}
-    </AsidePanelContent>
+          {form.proxyConfig?.host && (
+            <Button variant="ghost" className="w-full h-10 text-destructive" onClick={clearProxyConfig}>
+              <Trash2 size={14} className="mr-2" /> Remove Proxy
+            </Button>
+          )}
+        </AsidePanelContent>
       </AsidePanel>
     );
-}
+  }
 
-if (activeSubPanel === "chain") {
-  return (
-    <AsidePanel
-      open={true}
-      onClose={onCancel}
-      title="Edit Chain"
-      showBackButton={true}
-      onBack={() => setActiveSubPanel("none")}
-      actions={
-        <Button size="sm" onClick={() => setActiveSubPanel("none")}>
-          Save
-        </Button>
-      }
-    >
-      <AsidePanelContent>
-        <Card className="p-3 space-y-3 bg-card border-border/80">
-          <p className="text-xs text-muted-foreground">
-            Adding another host will create a connection to <span className="font-semibold text-foreground">{form.label || form.hostname}</span>
-          </p>
-          <Button className="w-full h-10" onClick={() => { }}>
-            <Plus size={14} className="mr-2" /> Add a Host
+  if (activeSubPanel === "chain") {
+    return (
+      <AsidePanel
+        open={true}
+        onClose={onCancel}
+        title="Edit Chain"
+        showBackButton={true}
+        onBack={() => setActiveSubPanel("none")}
+        actions={
+          <Button size="sm" onClick={() => setActiveSubPanel("none")}>
+            Save
           </Button>
-        </Card>
+        }
+      >
+        <AsidePanelContent>
+          <Card className="p-3 space-y-3 bg-card border-border/80">
+            <p className="text-xs text-muted-foreground">
+              Adding another host will create a connection to <span className="font-semibold text-foreground">{form.label || form.hostname}</span>
+            </p>
+            <Button className="w-full h-10" onClick={() => { }}>
+              <Plus size={14} className="mr-2" /> Add a Host
+            </Button>
+          </Card>
 
-        {/* Chain visualization */}
-        <div className="space-y-2">
-          {chainedHosts.map((host, index) => (
-            <React.Fragment key={host.id}>
-              {index > 0 && (
-                <div className="flex justify-center py-1">
-                  <ArrowDown size={16} className="text-muted-foreground" />
+          {/* Chain visualization */}
+          <div className="space-y-2">
+            {chainedHosts.map((host, index) => (
+              <React.Fragment key={host.id}>
+                {index > 0 && (
+                  <div className="flex justify-center py-1">
+                    <ArrowDown size={16} className="text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex items-center gap-2 p-2 rounded-lg border border-border/60 bg-card">
+                  <DistroAvatar host={host} fallback={host.label.slice(0, 2).toUpperCase()} className="h-8 w-8" />
+                  <span className="text-sm font-medium flex-1">{host.label || host.hostname}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                    onClick={() => removeHostFromChain(index)}
+                  >
+                    <X size={14} />
+                  </Button>
                 </div>
-              )}
-              <div className="flex items-center gap-2 p-2 rounded-lg border border-border/60 bg-card">
-                <DistroAvatar host={host} fallback={host.label.slice(0, 2).toUpperCase()} className="h-8 w-8" />
-                <span className="text-sm font-medium flex-1">{host.label || host.hostname}</span>
+              </React.Fragment>
+            ))}
+
+            {chainedHosts.length > 0 && (
+              <div className="flex justify-center py-1">
+                <ArrowDown size={16} className="text-muted-foreground" />
+              </div>
+            )}
+
+            {/* Target host (current) */}
+            <div className="flex items-center gap-2 p-2 rounded-lg border-2 border-primary/30 bg-primary/5">
+              <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                <Server size={14} className="text-primary" />
+              </div>
+              <span className="text-sm font-medium text-primary">{form.label || form.hostname || "Target"}</span>
+            </div>
+          </div>
+
+          {/* Available hosts to add */}
+          {availableHostsForChain.length > 0 && (
+            <Card className="p-3 space-y-2 bg-card border-border/80">
+              <p className="text-xs font-semibold text-muted-foreground">Available Hosts</p>
+              <ScrollArea className="max-h-48">
+                <div className="space-y-1">
+                  {availableHostsForChain.map((host) => (
+                    <button
+                      key={host.id}
+                      className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-secondary transition-colors text-left"
+                      onClick={() => addHostToChain(host.id)}
+                    >
+                      <DistroAvatar host={host} fallback={host.label.slice(0, 2).toUpperCase()} className="h-8 w-8" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{host.label}</div>
+                        <div className="text-xs text-muted-foreground truncate">{host.hostname}</div>
+                      </div>
+                      <Plus size={14} className="text-muted-foreground" />
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </Card>
+          )}
+
+          {chainedHosts.length > 0 && (
+            <Button variant="ghost" className="w-full h-10 text-destructive" onClick={clearHostChain}>
+              Clear
+            </Button>
+          )}
+        </AsidePanelContent>
+      </AsidePanel>
+    );
+  }
+
+  // Environment Variables sub-panel
+  if (activeSubPanel === "env-vars") {
+    return (
+      <AsidePanel
+        open={true}
+        onClose={onCancel}
+        title="Environment Variables"
+        showBackButton={true}
+        onBack={() => setActiveSubPanel("none")}
+        actions={
+          <Button size="sm" onClick={() => setActiveSubPanel("none")}>
+            Save
+          </Button>
+        }
+      >
+        <AsidePanelContent>
+          <div className="text-sm text-muted-foreground">
+            Set an environment variable for <span className="font-semibold text-foreground">{form.label || form.hostname}</span>.
+            <p className="text-xs mt-1">Some SSH servers by default only allow variables with prefix LC_ and LANG_.</p>
+          </div>
+
+          <Button className="w-full h-10" onClick={addEnvVar} disabled={!newEnvName.trim()}>
+            <Plus size={14} className="mr-2" /> Add a variable
+          </Button>
+
+          {/* Existing variables */}
+          {(form.environmentVariables || []).map((envVar, index) => (
+            <Card key={index} className="p-3 space-y-2 bg-card border-border/80">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold">Variable</span>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                  onClick={() => removeHostFromChain(index)}
+                  onClick={() => removeEnvVar(index)}
                 >
                   <X size={14} />
                 </Button>
               </div>
-            </React.Fragment>
+              <Input
+                placeholder="Variable"
+                value={envVar.name}
+                onChange={(e) => {
+                  const newVars = [...(form.environmentVariables || [])];
+                  newVars[index] = { ...newVars[index], name: e.target.value };
+                  setForm(prev => ({ ...prev, environmentVariables: newVars }));
+                }}
+                className="h-10"
+              />
+              <Input
+                placeholder="Value"
+                value={envVar.value}
+                onChange={(e) => {
+                  const newVars = [...(form.environmentVariables || [])];
+                  newVars[index] = { ...newVars[index], value: e.target.value };
+                  setForm(prev => ({ ...prev, environmentVariables: newVars }));
+                }}
+                className="h-10"
+              />
+            </Card>
           ))}
 
-          {chainedHosts.length > 0 && (
-            <div className="flex justify-center py-1">
-              <ArrowDown size={16} className="text-muted-foreground" />
-            </div>
-          )}
-
-          {/* Target host (current) */}
-          <div className="flex items-center gap-2 p-2 rounded-lg border-2 border-primary/30 bg-primary/5">
-            <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Server size={14} className="text-primary" />
-            </div>
-            <span className="text-sm font-medium text-primary">{form.label || form.hostname || "Target"}</span>
-          </div>
-        </div>
-
-        {/* Available hosts to add */}
-        {availableHostsForChain.length > 0 && (
+          {/* New variable input */}
           <Card className="p-3 space-y-2 bg-card border-border/80">
-            <p className="text-xs font-semibold text-muted-foreground">Available Hosts</p>
-            <ScrollArea className="max-h-48">
-              <div className="space-y-1">
-                {availableHostsForChain.map((host) => (
-                  <button
-                    key={host.id}
-                    className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-secondary transition-colors text-left"
-                    onClick={() => addHostToChain(host.id)}
-                  >
-                    <DistroAvatar host={host} fallback={host.label.slice(0, 2).toUpperCase()} className="h-8 w-8" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{host.label}</div>
-                      <div className="text-xs text-muted-foreground truncate">{host.hostname}</div>
-                    </div>
-                    <Plus size={14} className="text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
-          </Card>
-        )}
-
-        {chainedHosts.length > 0 && (
-          <Button variant="ghost" className="w-full h-10 text-destructive" onClick={clearHostChain}>
-            Clear
-          </Button>
-        )}
-    </AsidePanelContent>
-      </AsidePanel>
-    );
-}
-
-// Environment Variables sub-panel
-if (activeSubPanel === "env-vars") {
-  return (
-    <AsidePanel
-      open={true}
-      onClose={onCancel}
-      title="Environment Variables"
-      showBackButton={true}
-      onBack={() => setActiveSubPanel("none")}
-      actions={
-        <Button size="sm" onClick={() => setActiveSubPanel("none")}>
-          Save
-        </Button>
-      }
-    >
-      <AsidePanelContent>
-        <div className="text-sm text-muted-foreground">
-          Set an environment variable for <span className="font-semibold text-foreground">{form.label || form.hostname}</span>.
-          <p className="text-xs mt-1">Some SSH servers by default only allow variables with prefix LC_ and LANG_.</p>
-        </div>
-
-        <Button className="w-full h-10" onClick={addEnvVar} disabled={!newEnvName.trim()}>
-          <Plus size={14} className="mr-2" /> Add a variable
-        </Button>
-
-        {/* Existing variables */}
-        {(form.environmentVariables || []).map((envVar, index) => (
-          <Card key={index} className="p-3 space-y-2 bg-card border-border/80">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold">Variable</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                onClick={() => removeEnvVar(index)}
-              >
-                <X size={14} />
-              </Button>
+              <X size={14} className="text-muted-foreground opacity-0" />
             </div>
             <Input
               placeholder="Variable"
-              value={envVar.name}
-              onChange={(e) => {
-                const newVars = [...(form.environmentVariables || [])];
-                newVars[index] = { ...newVars[index], name: e.target.value };
-                setForm(prev => ({ ...prev, environmentVariables: newVars }));
-              }}
+              value={newEnvName}
+              onChange={(e) => setNewEnvName(e.target.value)}
               className="h-10"
             />
             <Input
               placeholder="Value"
-              value={envVar.value}
-              onChange={(e) => {
-                const newVars = [...(form.environmentVariables || [])];
-                newVars[index] = { ...newVars[index], value: e.target.value };
-                setForm(prev => ({ ...prev, environmentVariables: newVars }));
-              }}
+              value={newEnvValue}
+              onChange={(e) => setNewEnvValue(e.target.value)}
               className="h-10"
             />
           </Card>
-        ))}
-
-        {/* New variable input */}
-        <Card className="p-3 space-y-2 bg-card border-border/80">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold">Variable</span>
-            <X size={14} className="text-muted-foreground opacity-0" />
-          </div>
-          <Input
-            placeholder="Variable"
-            value={newEnvName}
-            onChange={(e) => setNewEnvName(e.target.value)}
-            className="h-10"
-          />
-          <Input
-            placeholder="Value"
-            value={newEnvValue}
-            onChange={(e) => setNewEnvValue(e.target.value)}
-            className="h-10"
-          />
-        </Card>
-    </AsidePanelContent>
+        </AsidePanelContent>
       </AsidePanel>
     );
-}
+  }
 
-// Main panel
-return (
-  <AsidePanel
-    open={true}
-    onClose={onCancel}
-    title={initialData ? "Host Details" : "New Host"}
-    actions={
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        onClick={handleSubmit}
-        disabled={!form.hostname || !form.label}
-        aria-label="Save"
-      >
-        <Check size={16} />
-      </Button>
-    }
-  >
-    <AsidePanelContent>
-      <Card className="p-3 space-y-2 bg-card border-border/80">
-        <p className="text-xs font-semibold">Address</p>
-        <div className="flex items-center gap-2">
-          <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center">
-            <Server size={18} className="text-primary" />
-          </div>
-          <Input
-            placeholder="IP or Hostname"
-            value={form.hostname}
-            onChange={(e) => update("hostname", e.target.value)}
-            className="h-10 flex-1"
-          />
-        </div>
-      </Card>
-
-      <Card className="p-3 space-y-3 bg-card border-border/80">
-        <p className="text-xs font-semibold">General</p>
-        <Input
-          placeholder="Label (e.g., Production Server)"
-          value={form.label}
-          onChange={(e) => update("label", e.target.value)}
-          className="h-10"
-        />
-
-        {/* Group input with inline create suggestion */}
-        <div className="relative">
+  // Main panel
+  return (
+    <AsidePanel
+      open={true}
+      onClose={onCancel}
+      title={initialData ? "Host Details" : "New Host"}
+      actions={
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={handleSubmit}
+          disabled={!form.hostname || !form.label}
+          aria-label="Save"
+        >
+          <Check size={16} />
+        </Button>
+      }
+    >
+      <AsidePanelContent>
+        <Card className="p-3 space-y-2 bg-card border-border/80">
+          <p className="text-xs font-semibold">Address</p>
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center">
-              <FolderPlus size={16} className="text-muted-foreground" />
+            <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center">
+              <Server size={18} className="text-primary" />
             </div>
             <Input
-              placeholder="Group"
-              value={groupInputValue}
-              onChange={(e) => handleGroupInputChange(e.target.value)}
-              onFocus={() => setShowCreateGroupSuggestion(true)}
-              onBlur={() => setTimeout(() => setShowCreateGroupSuggestion(false), 150)}
-              list="group-options"
+              placeholder="IP or Hostname"
+              value={form.hostname}
+              onChange={(e) => update("hostname", e.target.value)}
               className="h-10 flex-1"
             />
           </div>
-          {showCreateGroupSuggestion && isNewGroup && (
-            <button
-              className="absolute left-12 right-0 top-full mt-1 z-10 flex items-center gap-2 px-3 py-2 rounded-md bg-card border border-border/80 shadow-lg hover:bg-secondary transition-colors text-left"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleCreateGroupFromInput}
-            >
-              <Plus size={14} className="text-primary" />
-              <span className="text-sm">Create Group</span>
-              <span className="text-sm font-medium text-primary">{groupInputValue}</span>
-            </button>
-          )}
-          <datalist id="group-options">
-            {groups.map((g) => <option key={g} value={g} />)}
-          </datalist>
-        </div>
+        </Card>
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center shrink-0">
-              <Tag size={16} className="text-muted-foreground" />
+        <Card className="p-3 space-y-3 bg-card border-border/80">
+          <p className="text-xs font-semibold">General</p>
+          <Input
+            placeholder="Label (e.g., Production Server)"
+            value={form.label}
+            onChange={(e) => update("label", e.target.value)}
+            className="h-10"
+          />
+
+          {/* Group input with inline create suggestion */}
+          <div className="relative">
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center">
+                <FolderPlus size={16} className="text-muted-foreground" />
+              </div>
+              <Input
+                placeholder="Group"
+                value={groupInputValue}
+                onChange={(e) => handleGroupInputChange(e.target.value)}
+                onFocus={() => setShowCreateGroupSuggestion(true)}
+                onBlur={() => setTimeout(() => setShowCreateGroupSuggestion(false), 150)}
+                list="group-options"
+                className="h-10 flex-1"
+              />
             </div>
-            <div
-              className="flex-1 flex items-center gap-1 bg-secondary/50 rounded-md border border-border/60 px-2 min-h-10 py-1.5 cursor-pointer hover:bg-secondary/70 transition-colors"
-              onClick={() => setShowTagInput(true)}
-            >
-              {form.tags && form.tags.length > 0 ? (
-                <div className="flex flex-wrap gap-1">
-                  {form.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveTag(tag);
-                        }}
-                        className="hover:bg-primary/20 rounded-full p-0.5"
+            {showCreateGroupSuggestion && isNewGroup && (
+              <button
+                className="absolute left-12 right-0 top-full mt-1 z-10 flex items-center gap-2 px-3 py-2 rounded-md bg-card border border-border/80 shadow-lg hover:bg-secondary transition-colors text-left"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleCreateGroupFromInput}
+              >
+                <Plus size={14} className="text-primary" />
+                <span className="text-sm">Create Group</span>
+                <span className="text-sm font-medium text-primary">{groupInputValue}</span>
+              </button>
+            )}
+            <datalist id="group-options">
+              {groups.map((g) => <option key={g} value={g} />)}
+            </datalist>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center shrink-0">
+                <Tag size={16} className="text-muted-foreground" />
+              </div>
+              <div
+                className="flex-1 flex items-center gap-1 bg-secondary/50 rounded-md border border-border/60 px-2 min-h-10 py-1.5 cursor-pointer hover:bg-secondary/70 transition-colors"
+                onClick={() => setShowTagInput(true)}
+              >
+                {form.tags && form.tags.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {form.tags.map(tag => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
                       >
-                        <X size={10} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveTag(tag);
+                          }}
+                          className="hover:bg-primary/20 rounded-full p-0.5"
+                        >
+                          <X size={10} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Click to add tags...</span>
+                )}
+              </div>
+            </div>
+            {showTagInput && (
+              <div className="flex items-center gap-2 ml-12">
+                <Input
+                  autoFocus
+                  placeholder="Enter tag name..."
+                  value={tagInputValue}
+                  onChange={(e) => setTagInputValue(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  onBlur={() => {
+                    if (!tagInputValue.trim()) {
+                      setShowTagInput(false);
+                    }
+                  }}
+                  className="h-8 flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddTag}
+                  disabled={!tagInputValue.trim()}
+                  className="h-8"
+                >
+                  <Plus size={14} />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowTagInput(false);
+                    setTagInputValue("");
+                  }}
+                  className="h-8"
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-3 space-y-2 bg-card border-border/80">
+          <div className="flex items-center gap-2 bg-secondary/70 border border-border/70 rounded-md px-2 py-1">
+            <span className="text-xs text-muted-foreground">SSH on</span>
+            <Input
+              type="number"
+              value={form.port}
+              onChange={(e) => update("port", Number(e.target.value))}
+              className="h-8 w-16 text-center"
+            />
+            <span className="text-xs text-muted-foreground">port</span>
+          </div>
+        </Card>
+
+        <Card className="p-3 space-y-3 bg-card border-border/80">
+          <p className="text-xs font-semibold">Credentials</p>
+          <div className="grid gap-2">
+            <Input placeholder="Username" value={form.username} onChange={(e) => update("username", e.target.value)} className="h-10" />
+            {form.authMethod !== "key" && (
+              <Input placeholder="Password" type="password" value={form.password || ""} onChange={(e) => update("password", e.target.value)} className="h-10" />
+            )}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Plus size={12} />
+              <span>SSH.id, Key, Certificate, FIDO2</span>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-3 space-y-2 bg-card border-border/80">
+          <ToggleRow
+            label="Agent Forwarding"
+            enabled={!!form.agentForwarding}
+            onToggle={() => update("agentForwarding", !form.agentForwarding)}
+          />
+        </Card>
+
+        {/* Host Chain Configuration - Only show when Agent Forwarding is enabled */}
+        {form.agentForwarding && (
+          <Card className="p-3 space-y-2 bg-card border-border/80">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Link2 size={14} className="text-muted-foreground" />
+                <p className="text-xs font-semibold">Jump Hosts</p>
+              </div>
+              {chainedHosts.length > 0 ? (
+                <Badge variant="secondary" className="text-xs">
+                  {chainedHosts.length} hop{chainedHosts.length > 1 ? 's' : ''}
+                </Badge>
               ) : (
-                <span className="text-xs text-muted-foreground">Click to add tags...</span>
+                <Badge variant="outline" className="text-xs text-muted-foreground">Direct</Badge>
               )}
             </div>
-          </div>
-          {showTagInput && (
-            <div className="flex items-center gap-2 ml-12">
-              <Input
-                autoFocus
-                placeholder="Enter tag name..."
-                value={tagInputValue}
-                onChange={(e) => setTagInputValue(e.target.value)}
-                onKeyDown={handleTagKeyDown}
-                onBlur={() => {
-                  if (!tagInputValue.trim()) {
-                    setShowTagInput(false);
-                  }
-                }}
-                className="h-8 flex-1"
-              />
+            {chainedHosts.length > 0 && (
+              <button
+                className="w-full flex items-center gap-1 p-2 rounded-md bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
+                onClick={() => setActiveSubPanel("chain")}
+              >
+                <Link2 size={14} className="text-muted-foreground flex-shrink-0" />
+                <span className="text-sm truncate">
+                  {chainedHosts.slice(0, 3).map(h => h.hostname || h.label).join(' -> ')}
+                  {chainedHosts.length > 3 && '...'}
+                </span>
+                <X
+                  size={14}
+                  className="text-muted-foreground hover:text-destructive flex-shrink-0 ml-auto"
+                  onClick={(e) => { e.stopPropagation(); clearHostChain(); }}
+                />
+              </button>
+            )}
+            {chainedHosts.length === 0 && (
               <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={handleAddTag}
-                disabled={!tagInputValue.trim()}
-                className="h-8"
+                variant="ghost"
+                className="w-full h-9 justify-start gap-2 text-sm"
+                onClick={() => setActiveSubPanel("chain")}
               >
                 <Plus size={14} />
+                Configure Jump Hosts
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowTagInput(false);
-                  setTagInputValue("");
-                }}
-                className="h-8"
-              >
-                <X size={14} />
-              </Button>
-            </div>
-          )}
-        </div>
-      </Card>
+            )}
+          </Card>
+        )}
 
-      <Card className="p-3 space-y-2 bg-card border-border/80">
-        <div className="flex items-center gap-2 bg-secondary/70 border border-border/70 rounded-md px-2 py-1">
-          <span className="text-xs text-muted-foreground">SSH on</span>
-          <Input
-            type="number"
-            value={form.port}
-            onChange={(e) => update("port", Number(e.target.value))}
-            className="h-8 w-16 text-center"
-          />
-          <span className="text-xs text-muted-foreground">port</span>
-        </div>
-      </Card>
-
-      <Card className="p-3 space-y-3 bg-card border-border/80">
-        <p className="text-xs font-semibold">Credentials</p>
-        <div className="grid gap-2">
-          <Input placeholder="Username" value={form.username} onChange={(e) => update("username", e.target.value)} className="h-10" />
-          {form.authMethod !== "key" && (
-            <Input placeholder="Password" type="password" value={form.password || ""} onChange={(e) => update("password", e.target.value)} className="h-10" />
-          )}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Plus size={12} />
-            <span>SSH.id, Key, Certificate, FIDO2</span>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-3 space-y-2 bg-card border-border/80">
-        <ToggleRow
-          label="Agent Forwarding"
-          enabled={!!form.agentForwarding}
-          onToggle={() => update("agentForwarding", !form.agentForwarding)}
-        />
-      </Card>
-
-      {/* Host Chain Configuration - Only show when Agent Forwarding is enabled */}
-      {form.agentForwarding && (
+        {/* Proxy Configuration */}
         <Card className="p-3 space-y-2 bg-card border-border/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Link2 size={14} className="text-muted-foreground" />
-              <p className="text-xs font-semibold">Jump Hosts</p>
+              <Globe size={14} className="text-muted-foreground" />
+              <p className="text-xs font-semibold">Proxy</p>
             </div>
-            {chainedHosts.length > 0 ? (
+            {form.proxyConfig?.host ? (
               <Badge variant="secondary" className="text-xs">
-                {chainedHosts.length} hop{chainedHosts.length > 1 ? 's' : ''}
+                {form.proxyConfig.type?.toUpperCase()} {form.proxyConfig.host}:{form.proxyConfig.port}
               </Badge>
             ) : (
-              <Badge variant="outline" className="text-xs text-muted-foreground">Direct</Badge>
+              <Badge variant="outline" className="text-xs text-muted-foreground">None</Badge>
             )}
           </div>
-          {chainedHosts.length > 0 && (
+          <Button
+            variant="ghost"
+            className="w-full h-9 justify-start gap-2 text-sm"
+            onClick={() => setActiveSubPanel("proxy")}
+          >
+            <Plus size={14} />
+            {form.proxyConfig?.host ? "Edit Proxy" : "Configure Proxy"}
+          </Button>
+        </Card>
+
+        {/* Environment Variables */}
+        <Card className="p-3 space-y-2 bg-card border-border/80">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Variable size={14} className="text-muted-foreground" />
+              <p className="text-xs font-semibold">Environment Variable</p>
+            </div>
+          </div>
+          {(form.environmentVariables?.length || 0) > 0 ? (
             <button
               className="w-full flex items-center gap-1 p-2 rounded-md bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
-              onClick={() => setActiveSubPanel("chain")}
+              onClick={() => setActiveSubPanel("env-vars")}
             >
-              <Link2 size={14} className="text-muted-foreground flex-shrink-0" />
               <span className="text-sm truncate">
-                {chainedHosts.slice(0, 3).map(h => h.hostname || h.label).join(' -> ')}
-                {chainedHosts.length > 3 && '...'}
+                {form.environmentVariables?.slice(0, 2).map(v => `${v.name}=${v.value}`).join(', ')}
+                {(form.environmentVariables?.length || 0) > 2 && '...'}
               </span>
               <X
                 size={14}
                 className="text-muted-foreground hover:text-destructive flex-shrink-0 ml-auto"
-                onClick={(e) => { e.stopPropagation(); clearHostChain(); }}
+                onClick={(e) => { e.stopPropagation(); setForm(prev => ({ ...prev, environmentVariables: [] })); }}
               />
             </button>
-          )}
-          {chainedHosts.length === 0 && (
+          ) : (
             <Button
               variant="ghost"
               className="w-full h-9 justify-start gap-2 text-sm"
-              onClick={() => setActiveSubPanel("chain")}
+              onClick={() => setActiveSubPanel("env-vars")}
             >
               <Plus size={14} />
-              Configure Jump Hosts
+              Add Environment Variable
             </Button>
           )}
         </Card>
-      )}
 
-      {/* Proxy Configuration */}
-      <Card className="p-3 space-y-2 bg-card border-border/80">
-        <div className="flex items-center justify-between">
+        {/* Startup Command */}
+        <Card className="p-3 space-y-2 bg-card border-border/80">
           <div className="flex items-center gap-2">
-            <Globe size={14} className="text-muted-foreground" />
-            <p className="text-xs font-semibold">Proxy</p>
+            <TerminalSquare size={14} className="text-muted-foreground" />
+            <p className="text-xs font-semibold">Startup Command</p>
           </div>
-          {form.proxyConfig?.host ? (
-            <Badge variant="secondary" className="text-xs">
-              {form.proxyConfig.type?.toUpperCase()} {form.proxyConfig.host}:{form.proxyConfig.port}
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="text-xs text-muted-foreground">None</Badge>
-          )}
-        </div>
-        <Button
-          variant="ghost"
-          className="w-full h-9 justify-start gap-2 text-sm"
-          onClick={() => setActiveSubPanel("proxy")}
-        >
-          <Plus size={14} />
-          {form.proxyConfig?.host ? "Edit Proxy" : "Configure Proxy"}
+          <Input
+            placeholder="Command to run on connect (e.g., cd /app && ls)"
+            value={form.startupCommand || ""}
+            onChange={(e) => update("startupCommand", e.target.value)}
+            className="h-9"
+          />
+          <p className="text-xs text-muted-foreground">This command will be executed automatically after SSH connection is established.</p>
+        </Card>
+
+        <Button className="w-full h-12" onClick={handleSubmit} disabled={!form.hostname || !form.label}>
+          Connect
         </Button>
-      </Card>
-
-      {/* Environment Variables */}
-      <Card className="p-3 space-y-2 bg-card border-border/80">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Variable size={14} className="text-muted-foreground" />
-            <p className="text-xs font-semibold">Environment Variable</p>
-          </div>
-        </div>
-        {(form.environmentVariables?.length || 0) > 0 ? (
-          <button
-            className="w-full flex items-center gap-1 p-2 rounded-md bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
-            onClick={() => setActiveSubPanel("env-vars")}
-          >
-            <span className="text-sm truncate">
-              {form.environmentVariables?.slice(0, 2).map(v => `${v.name}=${v.value}`).join(', ')}
-              {(form.environmentVariables?.length || 0) > 2 && '...'}
-            </span>
-            <X
-              size={14}
-              className="text-muted-foreground hover:text-destructive flex-shrink-0 ml-auto"
-              onClick={(e) => { e.stopPropagation(); setForm(prev => ({ ...prev, environmentVariables: [] })); }}
-            />
-          </button>
-        ) : (
-          <Button
-            variant="ghost"
-            className="w-full h-9 justify-start gap-2 text-sm"
-            onClick={() => setActiveSubPanel("env-vars")}
-          >
-            <Plus size={14} />
-            Add Environment Variable
-          </Button>
-        )}
-      </Card>
-
-      {/* Startup Command */}
-      <Card className="p-3 space-y-2 bg-card border-border/80">
-        <div className="flex items-center gap-2">
-          <TerminalSquare size={14} className="text-muted-foreground" />
-          <p className="text-xs font-semibold">Startup Command</p>
-        </div>
-        <Input
-          placeholder="Command to run on connect (e.g., cd /app && ls)"
-          value={form.startupCommand || ""}
-          onChange={(e) => update("startupCommand", e.target.value)}
-          className="h-9"
-        />
-        <p className="text-xs text-muted-foreground">This command will be executed automatically after SSH connection is established.</p>
-      </Card>
-
-      <Button className="w-full h-12" onClick={handleSubmit} disabled={!form.hostname || !form.label}>
-        Connect
-      </Button>
-    </AsidePanelContent>
-  </AsidePanel>
-);
+      </AsidePanelContent>
+    </AsidePanel>
+  );
 };
 
 interface ToggleRowProps {
