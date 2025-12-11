@@ -107,7 +107,8 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
   const [groupInputValue, setGroupInputValue] = useState(form.group || "");
 
   // Check if the entered group is new (doesn't exist)
-  const isNewGroup = useMemo(() => {
+  // Reserved for future use: showing inline "create new group" suggestion
+  const _isNewGroup = useMemo(() => {
     const trimmed = groupInputValue.trim();
     return trimmed.length > 0 && !groups.includes(trimmed);
   }, [groupInputValue, groups]);

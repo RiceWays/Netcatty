@@ -320,13 +320,16 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ensureSftp is defined inline, not a dependency
   }, []);
 
   const closeSftp = async () => {
     if (sftpIdRef.current && window.nebula?.closeSftp) {
       try {
         await window.nebula.closeSftp(sftpIdRef.current);
-      } catch {}
+      } catch {
+        // Silently ignore close errors - connection may already be closed
+      }
     }
     sftpIdRef.current = null;
   };

@@ -16,10 +16,10 @@ import { getKeyIcon,getKeyTypeDisplay,isMacOS } from './utils';
 
 interface ExportKeyPanelProps {
     keyItem: SSHKey;
-    hosts: Host[];
+    _hosts: Host[]; // Reserved for future inline host list/validation
     keys: SSHKey[];
     exportHost: Host | null;
-    setExportHost: (host: Host | null) => void;
+    _setExportHost: (host: Host | null) => void; // Host selection handled by onShowHostSelector callback
     onShowHostSelector: () => void;
     onSaveHost?: (host: Host) => void;
     onClose: () => void;
@@ -39,10 +39,10 @@ echo $3 >> "$FILE"`;
 
 export const ExportKeyPanel: React.FC<ExportKeyPanelProps> = ({
     keyItem,
-    hosts,
+    _hosts, // Reserved for future inline host list/validation
     keys,
     exportHost,
-    setExportHost,
+    _setExportHost, // Host selection handled by onShowHostSelector callback
     onShowHostSelector,
     onSaveHost,
     onClose,

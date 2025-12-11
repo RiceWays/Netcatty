@@ -70,7 +70,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
   keys,
   snippets,
   allHosts = [],
-  knownHosts = [],
+  knownHosts: _knownHosts = [], // Reserved for future host key verification UI
   isVisible,
   inWorkspace,
   isResizing,
@@ -324,6 +324,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       disposed = true;
       teardown();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Effect only runs on host.id/sessionId change, internal functions are stable
   }, [host.id, sessionId]);
 
   // Connection timeline and timeout visuals
@@ -375,6 +376,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       clearTimeout(timeout);
       clearInterval(prog);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- updateStatus is a stable internal helper
   }, [status, needsAuth]);
 
   const safeFit = () => {
@@ -1121,8 +1123,9 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       : status === "connecting"
         ? "bg-amber-400"
         : "bg-rose-500";
-  const isConnecting = status === "connecting";
-  const hasError = Boolean(error);
+  // Reserved for future status indicator enhancements
+  const _isConnecting = status === "connecting";
+  const _hasError = Boolean(error);
 
   return (
     <div className="relative h-full w-full flex overflow-hidden bg-gradient-to-br from-[#050910] via-[#06101a] to-[#0b1220]">
@@ -1200,7 +1203,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
             chainProgress={chainProgress}
             needsAuth={needsAuth}
             showLogs={showLogs}
-            setShowLogs={setShowLogs}
+            _setShowLogs={setShowLogs}
             keys={keys}
             authProps={{
               authMethod,

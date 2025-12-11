@@ -103,7 +103,7 @@ const parseKnownHostsFile = (content: string): KnownHost[] => {
         publicKey: publicKey.slice(0, 64) + "...",
         discoveredAt: Date.now(),
       });
-    } catch (_e) {
+    } catch {
       console.warn("Failed to parse known_hosts line:", line);
     }
   }
@@ -275,6 +275,35 @@ const KnownHostsManager: React.FC<KnownHostsManagerProps> = ({
   const hasScannedRef = React.useRef(false);
   const RENDER_LIMIT = 100; // Limit rendered items for performance
 
+  // Define handleScanSystem before useEffect that depends on it
+  const handleScanSystem = useCallback(async () => {
+    setIsScanning(true);
+    // Try to read from common known_hosts locations via Electron
+    if (window.nebula?.readKnownHosts) {
+      try {
+        const content = await window.nebula.readKnownHosts();
+        if (content) {
+          const parsed = parseKnownHostsFile(content);
+          const existingHostnames = new Set(
+            knownHosts.map((h) => `${h.hostname}:${h.port}`),
+          );
+          const newHosts = parsed.filter(
+            (h) => !existingHostnames.has(`${h.hostname}:${h.port}`),
+          );
+
+          // Directly import new hosts without dialog
+          if (newHosts.length > 0) {
+            onImportFromFile(newHosts);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to scan system known_hosts:", err);
+      }
+    }
+    onRefresh();
+    setIsScanning(false);
+  }, [knownHosts, onRefresh, onImportFromFile]);
+
   // Auto-scan on first mount
   useEffect(() => {
     if (!hasScannedRef.current) {
@@ -358,34 +387,6 @@ const KnownHostsManager: React.FC<KnownHostsManagerProps> = ({
     },
     [knownHosts, onImportFromFile],
   );
-
-  const handleScanSystem = useCallback(async () => {
-    setIsScanning(true);
-    // Try to read from common known_hosts locations via Electron
-    if (window.nebula?.readKnownHosts) {
-      try {
-        const content = await window.nebula.readKnownHosts();
-        if (content) {
-          const parsed = parseKnownHostsFile(content);
-          const existingHostnames = new Set(
-            knownHosts.map((h) => `${h.hostname}:${h.port}`),
-          );
-          const newHosts = parsed.filter(
-            (h) => !existingHostnames.has(`${h.hostname}:${h.port}`),
-          );
-
-          // Directly import new hosts without dialog
-          if (newHosts.length > 0) {
-            onImportFromFile(newHosts);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to scan system known_hosts:", err);
-      }
-    }
-    onRefresh();
-    setIsScanning(false);
-  }, [knownHosts, onRefresh, onImportFromFile]);
 
   // Memoize host lookup for performance
   const hostIdSet = useMemo(() => new Set(hosts.map((h) => h.id)), [hosts]);

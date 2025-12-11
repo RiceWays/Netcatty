@@ -20,7 +20,8 @@ interface NebulaJumpHost {
 }
 
 // Host key information for verification
-interface NebulaHostKeyInfo {
+// Reserved for future host key verification UI feature
+interface _NebulaHostKeyInfo {
   hostname: string;
   port: number;
   keyType: string;

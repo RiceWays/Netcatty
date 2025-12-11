@@ -25,12 +25,12 @@ export interface TerminalConnectionDialogProps {
     chainProgress: ChainProgress | null;
     needsAuth: boolean;
     showLogs: boolean;
-    setShowLogs: (show: boolean) => void;
+    _setShowLogs: (show: boolean) => void;
     // Auth dialog props
     authProps: Omit<TerminalAuthDialogProps, 'keys'>;
     keys: SSHKey[];
     // Progress props
-    progressProps: Omit<TerminalConnectionProgressProps, 'status' | 'error' | 'showLogs' | 'setShowLogs'>;
+    progressProps: Omit<TerminalConnectionProgressProps, 'status' | 'error' | 'showLogs' | '_setShowLogs'>;
 }
 
 export const TerminalConnectionDialog: React.FC<TerminalConnectionDialogProps> = ({
@@ -41,7 +41,7 @@ export const TerminalConnectionDialog: React.FC<TerminalConnectionDialogProps> =
     chainProgress,
     needsAuth,
     showLogs,
-    setShowLogs,
+    _setShowLogs: setShowLogs, // Rename back to setShowLogs for internal use
     authProps,
     keys,
     progressProps,
@@ -137,7 +137,7 @@ export const TerminalConnectionDialog: React.FC<TerminalConnectionDialogProps> =
                         status={status}
                         error={error}
                         showLogs={showLogs}
-                        setShowLogs={setShowLogs}
+                        _setShowLogs={setShowLogs}
                         {...progressProps}
                     />
                 )}

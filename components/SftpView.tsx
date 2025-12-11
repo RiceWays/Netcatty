@@ -386,7 +386,7 @@ const SftpPaneViewInner: React.FC<SftpPaneViewProps> = ({
       await onCreateDirectory(newFolderName.trim());
       setShowNewFolderDialog(false);
       setNewFolderName("");
-    } catch (_err) {
+    } catch {
       /* Error handling */
     }
   };
@@ -398,7 +398,7 @@ const SftpPaneViewInner: React.FC<SftpPaneViewProps> = ({
       setShowRenameDialog(false);
       setRenameTarget(null);
       setRenameName("");
-    } catch (_err) {
+    } catch {
       /* Error handling */
     }
   };
@@ -410,7 +410,7 @@ const SftpPaneViewInner: React.FC<SftpPaneViewProps> = ({
       setShowDeleteConfirm(false);
       setDeleteTargets([]);
       onClearSelection();
-    } catch (_err) {
+    } catch {
       /* Error handling */
     }
   };
@@ -1091,6 +1091,7 @@ const SftpViewInner: React.FC<SftpViewProps> = ({ hosts, keys }) => {
     setDraggedFiles(null);
   }, []);
 
+  /* eslint-disable react-hooks/exhaustive-deps -- sftp methods are stable references from useSftpState hook */
   const handleCopyToOtherPaneLeft = useCallback(
     (files: { name: string; isDirectory: boolean }[]) =>
       sftp.startTransfer(files, "left", "right"),
@@ -1217,6 +1218,8 @@ const SftpViewInner: React.FC<SftpViewProps> = ({ hosts, keys }) => {
     (old: string, newName: string) => sftp.renameFile("right", old, newName),
     [sftp.renameFile],
   );
+  /* eslint-enable react-hooks/exhaustive-deps */
+  
   const handleEditPermissionsLeft = useCallback(
     (file: SftpFileEntry) => setPermissionsState({ file, side: "left" }),
     [],
@@ -1228,10 +1231,12 @@ const SftpViewInner: React.FC<SftpViewProps> = ({ hosts, keys }) => {
 
   const leftFilteredFiles = useMemo(
     () => sftp.getFilteredFiles(sftp.leftPane),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sftp.getFilteredFiles is a stable reference
     [sftp.leftPane, sftp.getFilteredFiles],
   );
   const rightFilteredFiles = useMemo(
     () => sftp.getFilteredFiles(sftp.rightPane),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sftp.getFilteredFiles is a stable reference
     [sftp.rightPane, sftp.getFilteredFiles],
   );
   const visibleTransfers = useMemo(

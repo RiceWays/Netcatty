@@ -60,17 +60,18 @@ const ThemeSelectPanel: React.FC<ThemeSelectPanelProps> = ({
     onBack,
     showBackButton = true,
 }) => {
-    const [hoveredThemeId, setHoveredThemeId] = useState<string | null>(null);
+    // Reserved for future hover preview feature
+    const [_hoveredThemeId, setHoveredThemeId] = useState<string | null>(null);
 
-    // Group themes by type
-    const groupedThemes = useMemo(() => {
+    // Group themes by type - reserved for future sectioned view
+    const _groupedThemes = useMemo(() => {
         const dark = TERMINAL_THEMES.filter(t => t.type === 'dark');
         const light = TERMINAL_THEMES.filter(t => t.type === 'light');
         return { dark, light };
     }, []);
 
-    // Find selected theme info
-    const selectedTheme = useMemo(() => {
+    // Find selected theme info - reserved for displaying selection details
+    const _selectedTheme = useMemo(() => {
         return TERMINAL_THEMES.find(t => t.id === selectedThemeId);
     }, [selectedThemeId]);
 

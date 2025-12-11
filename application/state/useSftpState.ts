@@ -431,6 +431,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- listLocalFiles is intentionally omitted to prevent infinite loops
     [getHostCredentials, leftPane, rightPane],
   );
 
@@ -1066,6 +1067,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         }));
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- listLocalFiles is intentionally omitted to prevent infinite loops
     [leftPane, rightPane],
   );
 
@@ -1352,6 +1354,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         await processTransfer(task, sourcePane, targetPane);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- processTransfer is defined inline, not a dependency
     [leftPane, rightPane],
   );
 
@@ -1792,6 +1795,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         await processTransfer(task, sourcePane, targetPane);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- processTransfer is defined inline, not a dependency
     [transfers, leftPane, rightPane],
   );
 
@@ -1883,6 +1887,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         }, 100);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- processTransfer is defined inline, not a dependency
     [conflicts, transfers, leftPane, rightPane],
   );
 

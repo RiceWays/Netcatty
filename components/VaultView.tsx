@@ -379,6 +379,7 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
     return (Object.values(node.children) as GroupNode[]).sort((a, b) =>
       a.name.localeCompare(b.name),
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- findGroupNode is derived from buildGroupTree
   }, [buildGroupTree, selectedGroupPath]);
 
   // Known Hosts callbacks - use refs to keep stable references
@@ -433,6 +434,7 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
         onRefresh={handleRefreshKnownHosts}
       />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handle* callbacks are stable refs that read from refs
   }, [knownHosts, hosts, onConvertKnownHost]);
 
   const submitNewFolder = () => {

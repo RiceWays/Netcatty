@@ -178,7 +178,7 @@ export const isBackendAvailable = (): boolean => {
 export const stopAllPortForwards = async (): Promise<void> => {
   const nebula = window.nebula;
   
-  for (const [ruleId, conn] of activeConnections) {
+  for (const [_ruleId, conn] of activeConnections) {
     try {
       if (nebula?.stopPortForward) {
         await nebula.stopPortForward(conn.tunnelId);

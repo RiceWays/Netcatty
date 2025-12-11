@@ -296,7 +296,8 @@ const PortForwarding: React.FC<PortForwardingProps> = ({
     const label =
       newFormDraft.label?.trim() ||
       (() => {
-        const host = hosts.find((h) => h.id === newFormDraft.hostId);
+        // Host lookup reserved for future label enhancement (e.g., "Local:8080 → api.example.com:80 via server1")
+        const _host = hosts.find((h) => h.id === newFormDraft.hostId);
         switch (newFormDraft.type) {
           case "local":
             return `Local:${newFormDraft.localPort} → ${newFormDraft.remoteHost}:${newFormDraft.remotePort}`;

@@ -35,6 +35,7 @@ export const useSessionState = () => {
     };
     setSessions(prev => [...prev, newSession]);
     setActiveTabId(sessionId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setActiveTabId is a stable store method reference
   }, []);
 
   const connectToHost = useCallback((host: Host) => {
@@ -52,6 +53,7 @@ export const useSessionState = () => {
     };
     setSessions(prev => [...prev, newSession]);
     setActiveTabId(newSession.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setActiveTabId is a stable store method reference
   }, []);
 
   const updateSessionStatus = useCallback((sessionId: string, status: TerminalSession['status']) => {
@@ -138,6 +140,7 @@ export const useSessionState = () => {
       
       return prevSessions.filter(s => s.id !== sessionId);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setActiveTabId is a stable store method reference
   }, [workspaces]);
 
   const closeWorkspace = useCallback((workspaceId: string) => {
@@ -157,6 +160,7 @@ export const useSessionState = () => {
       
       return remainingWorkspaces;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setActiveTabId is a stable store method reference
   }, []);
 
   const startWorkspaceRename = useCallback((workspaceId: string) => {
@@ -213,6 +217,7 @@ export const useSessionState = () => {
         return s;
       });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setActiveTabId is a stable store method reference
   }, []);
 
   const addSessionToWorkspace = useCallback((
@@ -239,6 +244,7 @@ export const useSessionState = () => {
       setActiveTabId(workspaceId);
       return prevSessions.map(s => s.id === sessionId ? { ...s, workspaceId } : s);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setActiveTabId is a stable store method reference
   }, []);
 
   const updateSplitSizes = useCallback((workspaceId: string, splitId: string, sizes: number[]) => {
@@ -307,6 +313,7 @@ export const useSessionState = () => {
     setSessions(prev => [...prev, ...sessionsWithWorkspace]);
     setWorkspaces(prev => [...prev, workspace]);
     setActiveTabId(workspace.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setActiveTabId is a stable store method reference
   }, []);
 
   const orphanSessions = useMemo(() => sessions.filter(s => !s.workspaceId), [sessions]);

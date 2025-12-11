@@ -98,7 +98,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       onImport(importText);
       alert("Configuration imported successfully!");
       setImportText("");
-    } catch (_e) {
+    } catch {
       alert("Invalid JSON format.");
     }
   };

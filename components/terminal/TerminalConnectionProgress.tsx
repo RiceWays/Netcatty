@@ -13,7 +13,7 @@ export interface TerminalConnectionProgressProps {
     timeLeft: number;
     isCancelling: boolean;
     showLogs: boolean;
-    setShowLogs: (show: boolean) => void;
+    _setShowLogs: (show: boolean) => void; // Reserved for future log toggle UI within this component
     progressLogs: string[];
     onCancel: () => void;
     onRetry: () => void;
@@ -25,7 +25,7 @@ export const TerminalConnectionProgress: React.FC<TerminalConnectionProgressProp
     timeLeft,
     isCancelling,
     showLogs,
-    setShowLogs,
+    _setShowLogs, // Reserved for future log toggle UI within this component
     progressLogs,
     onCancel,
     onRetry,

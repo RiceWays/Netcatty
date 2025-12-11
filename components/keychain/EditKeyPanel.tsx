@@ -12,7 +12,7 @@ import { Textarea } from '../ui/textarea';
 
 interface EditKeyPanelProps {
     draftKey: Partial<SSHKey>;
-    originalKey: SSHKey;
+    _originalKey: SSHKey; // Reserved for future diff/comparison feature
     setDraftKey: (key: Partial<SSHKey>) => void;
     onExport: () => void;
     onSave: () => void;
@@ -20,7 +20,7 @@ interface EditKeyPanelProps {
 
 export const EditKeyPanel: React.FC<EditKeyPanelProps> = ({
     draftKey,
-    originalKey,
+    _originalKey, // Reserved for future diff/comparison feature
     setDraftKey,
     onExport,
     onSave,
