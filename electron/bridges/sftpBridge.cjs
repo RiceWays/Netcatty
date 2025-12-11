@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SFTP Bridge - Handles SFTP connections and file operations
  * Extracted from main.cjs for single responsibility
  */
@@ -115,7 +115,7 @@ async function writeSftpBinaryWithProgress(event, payload) {
         }
         
         const contents = electronModule.webContents.fromId(event.sender.id);
-        contents?.send("nebula:upload:progress", {
+        contents?.send("netcatty:upload:progress", {
           transferId,
           transferred: transferredBytes,
           totalBytes,
@@ -133,12 +133,12 @@ async function writeSftpBinaryWithProgress(event, payload) {
     await client.put(readableStream, remotePath);
     
     const contents = electronModule.webContents.fromId(event.sender.id);
-    contents?.send("nebula:upload:complete", { transferId });
+    contents?.send("netcatty:upload:complete", { transferId });
     
     return { success: true, transferId };
   } catch (err) {
     const contents = electronModule.webContents.fromId(event.sender.id);
-    contents?.send("nebula:upload:error", { transferId, error: err.message });
+    contents?.send("netcatty:upload:error", { transferId, error: err.message });
     throw err;
   }
 }
@@ -228,17 +228,17 @@ async function chmodSftp(event, payload) {
  * Register IPC handlers for SFTP operations
  */
 function registerHandlers(ipcMain) {
-  ipcMain.handle("nebula:sftp:open", openSftp);
-  ipcMain.handle("nebula:sftp:list", listSftp);
-  ipcMain.handle("nebula:sftp:read", readSftp);
-  ipcMain.handle("nebula:sftp:write", writeSftp);
-  ipcMain.handle("nebula:sftp:writeBinaryWithProgress", writeSftpBinaryWithProgress);
-  ipcMain.handle("nebula:sftp:close", closeSftp);
-  ipcMain.handle("nebula:sftp:mkdir", mkdirSftp);
-  ipcMain.handle("nebula:sftp:delete", deleteSftp);
-  ipcMain.handle("nebula:sftp:rename", renameSftp);
-  ipcMain.handle("nebula:sftp:stat", statSftp);
-  ipcMain.handle("nebula:sftp:chmod", chmodSftp);
+  ipcMain.handle("netcatty:sftp:open", openSftp);
+  ipcMain.handle("netcatty:sftp:list", listSftp);
+  ipcMain.handle("netcatty:sftp:read", readSftp);
+  ipcMain.handle("netcatty:sftp:write", writeSftp);
+  ipcMain.handle("netcatty:sftp:writeBinaryWithProgress", writeSftpBinaryWithProgress);
+  ipcMain.handle("netcatty:sftp:close", closeSftp);
+  ipcMain.handle("netcatty:sftp:mkdir", mkdirSftp);
+  ipcMain.handle("netcatty:sftp:delete", deleteSftp);
+  ipcMain.handle("netcatty:sftp:rename", renameSftp);
+  ipcMain.handle("netcatty:sftp:stat", statSftp);
+  ipcMain.handle("netcatty:sftp:chmod", chmodSftp);
 }
 
 module.exports = {

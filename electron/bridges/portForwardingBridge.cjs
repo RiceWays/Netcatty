@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Port Forwarding Bridge - Handles SSH port forwarding tunnels
  * Extracted from main.cjs for single responsibility
  */
@@ -33,7 +33,7 @@ async function startPortForward(event, payload) {
     
     const sendStatus = (status, error = null) => {
       if (!sender.isDestroyed()) {
-        sender.send("nebula:portforward:status", { tunnelId, status, error });
+        sender.send("netcatty:portforward:status", { tunnelId, status, error });
       }
     };
     
@@ -317,10 +317,10 @@ async function listPortForwards() {
  * Register IPC handlers for port forwarding operations
  */
 function registerHandlers(ipcMain) {
-  ipcMain.handle("nebula:portforward:start", startPortForward);
-  ipcMain.handle("nebula:portforward:stop", stopPortForward);
-  ipcMain.handle("nebula:portforward:status", getPortForwardStatus);
-  ipcMain.handle("nebula:portforward:list", listPortForwards);
+  ipcMain.handle("netcatty:portforward:start", startPortForward);
+  ipcMain.handle("netcatty:portforward:stop", stopPortForward);
+  ipcMain.handle("netcatty:portforward:status", getPortForwardStatus);
+  ipcMain.handle("netcatty:portforward:list", listPortForwards);
 }
 
 module.exports = {

@@ -68,7 +68,7 @@ const electronDir = __dirname;
 // Shared state
 const sessions = new Map();
 const sftpClients = new Map();
-const keyRoot = path.join(os.homedir(), ".nebula-ssh", "keys");
+const keyRoot = path.join(os.homedir(), ".netcatty", "keys");
 
 // Key management helpers
 const ensureKeyDir = () => {

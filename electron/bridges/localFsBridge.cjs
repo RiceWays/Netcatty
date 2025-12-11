@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Local Filesystem Bridge - Handles local file operations
  * Extracted from main.cjs for single responsibility
  */
@@ -137,15 +137,15 @@ async function readKnownHosts() {
  * Register IPC handlers for local filesystem operations
  */
 function registerHandlers(ipcMain) {
-  ipcMain.handle("nebula:local:list", listLocalDir);
-  ipcMain.handle("nebula:local:read", readLocalFile);
-  ipcMain.handle("nebula:local:write", writeLocalFile);
-  ipcMain.handle("nebula:local:delete", deleteLocalFile);
-  ipcMain.handle("nebula:local:rename", renameLocalFile);
-  ipcMain.handle("nebula:local:mkdir", mkdirLocal);
-  ipcMain.handle("nebula:local:stat", statLocal);
-  ipcMain.handle("nebula:local:homedir", getHomeDir);
-  ipcMain.handle("nebula:known-hosts:read", readKnownHosts);
+  ipcMain.handle("netcatty:local:list", listLocalDir);
+  ipcMain.handle("netcatty:local:read", readLocalFile);
+  ipcMain.handle("netcatty:local:write", writeLocalFile);
+  ipcMain.handle("netcatty:local:delete", deleteLocalFile);
+  ipcMain.handle("netcatty:local:rename", renameLocalFile);
+  ipcMain.handle("netcatty:local:mkdir", mkdirLocal);
+  ipcMain.handle("netcatty:local:stat", statLocal);
+  ipcMain.handle("netcatty:local:homedir", getHomeDir);
+  ipcMain.handle("netcatty:known-hosts:read", readKnownHosts);
 }
 
 module.exports = {

@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowUp,
   ChevronRight,
   Database,
@@ -292,8 +292,8 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
 
   const ensureSftp = async () => {
     if (sftpIdRef.current) return sftpIdRef.current;
-    if (!window.nebula?.openSftp) throw new Error("SFTP bridge unavailable");
-    const sftpId = await window.nebula.openSftp({
+    if (!window.netcatty?.openSftp) throw new Error("SFTP bridge unavailable");
+    const sftpId = await window.netcatty.openSftp({
       sessionId: `sftp-modal-${host.id}`,
       hostname: credentials.hostname,
       username: credentials.username || "root",
@@ -310,7 +310,7 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
       setError(null);
       const sftpId = await ensureSftp();
       setLoading(true);
-      const list = await window.nebula.listSftp(sftpId, path);
+      const list = await window.netcatty.listSftp(sftpId, path);
       setFiles(list);
       setSelectedFiles(new Set());
     } catch (e) {
@@ -324,9 +324,9 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
   }, []);
 
   const closeSftp = async () => {
-    if (sftpIdRef.current && window.nebula?.closeSftp) {
+    if (sftpIdRef.current && window.netcatty?.closeSftp) {
       try {
-        await window.nebula.closeSftp(sftpIdRef.current);
+        await window.netcatty.closeSftp(sftpIdRef.current);
       } catch {
         // Silently ignore close errors - connection may already be closed
       }
@@ -377,7 +377,7 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
       const fullPath =
         currentPath === "/" ? `/${file.name}` : `${currentPath}/${file.name}`;
       setLoading(true);
-      const content = await window.nebula.readSftp(sftpId, fullPath);
+      const content = await window.netcatty.readSftp(sftpId, fullPath);
       const blob = new Blob([content], { type: "application/octet-stream" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -422,8 +422,8 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
         currentPath === "/" ? `/${file.name}` : `${currentPath}/${file.name}`;
 
       // Use real-time progress API if available
-      if (window.nebula.writeSftpBinaryWithProgress) {
-        await window.nebula.writeSftpBinaryWithProgress(
+      if (window.netcatty.writeSftpBinaryWithProgress) {
+        await window.netcatty.writeSftpBinaryWithProgress(
           sftpId,
           fullPath,
           arrayBuffer,
@@ -479,13 +479,13 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
           },
         );
         return true;
-      } else if (window.nebula.writeSftpBinary) {
+      } else if (window.netcatty.writeSftpBinary) {
         // Fallback to non-progress API
-        await window.nebula.writeSftpBinary(sftpId, fullPath, arrayBuffer);
+        await window.netcatty.writeSftpBinary(sftpId, fullPath, arrayBuffer);
       } else {
         // Fallback: read as text (works for text files)
         const text = await file.text();
-        await window.nebula.writeSftp(sftpId, fullPath, text);
+        await window.netcatty.writeSftp(sftpId, fullPath, text);
       }
 
       // Calculate final speed (for fallback methods)
@@ -563,8 +563,8 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
       const fullPath =
         currentPath === "/" ? `/${file.name}` : `${currentPath}/${file.name}`;
       // Use deleteSftp which handles both files and directories
-      if (window.nebula.deleteSftp) {
-        await window.nebula.deleteSftp(sftpId, fullPath);
+      if (window.netcatty.deleteSftp) {
+        await window.netcatty.deleteSftp(sftpId, fullPath);
       }
       await loadFiles(currentPath);
     } catch (e) {
@@ -579,7 +579,7 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
       const sftpId = await ensureSftp();
       const fullPath =
         currentPath === "/" ? `/${folderName}` : `${currentPath}/${folderName}`;
-      await window.nebula.mkdirSftp(sftpId, fullPath);
+      await window.netcatty.mkdirSftp(sftpId, fullPath);
       await loadFiles(currentPath);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create folder");
@@ -808,8 +808,8 @@ const SFTPModal: React.FC<SFTPModalProps> = ({
       for (const fileName of fileNames) {
         const fullPath =
           currentPath === "/" ? `/${fileName}` : `${currentPath}/${fileName}`;
-        if (window.nebula.deleteSftp) {
-          await window.nebula.deleteSftp(sftpId, fullPath);
+        if (window.netcatty.deleteSftp) {
+          await window.netcatty.deleteSftp(sftpId, fullPath);
         }
       }
       await loadFiles(currentPath);

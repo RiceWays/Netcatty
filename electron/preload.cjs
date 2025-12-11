@@ -1,4 +1,4 @@
-const { ipcRenderer, contextBridge } = require("electron");
+﻿const { ipcRenderer, contextBridge } = require("electron");
 
 const dataListeners = new Map();
 const exitListeners = new Map();
@@ -8,7 +8,7 @@ const transferErrorListeners = new Map();
 const chainProgressListeners = new Map();
 const authFailedListeners = new Map();
 
-ipcRenderer.on("nebula:data", (_event, payload) => {
+ipcRenderer.on("netcatty:data", (_event, payload) => {
   const set = dataListeners.get(payload.sessionId);
   if (!set) return;
   set.forEach((cb) => {
@@ -20,7 +20,7 @@ ipcRenderer.on("nebula:data", (_event, payload) => {
   });
 });
 
-ipcRenderer.on("nebula:exit", (_event, payload) => {
+ipcRenderer.on("netcatty:exit", (_event, payload) => {
   const set = exitListeners.get(payload.sessionId);
   if (set) {
     set.forEach((cb) => {
@@ -36,7 +36,7 @@ ipcRenderer.on("nebula:exit", (_event, payload) => {
 });
 
 // Chain progress events (for jump host connections)
-ipcRenderer.on("nebula:chain:progress", (_event, payload) => {
+ipcRenderer.on("netcatty:chain:progress", (_event, payload) => {
   const { hop, total, label, status } = payload;
   // Notify all registered chain progress listeners
   chainProgressListeners.forEach((cb) => {
@@ -49,7 +49,7 @@ ipcRenderer.on("nebula:chain:progress", (_event, payload) => {
 });
 
 // Authentication failed events
-ipcRenderer.on("nebula:auth:failed", (_event, payload) => {
+ipcRenderer.on("netcatty:auth:failed", (_event, payload) => {
   const set = authFailedListeners.get(payload.sessionId);
   if (set) {
     set.forEach((cb) => {
@@ -63,7 +63,7 @@ ipcRenderer.on("nebula:auth:failed", (_event, payload) => {
 });
 
 // Transfer progress events
-ipcRenderer.on("nebula:transfer:progress", (_event, payload) => {
+ipcRenderer.on("netcatty:transfer:progress", (_event, payload) => {
   const cb = transferProgressListeners.get(payload.transferId);
   if (cb) {
     try {
@@ -74,7 +74,7 @@ ipcRenderer.on("nebula:transfer:progress", (_event, payload) => {
   }
 });
 
-ipcRenderer.on("nebula:transfer:complete", (_event, payload) => {
+ipcRenderer.on("netcatty:transfer:complete", (_event, payload) => {
   const cb = transferCompleteListeners.get(payload.transferId);
   if (cb) {
     try {
@@ -89,7 +89,7 @@ ipcRenderer.on("nebula:transfer:complete", (_event, payload) => {
   transferErrorListeners.delete(payload.transferId);
 });
 
-ipcRenderer.on("nebula:transfer:error", (_event, payload) => {
+ipcRenderer.on("netcatty:transfer:error", (_event, payload) => {
   const cb = transferErrorListeners.get(payload.transferId);
   if (cb) {
     try {
@@ -104,7 +104,7 @@ ipcRenderer.on("nebula:transfer:error", (_event, payload) => {
   transferErrorListeners.delete(payload.transferId);
 });
 
-ipcRenderer.on("nebula:transfer:cancelled", (_event, payload) => {
+ipcRenderer.on("netcatty:transfer:cancelled", (_event, payload) => {
   // Just cleanup listeners, the UI already knows it's cancelled
   transferProgressListeners.delete(payload.transferId);
   transferCompleteListeners.delete(payload.transferId);
@@ -116,7 +116,7 @@ const uploadProgressListeners = new Map();
 const uploadCompleteListeners = new Map();
 const uploadErrorListeners = new Map();
 
-ipcRenderer.on("nebula:upload:progress", (_event, payload) => {
+ipcRenderer.on("netcatty:upload:progress", (_event, payload) => {
   const cb = uploadProgressListeners.get(payload.transferId);
   if (cb) {
     try {
@@ -127,7 +127,7 @@ ipcRenderer.on("nebula:upload:progress", (_event, payload) => {
   }
 });
 
-ipcRenderer.on("nebula:upload:complete", (_event, payload) => {
+ipcRenderer.on("netcatty:upload:complete", (_event, payload) => {
   const cb = uploadCompleteListeners.get(payload.transferId);
   if (cb) {
     try {
@@ -142,7 +142,7 @@ ipcRenderer.on("nebula:upload:complete", (_event, payload) => {
   uploadErrorListeners.delete(payload.transferId);
 });
 
-ipcRenderer.on("nebula:upload:error", (_event, payload) => {
+ipcRenderer.on("netcatty:upload:error", (_event, payload) => {
   const cb = uploadErrorListeners.get(payload.transferId);
   if (cb) {
     try {
@@ -160,7 +160,7 @@ ipcRenderer.on("nebula:upload:error", (_event, payload) => {
 // Port forwarding status listeners
 const portForwardStatusListeners = new Map();
 
-ipcRenderer.on("nebula:portforward:status", (_event, payload) => {
+ipcRenderer.on("netcatty:portforward:status", (_event, payload) => {
   const { tunnelId, status, error } = payload;
   const callbacks = portForwardStatusListeners.get(tunnelId);
   if (callbacks) {
@@ -176,35 +176,35 @@ ipcRenderer.on("nebula:portforward:status", (_event, payload) => {
 
 const api = {
   startSSHSession: async (options) => {
-    const result = await ipcRenderer.invoke("nebula:start", options);
+    const result = await ipcRenderer.invoke("netcatty:start", options);
     return result.sessionId;
   },
   startTelnetSession: async (options) => {
-    const result = await ipcRenderer.invoke("nebula:telnet:start", options);
+    const result = await ipcRenderer.invoke("netcatty:telnet:start", options);
     return result.sessionId;
   },
   startMoshSession: async (options) => {
-    const result = await ipcRenderer.invoke("nebula:mosh:start", options);
+    const result = await ipcRenderer.invoke("netcatty:mosh:start", options);
     return result.sessionId;
   },
   startLocalSession: async (options) => {
-    const result = await ipcRenderer.invoke("nebula:local:start", options || {});
+    const result = await ipcRenderer.invoke("netcatty:local:start", options || {});
     return result.sessionId;
   },
   writeToSession: (sessionId, data) => {
-    ipcRenderer.send("nebula:write", { sessionId, data });
+    ipcRenderer.send("netcatty:write", { sessionId, data });
   },
   execCommand: async (options) => {
-    return ipcRenderer.invoke("nebula:ssh:exec", options);
+    return ipcRenderer.invoke("netcatty:ssh:exec", options);
   },
   generateKeyPair: async (options) => {
-    return ipcRenderer.invoke("nebula:key:generate", options);
+    return ipcRenderer.invoke("netcatty:key:generate", options);
   },
   resizeSession: (sessionId, cols, rows) => {
-    ipcRenderer.send("nebula:resize", { sessionId, cols, rows });
+    ipcRenderer.send("netcatty:resize", { sessionId, cols, rows });
   },
   closeSession: (sessionId) => {
-    ipcRenderer.send("nebula:close", { sessionId });
+    ipcRenderer.send("netcatty:close", { sessionId });
   },
   onSessionData: (sessionId, cb) => {
     if (!dataListeners.has(sessionId)) dataListeners.set(sessionId, new Set());
@@ -222,35 +222,35 @@ const api = {
     return () => authFailedListeners.get(sessionId)?.delete(cb);
   },
   openSftp: async (options) => {
-    const result = await ipcRenderer.invoke("nebula:sftp:open", options);
+    const result = await ipcRenderer.invoke("netcatty:sftp:open", options);
     return result.sftpId;
   },
   listSftp: async (sftpId, path) => {
-    return ipcRenderer.invoke("nebula:sftp:list", { sftpId, path });
+    return ipcRenderer.invoke("netcatty:sftp:list", { sftpId, path });
   },
   readSftp: async (sftpId, path) => {
-    return ipcRenderer.invoke("nebula:sftp:read", { sftpId, path });
+    return ipcRenderer.invoke("netcatty:sftp:read", { sftpId, path });
   },
   writeSftp: async (sftpId, path, content) => {
-    return ipcRenderer.invoke("nebula:sftp:write", { sftpId, path, content });
+    return ipcRenderer.invoke("netcatty:sftp:write", { sftpId, path, content });
   },
   closeSftp: async (sftpId) => {
-    return ipcRenderer.invoke("nebula:sftp:close", { sftpId });
+    return ipcRenderer.invoke("netcatty:sftp:close", { sftpId });
   },
   mkdirSftp: async (sftpId, path) => {
-    return ipcRenderer.invoke("nebula:sftp:mkdir", { sftpId, path });
+    return ipcRenderer.invoke("netcatty:sftp:mkdir", { sftpId, path });
   },
   deleteSftp: async (sftpId, path) => {
-    return ipcRenderer.invoke("nebula:sftp:delete", { sftpId, path });
+    return ipcRenderer.invoke("netcatty:sftp:delete", { sftpId, path });
   },
   renameSftp: async (sftpId, oldPath, newPath) => {
-    return ipcRenderer.invoke("nebula:sftp:rename", { sftpId, oldPath, newPath });
+    return ipcRenderer.invoke("netcatty:sftp:rename", { sftpId, oldPath, newPath });
   },
   statSftp: async (sftpId, path) => {
-    return ipcRenderer.invoke("nebula:sftp:stat", { sftpId, path });
+    return ipcRenderer.invoke("netcatty:sftp:stat", { sftpId, path });
   },
   chmodSftp: async (sftpId, path, mode) => {
-    return ipcRenderer.invoke("nebula:sftp:chmod", { sftpId, path, mode });
+    return ipcRenderer.invoke("netcatty:sftp:chmod", { sftpId, path, mode });
   },
   // Write binary with real-time progress callback
   writeSftpBinaryWithProgress: async (sftpId, path, content, transferId, onProgress, onComplete, onError) => {
@@ -259,7 +259,7 @@ const api = {
     if (onComplete) uploadCompleteListeners.set(transferId, onComplete);
     if (onError) uploadErrorListeners.set(transferId, onError);
     
-    return ipcRenderer.invoke("nebula:sftp:writeBinaryWithProgress", { 
+    return ipcRenderer.invoke("netcatty:sftp:writeBinaryWithProgress", { 
       sftpId, 
       path, 
       content, 
@@ -268,35 +268,35 @@ const api = {
   },
   // Local filesystem operations
   listLocalDir: async (path) => {
-    return ipcRenderer.invoke("nebula:local:list", { path });
+    return ipcRenderer.invoke("netcatty:local:list", { path });
   },
   readLocalFile: async (path) => {
-    return ipcRenderer.invoke("nebula:local:read", { path });
+    return ipcRenderer.invoke("netcatty:local:read", { path });
   },
   writeLocalFile: async (path, content) => {
-    return ipcRenderer.invoke("nebula:local:write", { path, content });
+    return ipcRenderer.invoke("netcatty:local:write", { path, content });
   },
   deleteLocalFile: async (path) => {
-    return ipcRenderer.invoke("nebula:local:delete", { path });
+    return ipcRenderer.invoke("netcatty:local:delete", { path });
   },
   renameLocalFile: async (oldPath, newPath) => {
-    return ipcRenderer.invoke("nebula:local:rename", { oldPath, newPath });
+    return ipcRenderer.invoke("netcatty:local:rename", { oldPath, newPath });
   },
   mkdirLocal: async (path) => {
-    return ipcRenderer.invoke("nebula:local:mkdir", { path });
+    return ipcRenderer.invoke("netcatty:local:mkdir", { path });
   },
   statLocal: async (path) => {
-    return ipcRenderer.invoke("nebula:local:stat", { path });
+    return ipcRenderer.invoke("netcatty:local:stat", { path });
   },
   getHomeDir: async () => {
-    return ipcRenderer.invoke("nebula:local:homedir");
+    return ipcRenderer.invoke("netcatty:local:homedir");
   },
   // Read system known_hosts file
   readKnownHosts: async () => {
-    return ipcRenderer.invoke("nebula:known-hosts:read");
+    return ipcRenderer.invoke("netcatty:known-hosts:read");
   },
   setTheme: async (theme) => {
-    return ipcRenderer.invoke("nebula:setTheme", theme);
+    return ipcRenderer.invoke("netcatty:setTheme", theme);
   },
   // Streaming transfer with real progress
   startStreamTransfer: async (options, onProgress, onComplete, onError) => {
@@ -306,33 +306,33 @@ const api = {
     if (onComplete) transferCompleteListeners.set(transferId, onComplete);
     if (onError) transferErrorListeners.set(transferId, onError);
     
-    return ipcRenderer.invoke("nebula:transfer:start", options);
+    return ipcRenderer.invoke("netcatty:transfer:start", options);
   },
   cancelTransfer: async (transferId) => {
     // Cleanup listeners
     transferProgressListeners.delete(transferId);
     transferCompleteListeners.delete(transferId);
     transferErrorListeners.delete(transferId);
-    return ipcRenderer.invoke("nebula:transfer:cancel", { transferId });
+    return ipcRenderer.invoke("netcatty:transfer:cancel", { transferId });
   },
   // Window controls for custom title bar
-  windowMinimize: () => ipcRenderer.invoke("nebula:window:minimize"),
-  windowMaximize: () => ipcRenderer.invoke("nebula:window:maximize"),
-  windowClose: () => ipcRenderer.invoke("nebula:window:close"),
-  windowIsMaximized: () => ipcRenderer.invoke("nebula:window:isMaximized"),
+  windowMinimize: () => ipcRenderer.invoke("netcatty:window:minimize"),
+  windowMaximize: () => ipcRenderer.invoke("netcatty:window:maximize"),
+  windowClose: () => ipcRenderer.invoke("netcatty:window:close"),
+  windowIsMaximized: () => ipcRenderer.invoke("netcatty:window:isMaximized"),
   
   // Port Forwarding API
   startPortForward: async (options) => {
-    return ipcRenderer.invoke("nebula:portforward:start", options);
+    return ipcRenderer.invoke("netcatty:portforward:start", options);
   },
   stopPortForward: async (tunnelId) => {
-    return ipcRenderer.invoke("nebula:portforward:stop", { tunnelId });
+    return ipcRenderer.invoke("netcatty:portforward:stop", { tunnelId });
   },
   getPortForwardStatus: async (tunnelId) => {
-    return ipcRenderer.invoke("nebula:portforward:status", { tunnelId });
+    return ipcRenderer.invoke("netcatty:portforward:status", { tunnelId });
   },
   listPortForwards: async () => {
-    return ipcRenderer.invoke("nebula:portforward:list");
+    return ipcRenderer.invoke("netcatty:portforward:list");
   },
   onPortForwardStatus: (tunnelId, cb) => {
     if (!portForwardStatusListeners.has(tunnelId)) {
@@ -356,6 +356,6 @@ const api = {
   },
 };
 
-// Merge with existing nebula (if any) to avoid stale objects on hot reload
-const existing = (typeof window !== "undefined" && window.nebula) ? window.nebula : {};
-contextBridge.exposeInMainWorld("nebula", { ...existing, ...api });
+// Merge with existing netcatty (if any) to avoid stale objects on hot reload
+const existing = (typeof window !== "undefined" && window.netcatty) ? window.netcatty : {};
+contextBridge.exposeInMainWorld("netcatty", { ...existing, ...api });

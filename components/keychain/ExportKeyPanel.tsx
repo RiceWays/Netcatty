@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Export Key Panel - Export SSH key to remote host
  */
 
@@ -83,7 +83,7 @@ export const ExportKeyPanel: React.FC<ExportKeyPanelProps> = ({
             const command = scriptWithVars;
 
             // Execute via SSH
-            const result = await window.nebula?.execCommand({
+            const result = await window.netcatty?.execCommand({
                 hostname: exportHost.hostname,
                 username: exportHost.username,
                 port: exportHost.port || 22,

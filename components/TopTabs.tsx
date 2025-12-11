@@ -1,4 +1,4 @@
-import { Bell,Copy,Folder,LayoutGrid,Minus,Moon,MoreHorizontal,Plus,Shield,Square,Sun,TerminalSquare,User,X } from 'lucide-react';
+﻿import { Bell,Copy,Folder,LayoutGrid,Minus,Moon,MoreHorizontal,Plus,Shield,Square,Sun,TerminalSquare,User,X } from 'lucide-react';
 import React,{ memo,useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState } from 'react';
 import { activeTabStore,useActiveTabId } from '../application/state/activeTabStore';
 import { cn } from '../lib/utils';
@@ -39,27 +39,27 @@ const WindowControls: React.FC = memo(() => {
 
   useEffect(() => {
     // Check initial maximized state
-    window.nebula?.windowIsMaximized?.().then(setIsMaximized);
+    window.netcatty?.windowIsMaximized?.().then(setIsMaximized);
 
     // Listen for window resize to update maximized state
     const handleResize = () => {
-      window.nebula?.windowIsMaximized?.().then(setIsMaximized);
+      window.netcatty?.windowIsMaximized?.().then(setIsMaximized);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleMinimize = () => {
-    window.nebula?.windowMinimize?.();
+    window.netcatty?.windowMinimize?.();
   };
 
   const handleMaximize = async () => {
-    const result = await window.nebula?.windowMaximize?.();
+    const result = await window.netcatty?.windowMaximize?.();
     setIsMaximized(result ?? false);
   };
 
   const handleClose = () => {
-    window.nebula?.windowClose?.();
+    window.netcatty?.windowClose?.();
   };
 
   return (

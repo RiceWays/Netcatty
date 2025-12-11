@@ -1,4 +1,4 @@
-import {
+﻿import {
   FitAddon,
   Terminal as GhosttyTerminal,
   init as initGhostty,
@@ -165,9 +165,9 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     disposeExitRef.current?.();
     disposeExitRef.current = null;
 
-    if (sessionRef.current && window.nebula?.closeSession) {
+    if (sessionRef.current && window.netcatty?.closeSession) {
       try {
-        window.nebula.closeSession(sessionRef.current);
+        window.netcatty.closeSession(sessionRef.current);
       } catch (err) {
         console.warn("Failed to close SSH session", err);
       }
@@ -184,9 +184,9 @@ const TerminalComponent: React.FC<TerminalProps> = ({
   };
 
   const runDistroDetection = async (key?: SSHKey) => {
-    if (!window.nebula?.execCommand) return;
+    if (!window.netcatty?.execCommand) return;
     try {
-      const res = await window.nebula.execCommand({
+      const res = await window.netcatty.execCommand({
         hostname: host.hostname,
         username: host.username || "root",
         port: host.port || 22,
@@ -249,8 +249,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
         term.onData((data) => {
           const id = sessionRef.current;
-          if (id && window.nebula?.writeToSession) {
-            window.nebula.writeToSession(id, data);
+          if (id && window.netcatty?.writeToSession) {
+            window.netcatty.writeToSession(id, data);
 
             // Track command input for shell history
             if (status === "connected" && onCommandExecuted) {
@@ -287,8 +287,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
         term.onResize(({ cols, rows }) => {
           const id = sessionRef.current;
-          if (id && window.nebula?.resizeSession) {
-            window.nebula.resizeSession(id, cols, rows);
+          if (id && window.netcatty?.resizeSession) {
+            window.netcatty.resizeSession(id, cols, rows);
           }
         });
 
@@ -451,9 +451,9 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         }
 
         const id = sessionRef.current;
-        if (id && term && window.nebula?.resizeSession) {
+        if (id && term && window.netcatty?.resizeSession) {
           try {
-            window.nebula.resizeSession(id, term.cols, term.rows);
+            window.netcatty.resizeSession(id, term.cols, term.rows);
           } catch (err) {
             console.warn("Resize session after fonts ready failed", err);
           }
@@ -547,7 +547,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       console.warn("Failed to clear terminal before connect", err);
     }
 
-    if (!window.nebula?.startSSHSession) {
+    if (!window.netcatty?.startSSHSession) {
       setError("Native SSH bridge unavailable. Launch via Electron app.");
       term.writeln(
         "\r\n[netcatty SSH bridge unavailable. Please run the desktop build to connect.]",
@@ -610,8 +610,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       ]);
 
       // Subscribe to chain progress events from IPC
-      if (window.nebula?.onChainProgress) {
-        unsubscribeChainProgress = window.nebula.onChainProgress(
+      if (window.netcatty?.onChainProgress) {
+        unsubscribeChainProgress = window.netcatty.onChainProgress(
           (hop, total, label, status) => {
             setChainProgress({
               currentHop: hop,
@@ -631,7 +631,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     }
 
     try {
-      const id = await window.nebula.startSSHSession({
+      const id = await window.netcatty.startSSHSession({
         sessionId,
         hostname: host.hostname,
         username: effectiveUsername,
@@ -663,7 +663,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
       sessionRef.current = id;
 
-      disposeDataRef.current = window.nebula.onSessionData(id, (chunk) => {
+      disposeDataRef.current = window.netcatty.onSessionData(id, (chunk) => {
         term.write(chunk);
         if (!hasConnectedRef.current) {
           updateStatus("connected");
@@ -674,8 +674,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
               try {
                 fitAddonRef.current.fit();
                 // Send updated size to remote
-                if (sessionRef.current && window.nebula?.resizeSession) {
-                  window.nebula.resizeSession(
+                if (sessionRef.current && window.netcatty?.resizeSession) {
+                  window.netcatty.resizeSession(
                     sessionRef.current,
                     term.cols,
                     term.rows,
@@ -689,7 +689,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         }
       });
 
-      disposeExitRef.current = window.nebula.onSessionExit(id, (evt) => {
+      disposeExitRef.current = window.netcatty.onSessionExit(id, (evt) => {
         updateStatus("disconnected");
         setChainProgress(null); // Clear chain progress on disconnect
         term.writeln(
@@ -704,7 +704,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         hasRunStartupCommandRef.current = true;
         setTimeout(() => {
           if (sessionRef.current) {
-            window.nebula?.writeToSession(
+            window.netcatty?.writeToSession(
               sessionRef.current,
               `${commandToRun}\r`,
             );
@@ -763,7 +763,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       console.warn("Failed to clear terminal before connect", err);
     }
 
-    const startTelnetSession = window.nebula?.startTelnetSession;
+    const startTelnetSession = window.netcatty?.startTelnetSession;
     if (!startTelnetSession) {
       setError("Telnet bridge unavailable. Please run the desktop build.");
       term.writeln(
@@ -792,7 +792,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
       sessionRef.current = id;
 
-      disposeDataRef.current = window.nebula?.onSessionData(id, (chunk) => {
+      disposeDataRef.current = window.netcatty?.onSessionData(id, (chunk) => {
         term.write(chunk);
         if (!hasConnectedRef.current) {
           updateStatus("connected");
@@ -800,8 +800,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
             if (fitAddonRef.current) {
               try {
                 fitAddonRef.current.fit();
-                if (sessionRef.current && window.nebula?.resizeSession) {
-                  window.nebula.resizeSession(
+                if (sessionRef.current && window.netcatty?.resizeSession) {
+                  window.netcatty.resizeSession(
                     sessionRef.current,
                     term.cols,
                     term.rows,
@@ -815,7 +815,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         }
       });
 
-      disposeExitRef.current = window.nebula?.onSessionExit(id, (evt) => {
+      disposeExitRef.current = window.netcatty?.onSessionExit(id, (evt) => {
         updateStatus("disconnected");
         term.writeln(
           `\r\n[Telnet session closed${evt?.exitCode !== undefined ? ` (code ${evt.exitCode})` : ""}]`,
@@ -837,7 +837,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       console.warn("Failed to clear terminal before connect", err);
     }
 
-    const startMoshSession = window.nebula?.startMoshSession;
+    const startMoshSession = window.netcatty?.startMoshSession;
     if (!startMoshSession) {
       setError("Mosh bridge unavailable. Please run the desktop build.");
       term.writeln(
@@ -869,7 +869,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
       sessionRef.current = id;
 
-      disposeDataRef.current = window.nebula?.onSessionData(id, (chunk) => {
+      disposeDataRef.current = window.netcatty?.onSessionData(id, (chunk) => {
         term.write(chunk);
         if (!hasConnectedRef.current) {
           updateStatus("connected");
@@ -877,8 +877,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
             if (fitAddonRef.current) {
               try {
                 fitAddonRef.current.fit();
-                if (sessionRef.current && window.nebula?.resizeSession) {
-                  window.nebula.resizeSession(
+                if (sessionRef.current && window.netcatty?.resizeSession) {
+                  window.netcatty.resizeSession(
                     sessionRef.current,
                     term.cols,
                     term.rows,
@@ -892,7 +892,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         }
       });
 
-      disposeExitRef.current = window.nebula?.onSessionExit(id, (evt) => {
+      disposeExitRef.current = window.netcatty?.onSessionExit(id, (evt) => {
         updateStatus("disconnected");
         term.writeln(
           `\r\n[Mosh session closed${evt?.exitCode !== undefined ? ` (code ${evt.exitCode})` : ""}]`,
@@ -906,7 +906,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         hasRunStartupCommandRef.current = true;
         setTimeout(() => {
           if (sessionRef.current) {
-            window.nebula?.writeToSession(
+            window.netcatty?.writeToSession(
               sessionRef.current,
               `${commandToRun}\r`,
             );
@@ -931,7 +931,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
       console.warn("Failed to clear terminal before connect", err);
     }
 
-    const startLocalSession = window.nebula?.startLocalSession;
+    const startLocalSession = window.netcatty?.startLocalSession;
     if (!startLocalSession) {
       setError("Local shell bridge unavailable. Please run the desktop build.");
       term.writeln(
@@ -948,7 +948,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         rows: term.rows,
       });
       sessionRef.current = id;
-      disposeDataRef.current = window.nebula?.onSessionData(id, (chunk) => {
+      disposeDataRef.current = window.netcatty?.onSessionData(id, (chunk) => {
         term.write(chunk);
         if (!hasConnectedRef.current) {
           updateStatus("connected");
@@ -958,8 +958,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
               try {
                 fitAddonRef.current.fit();
                 // Send updated size to remote
-                if (sessionRef.current && window.nebula?.resizeSession) {
-                  window.nebula.resizeSession(
+                if (sessionRef.current && window.netcatty?.resizeSession) {
+                  window.netcatty.resizeSession(
                     sessionRef.current,
                     term.cols,
                     term.rows,
@@ -972,7 +972,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
           }, 100);
         }
       });
-      disposeExitRef.current = window.nebula?.onSessionExit(id, (evt) => {
+      disposeExitRef.current = window.netcatty?.onSessionExit(id, (evt) => {
         updateStatus("disconnected");
         term.writeln(
           `\r\n[session closed${evt?.exitCode !== undefined ? ` (code ${evt.exitCode})` : ""}]`,
@@ -988,8 +988,8 @@ const TerminalComponent: React.FC<TerminalProps> = ({
   };
 
   const handleSnippetClick = (cmd: string) => {
-    if (sessionRef.current && window.nebula?.writeToSession) {
-      window.nebula.writeToSession(sessionRef.current, `${cmd}\r`);
+    if (sessionRef.current && window.netcatty?.writeToSession) {
+      window.netcatty.writeToSession(sessionRef.current, `${cmd}\r`);
       setIsScriptsOpen(false);
       termRef.current?.focus();
       return;

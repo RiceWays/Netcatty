@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowRight,
   ChevronDown,
   Clock,
@@ -279,9 +279,9 @@ const KnownHostsManager: React.FC<KnownHostsManagerProps> = ({
   const handleScanSystem = useCallback(async () => {
     setIsScanning(true);
     // Try to read from common known_hosts locations via Electron
-    if (window.nebula?.readKnownHosts) {
+    if (window.netcatty?.readKnownHosts) {
       try {
-        const content = await window.nebula.readKnownHosts();
+        const content = await window.netcatty.readKnownHosts();
         if (content) {
           const parsed = parseKnownHostsFile(content);
           const existingHostnames = new Set(

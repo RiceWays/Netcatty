@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Window Manager - Handles Electron window creation and management
  * Extracted from main.cjs for single responsibility
  */
@@ -184,13 +184,13 @@ async function createWindow(electronModule, options) {
  * Register window control IPC handlers
  */
 function registerWindowHandlers(ipcMain, nativeTheme) {
-  ipcMain.handle("nebula:window:minimize", () => {
+  ipcMain.handle("netcatty:window:minimize", () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.minimize();
     }
   });
 
-  ipcMain.handle("nebula:window:maximize", () => {
+  ipcMain.handle("netcatty:window:maximize", () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMaximized()) {
         mainWindow.unmaximize();
@@ -203,20 +203,20 @@ function registerWindowHandlers(ipcMain, nativeTheme) {
     return false;
   });
 
-  ipcMain.handle("nebula:window:close", () => {
+  ipcMain.handle("netcatty:window:close", () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.close();
     }
   });
 
-  ipcMain.handle("nebula:window:isMaximized", () => {
+  ipcMain.handle("netcatty:window:isMaximized", () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       return mainWindow.isMaximized();
     }
     return false;
   });
 
-  ipcMain.handle("nebula:setTheme", (_event, theme) => {
+  ipcMain.handle("netcatty:setTheme", (_event, theme) => {
     currentTheme = theme;
     nativeTheme.themeSource = theme;
     const themeConfig = THEME_COLORS[theme] || THEME_COLORS.light;

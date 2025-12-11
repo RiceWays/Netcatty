@@ -192,7 +192,7 @@ function App() {
   }, [setDraggingSessionId]);
 
   return (
-    <div className="flex flex-col h-screen text-foreground font-sans nebula-shell" onContextMenu={(e) => e.preventDefault()}>
+    <div className="flex flex-col h-screen text-foreground font-sans netcatty-shell" onContextMenu={(e) => e.preventDefault()}>
       <TopTabs
         theme={theme}
         sessions={sessions}

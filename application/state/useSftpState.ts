@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FileConflict,
   Host,
@@ -239,7 +239,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
       // Clear all SFTP sessions
       sessionsRef.forEach(async (sftpId) => {
         try {
-          await window.nebula?.closeSftp(sftpId);
+          await window.netcatty?.closeSftp(sftpId);
         } catch {
           // Ignore errors when closing SFTP sessions during cleanup
         }
@@ -289,7 +289,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         );
         if (oldSftpId) {
           try {
-            await window.nebula?.closeSftp(oldSftpId);
+            await window.netcatty?.closeSftp(oldSftpId);
           } catch {
             // Ignore errors when closing stale SFTP sessions
           }
@@ -300,7 +300,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
       if (host === "local") {
         // Local filesystem connection
         // Try to get home directory from backend, fallback to platform-specific default
-        let homeDir = await window.nebula?.getHomeDir?.();
+        let homeDir = await window.netcatty?.getHomeDir?.();
         if (!homeDir) {
           // Detect platform and use appropriate default
           const isWindows = navigator.platform.toLowerCase().includes("win");
@@ -367,7 +367,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
 
         try {
           const credentials = getHostCredentials(host);
-          const sftpId = await window.nebula?.openSftp({
+          const sftpId = await window.netcatty?.openSftp({
             sessionId: `sftp-${connectionId}`,
             ...credentials,
           });
@@ -379,14 +379,14 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
           // Try to get home directory, default to /
           let startPath = "/";
           try {
-            const homeFiles = await window.nebula?.listSftp(
+            const homeFiles = await window.netcatty?.listSftp(
               sftpId,
               `/home/${credentials.username}`,
             );
             if (homeFiles) startPath = `/home/${credentials.username}`;
           } catch {
             try {
-              const rootFiles = await window.nebula?.listSftp(sftpId, "/root");
+              const rootFiles = await window.netcatty?.listSftp(sftpId, "/root");
               if (rootFiles) startPath = "/root";
             } catch {
               // Fallback path not available, use default
@@ -481,7 +481,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         const sftpId = sftpSessionsRef.current.get(pane.connection.id);
         if (sftpId) {
           try {
-            await window.nebula?.closeSftp(sftpId);
+            await window.netcatty?.closeSftp(sftpId);
           } catch {
             // Ignore errors when closing SFTP session during disconnect
           }
@@ -956,7 +956,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
 
   // List local files
   const listLocalFiles = async (path: string): Promise<SftpFileEntry[]> => {
-    const rawFiles = await window.nebula?.listLocalDir?.(path);
+    const rawFiles = await window.netcatty?.listLocalDir?.(path);
     if (!rawFiles) {
       // Fallback mock for development
       return getMockLocalFiles(path);
@@ -977,7 +977,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
     sftpId: string,
     path: string,
   ): Promise<SftpFileEntry[]> => {
-    const rawFiles = await window.nebula?.listSftp(sftpId, path);
+    const rawFiles = await window.netcatty?.listSftp(sftpId, path);
     if (!rawFiles) return [];
 
     return rawFiles.map((f) => ({
@@ -1193,14 +1193,14 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
 
       try {
         if (pane.connection.isLocal) {
-          await window.nebula?.mkdirLocal?.(fullPath);
+          await window.netcatty?.mkdirLocal?.(fullPath);
         } else {
           const sftpId = sftpSessionsRef.current.get(pane.connection.id);
           if (!sftpId) {
             handleSessionError(side, new Error("SFTP session not found"));
             return;
           }
-          await window.nebula?.mkdirSftp(sftpId, fullPath);
+          await window.netcatty?.mkdirSftp(sftpId, fullPath);
         }
         await refresh(side);
       } catch (err) {
@@ -1225,14 +1225,14 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
           const fullPath = joinPath(pane.connection.currentPath, name);
 
           if (pane.connection.isLocal) {
-            await window.nebula?.deleteLocalFile?.(fullPath);
+            await window.netcatty?.deleteLocalFile?.(fullPath);
           } else {
             const sftpId = sftpSessionsRef.current.get(pane.connection.id);
             if (!sftpId) {
               handleSessionError(side, new Error("SFTP session not found"));
               return;
             }
-            await window.nebula?.deleteSftp?.(sftpId, fullPath);
+            await window.netcatty?.deleteSftp?.(sftpId, fullPath);
           }
         }
         await refresh(side);
@@ -1258,14 +1258,14 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
 
       try {
         if (pane.connection.isLocal) {
-          await window.nebula?.renameLocalFile?.(oldPath, newPath);
+          await window.netcatty?.renameLocalFile?.(oldPath, newPath);
         } else {
           const sftpId = sftpSessionsRef.current.get(pane.connection.id);
           if (!sftpId) {
             handleSessionError(side, new Error("SFTP session not found"));
             return;
           }
-          await window.nebula?.renameSftp?.(sftpId, oldPath, newPath);
+          await window.netcatty?.renameSftp?.(sftpId, oldPath, newPath);
         }
         await refresh(side);
       } catch (err) {
@@ -1316,10 +1316,10 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
           try {
             const fullPath = joinPath(sourcePath, file.name);
             if (sourcePane.connection!.isLocal) {
-              const stat = await window.nebula?.statLocal?.(fullPath);
+              const stat = await window.netcatty?.statLocal?.(fullPath);
               if (stat) fileSize = stat.size;
             } else if (sourceSftpId) {
-              const stat = await window.nebula?.statSftp?.(
+              const stat = await window.netcatty?.statSftp?.(
                 sourceSftpId,
                 fullPath,
               );
@@ -1379,10 +1379,10 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
           : sftpSessionsRef.current.get(sourcePane.connection!.id);
 
         if (sourcePane.connection?.isLocal) {
-          const stat = await window.nebula?.statLocal?.(task.sourcePath);
+          const stat = await window.netcatty?.statLocal?.(task.sourcePath);
           if (stat) actualFileSize = stat.size;
         } else if (sourceSftpId) {
-          const stat = await window.nebula?.statSftp?.(
+          const stat = await window.netcatty?.statSftp?.(
             sourceSftpId,
             task.sourcePath,
           );
@@ -1402,7 +1402,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
           : 256 * 1024; // 256KB default for files
 
     // Check if streaming transfer is available (will provide real progress)
-    const hasStreamingTransfer = !!window.nebula?.startStreamTransfer;
+    const hasStreamingTransfer = !!window.netcatty?.startStreamTransfer;
 
     updateTask({
       status: "transferring",
@@ -1435,15 +1435,15 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         // Get source file stat for accurate size and mtime
         try {
           if (sourcePane.connection?.isLocal) {
-            const stat = await window.nebula?.statLocal?.(task.sourcePath);
+            const stat = await window.netcatty?.statLocal?.(task.sourcePath);
             if (stat) {
               sourceStat = {
                 size: stat.size,
                 mtime: stat.lastModified || Date.now(),
               };
             }
-          } else if (sourceSftpId && window.nebula?.statSftp) {
-            const stat = await window.nebula.statSftp(
+          } else if (sourceSftpId && window.netcatty?.statSftp) {
+            const stat = await window.netcatty.statSftp(
               sourceSftpId,
               task.sourcePath,
             );
@@ -1461,7 +1461,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
         // Get target file stat to check for conflict
         try {
           if (targetPane.connection?.isLocal) {
-            const stat = await window.nebula?.statLocal?.(task.targetPath);
+            const stat = await window.netcatty?.statLocal?.(task.targetPath);
             if (stat) {
               targetExists = true;
               existingStat = {
@@ -1469,8 +1469,8 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
                 mtime: stat.lastModified || Date.now(),
               };
             }
-          } else if (targetSftpId && window.nebula?.statSftp) {
-            const stat = await window.nebula.statSftp(
+          } else if (targetSftpId && window.netcatty?.statSftp) {
+            const stat = await window.netcatty.statSftp(
               targetSftpId,
               task.targetPath,
             );
@@ -1575,7 +1575,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
     targetIsLocal: boolean,
   ): Promise<void> => {
     // Try to use streaming transfer if available
-    if (window.nebula?.startStreamTransfer) {
+    if (window.netcatty?.startStreamTransfer) {
       return new Promise((resolve, reject) => {
         const options = {
           transferId: task.id,
@@ -1616,7 +1616,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
           reject(new Error(error));
         };
 
-        window.nebula!.startStreamTransfer!(
+        window.netcatty!.startStreamTransfer!(
           options,
           onProgress,
           onComplete,
@@ -1631,17 +1631,17 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
     // Read from source
     if (sourceIsLocal) {
       content =
-        (await window.nebula?.readLocalFile?.(task.sourcePath)) ||
+        (await window.netcatty?.readLocalFile?.(task.sourcePath)) ||
         new ArrayBuffer(0);
     } else if (sourceSftpId) {
-      if (window.nebula?.readSftpBinary) {
-        content = await window.nebula.readSftpBinary(
+      if (window.netcatty?.readSftpBinary) {
+        content = await window.netcatty.readSftpBinary(
           sourceSftpId,
           task.sourcePath,
         );
       } else {
         content =
-          (await window.nebula?.readSftp(sourceSftpId, task.sourcePath)) || "";
+          (await window.netcatty?.readSftp(sourceSftpId, task.sourcePath)) || "";
       }
     } else {
       throw new Error("No source connection");
@@ -1650,17 +1650,17 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
     // Write to target
     if (targetIsLocal) {
       if (content instanceof ArrayBuffer) {
-        await window.nebula?.writeLocalFile?.(task.targetPath, content);
+        await window.netcatty?.writeLocalFile?.(task.targetPath, content);
       } else {
         const encoder = new TextEncoder();
-        await window.nebula?.writeLocalFile?.(
+        await window.netcatty?.writeLocalFile?.(
           task.targetPath,
           encoder.encode(content).buffer,
         );
       }
     } else if (targetSftpId) {
-      if (content instanceof ArrayBuffer && window.nebula?.writeSftpBinary) {
-        await window.nebula.writeSftpBinary(
+      if (content instanceof ArrayBuffer && window.netcatty?.writeSftpBinary) {
+        await window.netcatty.writeSftpBinary(
           targetSftpId,
           task.targetPath,
           content,
@@ -1670,7 +1670,7 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
           content instanceof ArrayBuffer
             ? new TextDecoder().decode(content)
             : content;
-        await window.nebula?.writeSftp(targetSftpId, task.targetPath, text);
+        await window.netcatty?.writeSftp(targetSftpId, task.targetPath, text);
       }
     } else {
       throw new Error("No target connection");
@@ -1687,9 +1687,9 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
   ) => {
     // Create target directory
     if (targetIsLocal) {
-      await window.nebula?.mkdirLocal?.(task.targetPath);
+      await window.netcatty?.mkdirLocal?.(task.targetPath);
     } else if (targetSftpId) {
-      await window.nebula?.mkdirSftp(targetSftpId, task.targetPath);
+      await window.netcatty?.mkdirSftp(targetSftpId, task.targetPath);
     }
 
     // List source directory
@@ -1760,9 +1760,9 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
       setConflicts((prev) => prev.filter((c) => c.transferId !== transferId));
 
       // Cancel at backend level if streaming transfer is in progress
-      if (window.nebula?.cancelTransfer) {
+      if (window.netcatty?.cancelTransfer) {
         try {
-          await window.nebula.cancelTransfer(transferId);
+          await window.netcatty.cancelTransfer(transferId);
         } catch (err) {
           console.warn("Failed to cancel transfer at backend:", err);
         }
@@ -1919,13 +1919,13 @@ export const useSftpState = (hosts: Host[], keys: SSHKey[]) => {
       }
 
       const sftpId = sftpSessionsRef.current.get(pane.connection.id);
-      if (!sftpId || !window.nebula?.chmodSftp) {
+      if (!sftpId || !window.netcatty?.chmodSftp) {
         handleSessionError(side, new Error("SFTP session not found"));
         return;
       }
 
       try {
-        await window.nebula.chmodSftp(sftpId, filePath, mode);
+        await window.netcatty.chmodSftp(sftpId, filePath, mode);
         await refresh(side);
       } catch (err) {
         if (isSessionError(err)) {

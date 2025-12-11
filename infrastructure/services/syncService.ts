@@ -11,10 +11,10 @@ interface BackupData {
 
 export const syncToGist = async (token: string, gistId: string | undefined, data: Omit<BackupData, 'timestamp' | 'version'>): Promise<string> => {
   const payload = {
-    description: "netcatty SSH Config Backup",
+    description: "Netcatty SSH Config Backup",
     public: false,
     files: {
-      "nebula-config.json": {
+      "netcatty-config.json": {
         content: JSON.stringify({ ...data, timestamp: Date.now(), version: 1 }, null, 2)
       }
     }
@@ -56,10 +56,10 @@ export const loadFromGist = async (token: string, gistId: string): Promise<Backu
   }
 
   const result = await response.json();
-  const file = result.files["nebula-config.json"];
+  const file = result.files["netcatty-config.json"];
 
   if (!file || !file.content) {
-    throw new Error("Invalid Gist format: nebula-config.json not found");
+    throw new Error("Invalid Gist format: netcatty-config.json not found");
   }
 
   return JSON.parse(file.content);

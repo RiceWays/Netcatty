@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Port Forwarding Service
  * Handles communication between the frontend and the Electron backend
  * for establishing and managing SSH port forwarding tunnels.
@@ -42,9 +42,9 @@ export const startPortForward = async (
   keys: { id: string; privateKey: string }[],
   onStatusChange: (status: PortForwardingRule['status'], error?: string) => void
 ): Promise<{ success: boolean; error?: string }> => {
-  const nebula = window.nebula;
+  const bridge = window.netcatty;
   
-  if (!nebula?.startPortForward) {
+  if (!bridge?.startPortForward) {
     // Fallback for browser/dev mode - simulate the connection
     console.warn('[PortForwardingService] Backend not available, simulating connection...');
     return simulateConnection(rule, onStatusChange);
@@ -64,7 +64,7 @@ export const startPortForward = async (
     }
     
     // Subscribe to status updates first
-    const unsubscribe = nebula.onPortForwardStatus?.(tunnelId, (status, error) => {
+    const unsubscribe = bridge.onPortForwardStatus?.(tunnelId, (status, error) => {
       const conn = activeConnections.get(rule.id);
       if (conn) {
         conn.status = status;
@@ -84,7 +84,7 @@ export const startPortForward = async (
     onStatusChange('connecting');
     
     // Start the tunnel
-    const result = await nebula.startPortForward({
+    const result = await bridge.startPortForward({
       tunnelId,
       type: rule.type,
       localPort: rule.localPort,
@@ -122,7 +122,7 @@ export const stopPortForward = async (
   ruleId: string,
   onStatusChange: (status: PortForwardingRule['status']) => void
 ): Promise<{ success: boolean; error?: string }> => {
-  const nebula = window.nebula;
+  const bridge = window.netcatty;
   const conn = activeConnections.get(ruleId);
   
   if (!conn) {
@@ -130,7 +130,7 @@ export const stopPortForward = async (
     return { success: true };
   }
   
-  if (!nebula?.stopPortForward) {
+  if (!bridge?.stopPortForward) {
     // Fallback for browser/dev mode
     console.warn('[PortForwardingService] Backend not available, simulating stop...');
     conn.unsubscribe?.();
@@ -140,7 +140,7 @@ export const stopPortForward = async (
   }
   
   try {
-    const result = await nebula.stopPortForward(conn.tunnelId);
+    const result = await bridge.stopPortForward(conn.tunnelId);
     
     conn.unsubscribe?.();
     activeConnections.delete(ruleId);
@@ -169,19 +169,19 @@ export const getPortForwardStatus = async (
  * Check if backend is available
  */
 export const isBackendAvailable = (): boolean => {
-  return !!(window.nebula?.startPortForward);
+  return !!(window.netcatty?.startPortForward);
 };
 
 /**
  * Stop all active tunnels (cleanup on unmount)
  */
 export const stopAllPortForwards = async (): Promise<void> => {
-  const nebula = window.nebula;
+  const bridge = window.netcatty;
   
   for (const [_ruleId, conn] of activeConnections) {
     try {
-      if (nebula?.stopPortForward) {
-        await nebula.stopPortForward(conn.tunnelId);
+      if (bridge?.stopPortForward) {
+        await bridge.stopPortForward(conn.tunnelId);
       }
       conn.unsubscribe?.();
     } catch (err) {

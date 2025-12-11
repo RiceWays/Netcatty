@@ -1,7 +1,7 @@
 import type { RemoteFile } from "./types";
 
 // Proxy configuration for SSH connections
-interface NebulaProxyConfig {
+interface NetcattyProxyConfig {
   type: 'http' | 'socks5';
   host: string;
   port: number;
@@ -10,7 +10,7 @@ interface NebulaProxyConfig {
 }
 
 // Jump host configuration for SSH tunneling
-interface NebulaJumpHost {
+interface NetcattyJumpHost {
   hostname: string;
   port: number;
   username: string;
@@ -21,7 +21,7 @@ interface NebulaJumpHost {
 
 // Host key information for verification
 // Reserved for future host key verification UI feature
-interface _NebulaHostKeyInfo {
+interface _NetcattyHostKeyInfo {
   hostname: string;
   port: number;
   keyType: string;
@@ -29,7 +29,7 @@ interface _NebulaHostKeyInfo {
   publicKey?: string;
 }
 
-interface NebulaSSHOptions {
+interface NetcattySSHOptions {
   sessionId?: string;
   hostname: string;
   username: string;
@@ -47,9 +47,9 @@ interface NebulaSSHOptions {
   // Environment variables to set in the remote shell
   env?: Record<string, string>;
   // Proxy configuration
-  proxy?: NebulaProxyConfig;
+  proxy?: NetcattyProxyConfig;
   // Jump hosts (bastion chain)
-  jumpHosts?: NebulaJumpHost[];
+  jumpHosts?: NetcattyJumpHost[];
 }
 
 interface SftpStatResult {
@@ -100,8 +100,8 @@ interface PortForwardStatusResult {
 
 type PortForwardStatusCallback = (status: 'inactive' | 'connecting' | 'active' | 'error', error?: string) => void;
 
-interface NebulaBridge {
-  startSSHSession(options: NebulaSSHOptions): Promise<string>;
+interface NetcattyBridge {
+  startSSHSession(options: NetcattySSHOptions): Promise<string>;
   startTelnetSession?(options: {
     sessionId?: string;
     hostname: string;
@@ -152,7 +152,7 @@ interface NebulaBridge {
   ): () => void;
   
   // SFTP operations
-  openSftp(options: NebulaSSHOptions): Promise<string>;
+  openSftp(options: NetcattySSHOptions): Promise<string>;
   listSftp(sftpId: string, path: string): Promise<RemoteFile[]>;
   readSftp(sftpId: string, path: string): Promise<string>;
   readSftpBinary?(sftpId: string, path: string): Promise<ArrayBuffer>;
@@ -233,7 +233,7 @@ interface NebulaBridge {
 
 declare global {
   interface Window {
-    nebula?: NebulaBridge;
+    netcatty?: NetcattyBridge;
   }
 }
 

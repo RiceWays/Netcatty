@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SSH Bridge - Handles SSH connections, sessions, and related operations
  * Extracted from main.cjs for single responsibility
  */
@@ -144,7 +144,7 @@ async function connectThroughChain(event, options, jumpHosts, targetHost, target
   
   const sendProgress = (hop, total, label, status) => {
     if (!sender.isDestroyed()) {
-      sender.send("nebula:chain:progress", { hop, total, label, status });
+      sender.send("netcatty:chain:progress", { hop, total, label, status });
     }
   };
   
@@ -281,7 +281,7 @@ async function startSSHSession(event, options) {
   
   const sendProgress = (hop, total, label, status) => {
     if (!sender.isDestroyed()) {
-      sender.send("nebula:chain:progress", { hop, total, label, status });
+      sender.send("netcatty:chain:progress", { hop, total, label, status });
     }
   };
 
@@ -410,7 +410,7 @@ async function startSSHSession(event, options) {
             const flushBuffer = () => {
               if (dataBuffer.length > 0) {
                 const contents = electronModule.BrowserWindow.fromWebContents(event.sender)?.webContents;
-                contents?.send("nebula:data", { sessionId, data: dataBuffer });
+                contents?.send("netcatty:data", { sessionId, data: dataBuffer });
                 dataBuffer = '';
               }
               flushTimeout = null;
@@ -446,7 +446,7 @@ async function startSSHSession(event, options) {
               }
               flushBuffer();
               const contents = electronModule.BrowserWindow.fromWebContents(event.sender)?.webContents;
-              contents?.send("nebula:exit", { sessionId, exitCode: 0 });
+              contents?.send("netcatty:exit", { sessionId, exitCode: 0 });
               sessions.delete(sessionId);
               conn.end();
               for (const c of chainConnections) {
@@ -476,14 +476,14 @@ async function startSSHSession(event, options) {
                            err.level === 'client-authentication';
         
         if (isAuthError) {
-          contents?.send("nebula:auth:failed", { 
+          contents?.send("netcatty:auth:failed", { 
             sessionId, 
             error: err.message,
             hostname: options.hostname 
           });
         }
         
-        contents?.send("nebula:exit", { sessionId, exitCode: 1, error: err.message });
+        contents?.send("netcatty:exit", { sessionId, exitCode: 1, error: err.message });
         sessions.delete(sessionId);
         for (const c of chainConnections) {
           try { c.end(); } catch {}
@@ -495,7 +495,7 @@ async function startSSHSession(event, options) {
         console.error(`[Chain] Final target ${options.hostname} connection timeout`);
         const err = new Error(`Connection timeout to ${options.hostname}`);
         const contents = electronModule.BrowserWindow.fromWebContents(event.sender)?.webContents;
-        contents?.send("nebula:exit", { sessionId, exitCode: 1, error: err.message });
+        contents?.send("netcatty:exit", { sessionId, exitCode: 1, error: err.message });
         sessions.delete(sessionId);
         for (const c of chainConnections) {
           try { c.end(); } catch {}
@@ -505,7 +505,7 @@ async function startSSHSession(event, options) {
 
       conn.on("close", () => {
         const contents = electronModule.BrowserWindow.fromWebContents(event.sender)?.webContents;
-        contents?.send("nebula:exit", { sessionId, exitCode: 0 });
+        contents?.send("netcatty:exit", { sessionId, exitCode: 0 });
         sessions.delete(sessionId);
         for (const c of chainConnections) {
           try { c.end(); } catch {}
@@ -518,7 +518,7 @@ async function startSSHSession(event, options) {
   } catch (err) {
     console.error("[Chain] SSH chain connection error:", err.message);
     const contents = electronModule.BrowserWindow.fromWebContents(event.sender)?.webContents;
-    contents?.send("nebula:exit", { sessionId, exitCode: 1, error: err.message });
+    contents?.send("netcatty:exit", { sessionId, exitCode: 1, error: err.message });
     throw err;
   }
 }
@@ -646,9 +646,9 @@ async function generateKeyPair(event, options) {
  * Register IPC handlers for SSH operations
  */
 function registerHandlers(ipcMain) {
-  ipcMain.handle("nebula:start", startSSHSession);
-  ipcMain.handle("nebula:ssh:exec", execCommand);
-  ipcMain.handle("nebula:key:generate", generateKeyPair);
+  ipcMain.handle("netcatty:start", startSSHSession);
+  ipcMain.handle("netcatty:ssh:exec", execCommand);
+  ipcMain.handle("netcatty:key:generate", generateKeyPair);
 }
 
 module.exports = {

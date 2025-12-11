@@ -86,7 +86,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       encodeURIComponent(JSON.stringify(exportData(), null, 2));
     const downloadAnchorNode = document.createElement("a");
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "nebula_backup.json");
+    downloadAnchorNode.setAttribute("download", "netcatty_backup.json");
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();

@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadgeCheck,
   ChevronDown,
   ChevronRight,
@@ -328,8 +328,8 @@ echo $3 >> "$FILE"`);
       const keySize = draftKey.keySize;
 
       // Use real key generation via Electron backend
-      if (window.nebula?.generateKeyPair) {
-        const result = await window.nebula.generateKeyPair({
+      if (window.netcatty?.generateKeyPair) {
+        const result = await window.netcatty.generateKeyPair({
           type: keyType,
           bits: keySize,
           comment: `${draftKey.label.trim()}@netcatty`,
@@ -1235,7 +1235,7 @@ echo $3 >> "$FILE"`);
                       const command = scriptWithVars;
 
                       // Execute via SSH
-                      const result = await window.nebula?.execCommand({
+                      const result = await window.netcatty?.execCommand({
                         hostname: exportHost.hostname,
                         username: exportHost.username,
                         port: exportHost.port || 22,

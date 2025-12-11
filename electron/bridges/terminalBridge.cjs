@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Terminal Bridge - Handles local shell and telnet/mosh sessions
  * Extracted from main.cjs for single responsibility
  */
@@ -84,13 +84,13 @@ function startLocalSession(event, payload) {
   
   proc.onData((data) => {
     const contents = electronModule.webContents.fromId(session.webContentsId);
-    contents?.send("nebula:data", { sessionId, data });
+    contents?.send("netcatty:data", { sessionId, data });
   });
   
   proc.onExit((evt) => {
     sessions.delete(sessionId);
     const contents = electronModule.webContents.fromId(session.webContentsId);
-    contents?.send("nebula:exit", { sessionId, ...evt });
+    contents?.send("netcatty:exit", { sessionId, ...evt });
   });
   
   return { sessionId };
@@ -265,7 +265,7 @@ async function startTelnetSession(event, options) {
       
       if (cleanData.length > 0) {
         const contents = electronModule.webContents.fromId(session.webContentsId);
-        contents?.send("nebula:data", { sessionId, data: cleanData.toString('binary') });
+        contents?.send("netcatty:data", { sessionId, data: cleanData.toString('binary') });
       }
     });
 
@@ -279,7 +279,7 @@ async function startTelnetSession(event, options) {
         const session = sessions.get(sessionId);
         if (session) {
           const contents = electronModule.webContents.fromId(session.webContentsId);
-          contents?.send("nebula:exit", { sessionId, exitCode: 1, error: err.message });
+          contents?.send("netcatty:exit", { sessionId, exitCode: 1, error: err.message });
         }
         sessions.delete(sessionId);
       }
@@ -292,7 +292,7 @@ async function startTelnetSession(event, options) {
       const session = sessions.get(sessionId);
       if (session) {
         const contents = electronModule.webContents.fromId(session.webContentsId);
-        contents?.send("nebula:exit", { sessionId, exitCode: hadError ? 1 : 0 });
+        contents?.send("netcatty:exit", { sessionId, exitCode: hadError ? 1 : 0 });
       }
       sessions.delete(sessionId);
     });
@@ -361,13 +361,13 @@ async function startMoshSession(event, options) {
 
     proc.onData((data) => {
       const contents = electronModule.webContents.fromId(session.webContentsId);
-      contents?.send("nebula:data", { sessionId, data });
+      contents?.send("netcatty:data", { sessionId, data });
     });
 
     proc.onExit((evt) => {
       sessions.delete(sessionId);
       const contents = electronModule.webContents.fromId(session.webContentsId);
-      contents?.send("nebula:exit", { sessionId, ...evt });
+      contents?.send("netcatty:exit", { sessionId, ...evt });
     });
 
     return { sessionId };
@@ -461,12 +461,12 @@ function closeSession(event, payload) {
  * Register IPC handlers for terminal operations
  */
 function registerHandlers(ipcMain) {
-  ipcMain.handle("nebula:local:start", startLocalSession);
-  ipcMain.handle("nebula:telnet:start", startTelnetSession);
-  ipcMain.handle("nebula:mosh:start", startMoshSession);
-  ipcMain.on("nebula:write", writeToSession);
-  ipcMain.on("nebula:resize", resizeSession);
-  ipcMain.on("nebula:close", closeSession);
+  ipcMain.handle("netcatty:local:start", startLocalSession);
+  ipcMain.handle("netcatty:telnet:start", startTelnetSession);
+  ipcMain.handle("netcatty:mosh:start", startMoshSession);
+  ipcMain.on("netcatty:write", writeToSession);
+  ipcMain.on("netcatty:resize", resizeSession);
+  ipcMain.on("netcatty:close", closeSession);
 }
 
 module.exports = {

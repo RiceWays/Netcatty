@@ -1,4 +1,4 @@
-import { useCallback,useEffect,useMemo,useState } from 'react';
+﻿import { useCallback,useEffect,useMemo,useState } from 'react';
 import { SyncConfig } from '../../domain/models';
 import {
 STORAGE_KEY_COLOR,
@@ -27,7 +27,7 @@ const applyThemeTokens = (theme: 'light' | 'dark', primaryColor: string) => {
   root.style.setProperty('--accent-foreground', accentForeground);
   
   // Sync with native window title bar (Electron)
-  window.nebula?.setTheme?.(theme);
+  window.netcatty?.setTheme?.(theme);
 };
 
 export const useSettingsState = () => {

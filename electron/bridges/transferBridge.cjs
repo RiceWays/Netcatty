@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transfer Bridge - Handles file transfers with progress and cancellation
  * Extracted from main.cjs for single responsibility
  */
@@ -47,17 +47,17 @@ async function startTransfer(event, payload) {
       lastTransferred = transferred;
     }
     
-    sender.send("nebula:transfer:progress", { transferId, transferred, speed, totalBytes: total });
+    sender.send("netcatty:transfer:progress", { transferId, transferred, speed, totalBytes: total });
   };
   
   const sendComplete = () => {
     activeTransfers.delete(transferId);
-    sender.send("nebula:transfer:complete", { transferId });
+    sender.send("netcatty:transfer:complete", { transferId });
   };
   
   const sendError = (error) => {
     activeTransfers.delete(transferId);
-    sender.send("nebula:transfer:error", { transferId, error: error.message || String(error) });
+    sender.send("netcatty:transfer:error", { transferId, error: error.message || String(error) });
   };
   
   const isCancelled = () => activeTransfers.get(transferId)?.cancelled;
@@ -152,7 +152,7 @@ async function startTransfer(event, payload) {
       
     } else if (sourceType === 'sftp' && targetType === 'sftp') {
       // SFTP to SFTP: download to temp then upload
-      const tempPath = path.join(os.tmpdir(), `nebula-transfer-${transferId}`);
+      const tempPath = path.join(os.tmpdir(), `netcatty-transfer-${transferId}`);
       
       const sourceClient = sftpClients.get(sourceSftpId);
       const targetClient = sftpClients.get(targetSftpId);
@@ -202,7 +202,7 @@ async function startTransfer(event, payload) {
   } catch (err) {
     if (err.message === 'Transfer cancelled') {
       activeTransfers.delete(transferId);
-      sender.send("nebula:transfer:cancelled", { transferId });
+      sender.send("netcatty:transfer:cancelled", { transferId });
     } else {
       sendError(err);
     }
@@ -233,8 +233,8 @@ async function cancelTransfer(event, payload) {
  * Register IPC handlers for transfer operations
  */
 function registerHandlers(ipcMain) {
-  ipcMain.handle("nebula:transfer:start", startTransfer);
-  ipcMain.handle("nebula:transfer:cancel", cancelTransfer);
+  ipcMain.handle("netcatty:transfer:start", startTransfer);
+  ipcMain.handle("netcatty:transfer:cancel", cancelTransfer);
 }
 
 module.exports = {
