@@ -74,7 +74,8 @@ const HostForm: React.FC<HostFormProps> = ({ initialData, availableKeys, groups,
         tags: formData.tags || [],
         port: formData.port || 22,
         group: formData.group || 'General',
-        identityFileId: authType === 'key' ? formData.identityFileId : undefined
+        identityFileId: authType === 'key' ? formData.identityFileId : undefined,
+        createdAt: initialData?.createdAt || Date.now()
       } as Host);
     }
   };

@@ -215,6 +215,7 @@ const QuickConnectWizard: React.FC<QuickConnectWizardProps> = ({
             // Set telnet-specific fields when using telnet protocol
             telnetEnabled: protocol === 'telnet',
             telnetPort: protocol === 'telnet' ? effectivePort : undefined,
+            createdAt: Date.now(),
         };
 
         // Save host if requested

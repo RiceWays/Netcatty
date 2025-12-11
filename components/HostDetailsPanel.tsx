@@ -54,7 +54,8 @@ const HostDetailsPanel: React.FC<HostDetailsPanelProps> = ({
     agentForwarding: false,
     authMethod: "password",
     charset: "UTF-8",
-    theme: "Flexoki Dark"
+    theme: "Flexoki Dark",
+    createdAt: Date.now()
   } as Host));
 
   // Sub-panel state

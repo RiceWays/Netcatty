@@ -48,6 +48,7 @@ export interface Host {
   password?: string;
   authMethod?: 'password' | 'key' | 'certificate' | 'fido2';
   agentForwarding?: boolean;
+  createdAt?: number; // Timestamp when host was created
   startupCommand?: string;
   hostChaining?: string; // Deprecated: use hostChain instead
   proxy?: string; // Deprecated: use proxyConfig instead
