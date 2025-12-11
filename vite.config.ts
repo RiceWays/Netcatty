@@ -10,11 +10,20 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 5173,
         host: '0.0.0.0',
+        headers: {
+          // Required for SharedArrayBuffer and WASM in some browsers
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        },
       },
       build: {
         chunkSizeWarningLimit: 1500,
+        target: 'esnext', // Required for top-level await in WASM modules
       },
       plugins: [tailwindcss(), react()],
+      optimizeDeps: {
+        exclude: ['ghostty-web'], // Don't pre-bundle ghostty-web to preserve WASM imports
+      },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)

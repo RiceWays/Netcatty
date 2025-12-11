@@ -56,10 +56,17 @@ interface TerminalProps {
 
 let ghosttyInitialized = false;
 let ghosttyInitPromise: Promise<void> | null = null;
+let ghosttyInitError: Error | null = null;
+
 const ensureGhostty = async () => {
+  if (ghosttyInitError) throw ghosttyInitError;
   if (ghosttyInitialized) return;
   if (!ghosttyInitPromise) {
-    ghosttyInitPromise = initGhostty();
+    ghosttyInitPromise = initGhostty().catch((err) => {
+      ghosttyInitError = err;
+      console.error("[Ghostty] WASM initialization failed:", err);
+      throw err;
+    });
   }
   await ghosttyInitPromise;
   ghosttyInitialized = true;
@@ -231,9 +238,14 @@ const TerminalComponent: React.FC<TerminalProps> = ({
         termRef.current = term;
         fitAddonRef.current = fitAddon;
 
-        term.open(containerRef.current);
-        fitAddon.fit();
-        term.focus();
+        try {
+          term.open(containerRef.current);
+          fitAddon.fit();
+          term.focus();
+        } catch (openErr) {
+          console.error("[Ghostty] Failed to open terminal:", openErr);
+          throw openErr;
+        }
 
         term.onData((data) => {
           const id = sessionRef.current;
