@@ -221,7 +221,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
         try {
           term.open(containerRef.current);
-          
+
           // Load WebGL addon for GPU-accelerated rendering
           try {
             const webglAddon = new WebglAddon();
@@ -232,7 +232,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
           } catch (webglErr) {
             console.warn("[XTerm] WebGL addon failed, using canvas renderer:", webglErr);
           }
-          
+
           fitAddon.fit();
           term.focus();
         } catch (openErr) {
