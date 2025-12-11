@@ -334,10 +334,13 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
             className={cn(
               "relative h-8 pl-3 pr-2 min-w-[140px] max-w-[240px] rounded-md border text-xs font-semibold cursor-pointer flex items-center justify-between gap-2 app-no-drag flex-shrink-0",
               "transition-all duration-200 ease-out",
-              activeTabId === session.id ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+              activeTabId === session.id ? "bg-accent/20 text-foreground" : "border-border/60 text-muted-foreground hover:border-accent/40 hover:text-foreground",
               isBeingDragged && isDraggingForReorder ? "opacity-40 scale-95" : ""
             )}
-            style={shiftStyle}
+            style={{
+              ...shiftStyle,
+              ...(activeTabId === session.id ? { borderColor: 'hsl(var(--accent))' } : {})
+            }}
           >
             {/* Drop indicator line - before */}
             {showDropIndicatorBefore && isDraggingForReorder && (
@@ -348,7 +351,7 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
               <div className="absolute -right-1.5 top-1 bottom-1 w-0.5 bg-primary rounded-full shadow-[0_0_8px_2px] shadow-primary/50 animate-pulse" />
             )}
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <TerminalSquare size={14} className={cn("shrink-0", activeTabId === session.id ? "text-primary" : "text-muted-foreground")} />
+              <TerminalSquare size={14} className={cn("shrink-0", activeTabId === session.id ? "text-accent" : "text-muted-foreground")} />
               <span className="truncate">{session.hostLabel}</span>
               <div className="flex-shrink-0">{sessionStatusDot(session.status)}</div>
             </div>
@@ -387,10 +390,13 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
                 className={cn(
                   "relative h-8 pl-3 pr-2 min-w-[150px] max-w-[260px] rounded-md border text-xs font-semibold cursor-pointer flex items-center justify-between gap-2 app-no-drag flex-shrink-0",
                   "transition-all duration-200 ease-out",
-                  isActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                  isActive ? "bg-accent/20 text-foreground" : "border-border/60 text-muted-foreground hover:border-accent/40 hover:text-foreground",
                   isBeingDragged && isDraggingForReorder ? "opacity-40 scale-95" : ""
                 )}
-                style={shiftStyle}
+                style={{
+                  ...shiftStyle,
+                  ...(isActive ? { borderColor: 'hsl(var(--accent))' } : {})
+                }}
               >
                 {/* Drop indicator line - before */}
                 {showDropIndicatorBefore && isDraggingForReorder && (
@@ -452,8 +458,9 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
             onClick={() => onSelectTab('vault')}
             className={cn(
               "h-8 px-3 rounded-md border text-xs font-semibold cursor-pointer flex items-center gap-2 app-no-drag",
-              isVaultActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              isVaultActive ? "bg-accent/20 text-foreground" : "border-border/60 text-muted-foreground hover:border-accent/40 hover:text-foreground"
             )}
+            style={isVaultActive ? { borderColor: 'hsl(var(--accent))' } : undefined}
           >
             <Shield size={14} /> Vaults
           </div>
@@ -461,8 +468,9 @@ const TopTabsInner: React.FC<TopTabsProps> = ({
             onClick={() => onSelectTab('sftp')}
             className={cn(
               "h-8 px-3 rounded-md border text-xs font-semibold cursor-pointer flex items-center gap-2 app-no-drag",
-              isSftpActive ? "bg-primary/20 border-primary/60 text-foreground" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              isSftpActive ? "bg-accent/20 text-foreground" : "border-border/60 text-muted-foreground hover:border-accent/40 hover:text-foreground"
             )}
+            style={isSftpActive ? { borderColor: 'hsl(var(--accent))' } : undefined}
           >
             <Folder size={14} /> SFTP
           </div>

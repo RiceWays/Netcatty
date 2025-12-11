@@ -321,6 +321,10 @@ const api = {
   windowClose: () => ipcRenderer.invoke("netcatty:window:close"),
   windowIsMaximized: () => ipcRenderer.invoke("netcatty:window:isMaximized"),
   
+  // Settings window
+  openSettingsWindow: () => ipcRenderer.invoke("netcatty:settings:open"),
+  closeSettingsWindow: () => ipcRenderer.invoke("netcatty:settings:close"),
+  
   // Port Forwarding API
   startPortForward: async (options) => {
     return ipcRenderer.invoke("netcatty:portforward:start", options);

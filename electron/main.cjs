@@ -160,6 +160,19 @@ const registerBridges = (win) => {
   portForwardingBridge.registerHandlers(ipcMain);
   terminalBridge.registerHandlers(ipcMain);
 
+  // Settings window handler
+  ipcMain.handle("netcatty:settings:open", async () => {
+    await windowManager.openSettingsWindow(electronModule, {
+      preload,
+      devServerUrl,
+      isDev,
+      appIcon,
+      isMac,
+      electronDir,
+    });
+    return true;
+  });
+
   console.log('[Main] All bridges registered successfully');
 };
 

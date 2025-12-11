@@ -6,8 +6,9 @@ import {
   Terminal,
   TerminalSquare,
 } from "lucide-react";
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Host, TerminalSession, Workspace } from "../types";
+import { KeyBinding } from "../domain/models";
 
 type QuickSwitcherItem = {
   type: "host" | "tab" | "workspace" | "action";
@@ -31,6 +32,7 @@ interface QuickSwitcherProps {
   onClose: () => void;
   onCreateLocalTerminal?: () => void;
   onCreateWorkspace?: () => void;
+  keyBindings?: KeyBinding[];
 }
 
 const QuickSwitcherInner: React.FC<QuickSwitcherProps> = ({
@@ -45,7 +47,16 @@ const QuickSwitcherInner: React.FC<QuickSwitcherProps> = ({
   onClose,
   onCreateLocalTerminal,
   onCreateWorkspace,
+  keyBindings,
 }) => {
+  // Get hotkey display strings
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+  const getHotkeyLabel = (actionId: string) => {
+    const binding = keyBindings?.find(k => k.id === actionId);
+    if (!binding) return '';
+    return isMac ? binding.mac : binding.pc;
+  };
+  const quickSwitchKey = getHotkeyLabel('quick-switch');
   const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -212,9 +223,11 @@ const QuickSwitcherInner: React.FC<QuickSwitcherProps> = ({
             placeholder="Search hosts or tabs"
             className="flex-1 h-8 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-sm"
           />
-          <kbd className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-            Ctrl+K
-          </kbd>
+          {quickSwitchKey && (
+            <kbd className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+              {quickSwitchKey.replace(/ \+ /g, '+')}
+            </kbd>
+          )}
         </div>
 
         <ScrollArea className="flex-1 h-full">
@@ -260,9 +273,11 @@ const QuickSwitcherInner: React.FC<QuickSwitcherProps> = ({
               {/* Jump To hint */}
               <div className="px-4 py-2 flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Jump To</span>
-                <kbd className="text-[10px] text-muted-foreground bg-muted px-1 py-0.5 rounded">
-                  Ctrl+Shift+J
-                </kbd>
+                {quickSwitchKey && (
+                  <kbd className="text-[10px] text-muted-foreground bg-muted px-1 py-0.5 rounded">
+                    {quickSwitchKey.replace(/ \+ /g, '+')}
+                  </kbd>
+                )}
               </div>
 
               {/* Hosts section */}

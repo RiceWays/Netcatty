@@ -216,6 +216,10 @@ interface NetcattyBridge {
   windowClose?(): Promise<void>;
   windowIsMaximized?(): Promise<boolean>;
   
+  // Settings window
+  openSettingsWindow?(): Promise<boolean>;
+  closeSettingsWindow?(): Promise<void>;
+  
   // Port Forwarding
   startPortForward?(options: PortForwardOptions): Promise<PortForwardResult>;
   stopPortForward?(tunnelId: string): Promise<PortForwardResult>;

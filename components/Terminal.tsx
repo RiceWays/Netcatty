@@ -802,6 +802,17 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     return () => clearTimeout(timer);
   }, [inWorkspace, isVisible]);
 
+  // Auto-focus terminal when tab becomes visible
+  useEffect(() => {
+    if (isVisible && termRef.current) {
+      // Small delay to ensure the tab switch animation completes
+      const timer = setTimeout(() => {
+        termRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]);
+
   // Track terminal selection for context menu
   useEffect(() => {
     const term = termRef.current;

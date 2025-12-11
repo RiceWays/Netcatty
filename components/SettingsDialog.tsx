@@ -465,31 +465,31 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
             <TabsList className="flex flex-col h-auto bg-transparent gap-1 p-0 justify-start">
               <TabsTrigger
                 value="appearance"
-                className="w-full justify-start gap-3 px-3 py-2 data-[state=active]:bg-background"
+                className="w-full justify-start gap-3 px-3 py-2 rounded-md transition-colors data-[state=active]:bg-background hover:bg-background/60"
               >
                 <Palette size={16} /> Appearance
               </TabsTrigger>
               <TabsTrigger
                 value="terminal"
-                className="w-full justify-start gap-3 px-3 py-2 data-[state=active]:bg-background"
+                className="w-full justify-start gap-3 px-3 py-2 rounded-md transition-colors data-[state=active]:bg-background hover:bg-background/60"
               >
                 <TerminalSquare size={16} /> Terminal
               </TabsTrigger>
               <TabsTrigger
                 value="shortcuts"
-                className="w-full justify-start gap-3 px-3 py-2 data-[state=active]:bg-background"
+                className="w-full justify-start gap-3 px-3 py-2 rounded-md transition-colors data-[state=active]:bg-background hover:bg-background/60"
               >
                 <Keyboard size={16} /> Shortcuts
               </TabsTrigger>
               <TabsTrigger
                 value="sync"
-                className="w-full justify-start gap-3 px-3 py-2 data-[state=active]:bg-background"
+                className="w-full justify-start gap-3 px-3 py-2 rounded-md transition-colors data-[state=active]:bg-background hover:bg-background/60"
               >
                 <Cloud size={16} /> Sync & Cloud
               </TabsTrigger>
               <TabsTrigger
                 value="data"
-                className="w-full justify-start gap-3 px-3 py-2 data-[state=active]:bg-background"
+                className="w-full justify-start gap-3 px-3 py-2 rounded-md transition-colors data-[state=active]:bg-background hover:bg-background/60"
               >
                 <Download size={16} /> Data
               </TabsTrigger>

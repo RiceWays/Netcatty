@@ -68,6 +68,9 @@ function App() {
     setCustomCSS,
   } = useSettingsState();
 
+  // Debug: log hotkeyScheme and keyBindings on every render
+  console.log('[App] hotkeyScheme:', hotkeyScheme, 'keyBindings length:', keyBindings.length);
+
   const {
     hosts,
     keys,
@@ -264,6 +267,7 @@ function App() {
     if (hotkeyScheme === 'disabled') return;
 
     const isMac = hotkeyScheme === 'mac';
+    console.log('[Hotkeys] Registering global hotkey handler, scheme:', hotkeyScheme, 'bindings count:', keyBindings.length);
 
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Don't handle if we're in an input or textarea (except for Escape)
@@ -279,6 +283,7 @@ function App() {
       for (const binding of keyBindings) {
         const keyStr = isMac ? binding.mac : binding.pc;
         if (matchesKeyBinding(e, keyStr, isMac)) {
+          console.log('[Hotkeys] Matched binding:', binding.action, keyStr);
           // Terminal-specific actions should be handled by the terminal
           // Don't handle them at app level
           const terminalActions = ['copy', 'paste', 'selectAll', 'clearBuffer', 'searchTerminal'];
@@ -377,7 +382,12 @@ function App() {
   }, []);
 
   const handleOpenSettings = useCallback(() => {
-    setIsSettingsOpen(true);
+    // Try to open in a separate window, fallback to modal dialog
+    if (window.netcatty?.openSettingsWindow) {
+      window.netcatty.openSettingsWindow();
+    } else {
+      setIsSettingsOpen(true);
+    }
   }, []);
 
   const handleEndSessionDrag = useCallback(() => {
@@ -490,6 +500,7 @@ function App() {
           setIsQuickSwitcherOpen(false);
           setQuickSearch('');
         }}
+        keyBindings={keyBindings}
       />
 
       <Dialog open={!!workspaceRenameTarget} onOpenChange={(open) => {

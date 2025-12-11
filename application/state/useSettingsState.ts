@@ -50,7 +50,14 @@ export const useSettingsState = () => {
     const stored = localStorageAdapter.read<TerminalSettings>(STORAGE_KEY_TERM_SETTINGS);
     return stored ? { ...DEFAULT_TERMINAL_SETTINGS, ...stored } : DEFAULT_TERMINAL_SETTINGS;
   });
-  const [hotkeyScheme, setHotkeyScheme] = useState<HotkeyScheme>(() => (localStorageAdapter.readString(STORAGE_KEY_HOTKEY_SCHEME) as HotkeyScheme) || DEFAULT_HOTKEY_SCHEME);
+  const [hotkeyScheme, setHotkeyScheme] = useState<HotkeyScheme>(() => {
+    const stored = localStorageAdapter.readString(STORAGE_KEY_HOTKEY_SCHEME);
+    // Validate stored value is a valid HotkeyScheme
+    if (stored === 'disabled' || stored === 'mac' || stored === 'pc') {
+      return stored;
+    }
+    return DEFAULT_HOTKEY_SCHEME;
+  });
   const [customKeyBindings, setCustomKeyBindings] = useState<CustomKeyBindings>(() => 
     localStorageAdapter.read<CustomKeyBindings>(STORAGE_KEY_CUSTOM_KEY_BINDINGS) || {}
   );
@@ -63,6 +70,45 @@ export const useSettingsState = () => {
     localStorageAdapter.writeString(STORAGE_KEY_THEME, theme);
     localStorageAdapter.writeString(STORAGE_KEY_COLOR, primaryColor);
   }, [theme, primaryColor]);
+
+  // Listen for storage changes from other windows (cross-window sync)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY_THEME && e.newValue) {
+        const newTheme = e.newValue as 'light' | 'dark';
+        if (newTheme !== theme) {
+          setTheme(newTheme);
+        }
+      }
+      if (e.key === STORAGE_KEY_COLOR && e.newValue) {
+        if (e.newValue !== primaryColor) {
+          setPrimaryColor(e.newValue);
+        }
+      }
+      if (e.key === STORAGE_KEY_CUSTOM_CSS && e.newValue !== null) {
+        if (e.newValue !== customCSS) {
+          setCustomCSS(e.newValue);
+        }
+      }
+      if (e.key === STORAGE_KEY_HOTKEY_SCHEME && e.newValue) {
+        const newScheme = e.newValue as HotkeyScheme;
+        if (newScheme !== hotkeyScheme) {
+          setHotkeyScheme(newScheme);
+        }
+      }
+      if (e.key === STORAGE_KEY_CUSTOM_KEY_BINDINGS && e.newValue) {
+        try {
+          const newBindings = JSON.parse(e.newValue) as CustomKeyBindings;
+          setCustomKeyBindings(newBindings);
+        } catch {
+          // ignore parse errors
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [theme, primaryColor, customCSS, hotkeyScheme]);
 
   useEffect(() => {
     localStorageAdapter.writeString(STORAGE_KEY_TERM_THEME, terminalThemeId);

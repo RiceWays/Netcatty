@@ -1,6 +1,7 @@
 import { init as initGhostty } from 'ghostty-web';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import SettingsPage from './components/SettingsPage';
 
 // Pre-load Ghostty WASM immediately on app start for faster terminal open
 initGhostty().catch((err) => {
@@ -12,10 +13,28 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
+// Simple hash-based routing for separate windows
+const getRoute = () => {
+  const hash = window.location.hash;
+  if (hash === '#/settings' || hash.startsWith('#/settings')) {
+    return 'settings';
+  }
+  return 'main';
+};
+
 const root = ReactDOM.createRoot(rootElement);
-root.render(
-  // StrictMode causes double renders in development - disabled for performance testing
-  // <React.StrictMode>
-  <App />
-  // </React.StrictMode>
-);
+
+const renderApp = () => {
+  const route = getRoute();
+  if (route === 'settings') {
+    root.render(<SettingsPage />);
+  } else {
+    root.render(<App />);
+  }
+};
+
+// Initial render
+renderApp();
+
+// Listen for hash changes
+window.addEventListener('hashchange', renderApp);

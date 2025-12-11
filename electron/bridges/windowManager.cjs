@@ -42,6 +42,7 @@ const MIME_TYPES = {
 
 // State
 let mainWindow = null;
+let settingsWindow = null;
 let productionServer = null;
 let productionServerUrl = null;
 let currentTheme = "light";
@@ -182,6 +183,90 @@ async function createWindow(electronModule, options) {
 }
 
 /**
+ * Create or focus the settings window
+ */
+async function openSettingsWindow(electronModule, options) {
+  const { BrowserWindow } = electronModule;
+  const { preload, devServerUrl, isDev, appIcon, isMac, electronDir } = options;
+  
+  // If settings window already exists, just focus it
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.focus();
+    return settingsWindow;
+  }
+  
+  const themeConfig = THEME_COLORS[currentTheme];
+  const win = new BrowserWindow({
+    width: 800,
+    height: 650,
+    minWidth: 700,
+    minHeight: 500,
+    backgroundColor: themeConfig.background,
+    icon: appIcon,
+    parent: mainWindow,
+    modal: false,
+    show: false,
+    frame: false,
+    titleBarStyle: isMac ? "hiddenInset" : undefined,
+    trafficLightPosition: isMac ? { x: 16, y: 18 } : undefined,
+    webPreferences: {
+      preload,
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+    },
+  });
+
+  settingsWindow = win;
+
+  // Show window when ready to prevent flicker
+  win.once('ready-to-show', () => {
+    win.show();
+  });
+
+  // Clean up reference when closed
+  win.on('closed', () => {
+    settingsWindow = null;
+  });
+
+  // Load the settings page
+  const settingsPath = '/#/settings';
+  
+  if (isDev) {
+    try {
+      await win.loadURL(devServerUrl + settingsPath);
+      return win;
+    } catch (e) {
+      console.warn("Dev server not reachable for settings window", e);
+    }
+  }
+
+  // Production mode
+  try {
+    if (!productionServerUrl) {
+      await startProductionServer(electronDir);
+    }
+    await win.loadURL(productionServerUrl + settingsPath);
+  } catch (e) {
+    console.warn("Failed to load settings in production server", e);
+    const indexPath = path.join(electronDir, "../dist/index.html");
+    await win.loadFile(indexPath, { hash: '/settings' });
+  }
+  
+  return win;
+}
+
+/**
+ * Close the settings window
+ */
+function closeSettingsWindow() {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.close();
+    settingsWindow = null;
+  }
+}
+
+/**
  * Register window control IPC handlers (only once)
  */
 function registerWindowHandlers(ipcMain, nativeTheme) {
@@ -230,7 +315,16 @@ function registerWindowHandlers(ipcMain, nativeTheme) {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.setBackgroundColor(themeConfig.background);
     }
+    // Also update settings window if open
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+      settingsWindow.setBackgroundColor(themeConfig.background);
+    }
     return true;
+  });
+
+  // Settings window close handler
+  ipcMain.handle("netcatty:settings:close", () => {
+    closeSettingsWindow();
   });
 }
 
@@ -303,10 +397,20 @@ function getMainWindow() {
   return mainWindow;
 }
 
+/**
+ * Get the settings window instance
+ */
+function getSettingsWindow() {
+  return settingsWindow;
+}
+
 module.exports = {
   createWindow,
+  openSettingsWindow,
+  closeSettingsWindow,
   closeProductionServer,
   buildAppMenu,
   getMainWindow,
+  getSettingsWindow,
   THEME_COLORS,
 };
