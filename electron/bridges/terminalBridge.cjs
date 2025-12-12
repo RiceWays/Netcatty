@@ -333,11 +333,20 @@ async function startMoshSession(event, options) {
     : options.hostname;
   args.push(userHost);
 
+  const resolveLangFromCharset = (charset) => {
+    if (!charset) return 'en_US.UTF-8';
+    const trimmed = String(charset).trim();
+    if (/^utf-?8$/i.test(trimmed) || /^utf8$/i.test(trimmed)) {
+      return 'en_US.UTF-8';
+    }
+    return trimmed;
+  };
+
   const env = {
     ...process.env,
     ...(options.env || {}),
     TERM: 'xterm-256color',
-    LANG: options.charset || 'en_US.UTF-8',
+    LANG: resolveLangFromCharset(options.charset),
   };
 
   if (options.agentForwarding && process.env.SSH_AUTH_SOCK) {

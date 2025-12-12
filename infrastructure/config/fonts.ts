@@ -11,7 +11,36 @@ export interface TerminalFont {
   category: 'monospace' | 'proportional';
 }
 
-export const TERMINAL_FONTS: TerminalFont[] = [
+// Fonts that hint the browser to pick a CJK-capable fallback when the primary
+// monospace font lacks Chinese glyphs. Kept ASCII-only and ordered so that the
+// generic monospace fallback remains earlier in the stack (important for cell
+// width stability in xterm.js).
+const CJK_FALLBACK_FONTS = [
+  '"Sarasa Mono SC"',
+  '"Noto Sans Mono CJK SC"',
+  '"Noto Sans Mono CJK"',
+  '"Source Han Mono SC"',
+  '"WenQuanYi Zen Hei Mono"',
+  '"PingFang SC"',
+  '"Hiragino Sans GB"',
+  '"Microsoft YaHei UI"',
+  '"Microsoft YaHei"',
+  '"SimSun"',
+];
+
+const CJK_FALLBACK_STACK = CJK_FALLBACK_FONTS.join(', ');
+
+const withCjkFallback = (family: string) => {
+  const trimmed = family.trim();
+  if (!CJK_FALLBACK_STACK) return trimmed;
+  // Avoid double-appending if a custom stack already includes one of these fonts.
+  if (CJK_FALLBACK_FONTS.some((f) => trimmed.includes(f.replace(/"/g, "")))) {
+    return trimmed;
+  }
+  return `${trimmed}, ${CJK_FALLBACK_STACK}`;
+};
+
+const BASE_TERMINAL_FONTS: TerminalFont[] = [
   {
     id: 'menlo',
     name: 'Menlo',
@@ -216,6 +245,11 @@ export const TERMINAL_FONTS: TerminalFont[] = [
     category: 'monospace',
   },
 ];
+
+export const TERMINAL_FONTS: TerminalFont[] = BASE_TERMINAL_FONTS.map((font) => ({
+  ...font,
+  family: withCjkFallback(font.family),
+}));
 
 export const DEFAULT_FONT_SIZE = 14;
 export const MIN_FONT_SIZE = 10;

@@ -10,6 +10,17 @@ const { Client: SSHClient, utils: sshUtils } = require("ssh2");
 let sessions = null;
 let electronModule = null;
 
+// Normalize charset inputs (often provided as bare encodings like "UTF-8")
+// into a usable LANG locale for remote shells.
+function resolveLangFromCharset(charset) {
+  if (!charset) return "en_US.UTF-8";
+  const trimmed = String(charset).trim();
+  if (/^utf-?8$/i.test(trimmed) || /^utf8$/i.test(trimmed)) {
+    return "en_US.UTF-8";
+  }
+  return trimmed;
+}
+
 /**
  * Initialize the SSH bridge with dependencies
  */
@@ -378,7 +389,7 @@ async function startSSHSession(event, options) {
           },
           {
             env: { 
-              LANG: options.charset || "en_US.UTF-8",
+              LANG: resolveLangFromCharset(options.charset),
               COLORTERM: "truecolor",
               ...(options.env || {}),
             },
