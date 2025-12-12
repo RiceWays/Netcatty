@@ -42,6 +42,7 @@ interface TerminalProps {
   inWorkspace?: boolean;
   isResizing?: boolean;
   isFocusMode?: boolean; // Whether workspace is in focus mode
+  isFocused?: boolean; // Whether this terminal should have keyboard focus (for split views)
   fontSize: number;
   terminalTheme: TerminalTheme;
   sessionId: string;
@@ -84,6 +85,7 @@ const TerminalComponent: React.FC<TerminalProps> = ({
   inWorkspace,
   isResizing,
   isFocusMode,
+  isFocused,
   fontSize,
   terminalTheme,
   sessionId,
@@ -416,14 +418,28 @@ const TerminalComponent: React.FC<TerminalProps> = ({
 
             const isMac = currentScheme === 'mac';
 
+            // Debug: log arrow key combinations
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && (e.ctrlKey || e.metaKey)) {
+              console.log('[Terminal] Arrow key combo detected:', {
+                key: e.key,
+                ctrlKey: e.ctrlKey,
+                altKey: e.altKey,
+                metaKey: e.metaKey,
+                scheme: currentScheme,
+                bindingsCount: currentBindings.length,
+              });
+            }
+
             // Check if this matches any of our shortcuts
             const matched = checkAppShortcut(e, currentBindings, isMac);
             if (!matched) return true; // Let xterm handle it
 
+            console.log('[Terminal] Matched hotkey:', matched.action);
             const { action } = matched;
 
             // App-level actions: call the callback directly and prevent xterm from handling
             if (appLevelActions.has(action)) {
+              console.log('[Terminal] Executing app-level action:', action);
               e.preventDefault();
               if (hotkeyCallback) {
                 hotkeyCallback(action, e);
@@ -802,16 +818,31 @@ const TerminalComponent: React.FC<TerminalProps> = ({
     return () => clearTimeout(timer);
   }, [inWorkspace, isVisible]);
 
-  // Auto-focus terminal when tab becomes visible
+  // Auto-focus terminal when tab becomes visible (only for solo tabs, not split views)
   useEffect(() => {
-    if (isVisible && termRef.current) {
+    // In split view mode (inWorkspace && !isFocusMode), focus is controlled by isFocused prop
+    // Only auto-focus for solo tabs or focus mode
+    const shouldAutoFocus = isVisible && termRef.current && (!inWorkspace || isFocusMode);
+    if (shouldAutoFocus) {
       // Small delay to ensure the tab switch animation completes
       const timer = setTimeout(() => {
         termRef.current?.focus();
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [isVisible]);
+  }, [isVisible, inWorkspace, isFocusMode]);
+
+  // Focus terminal when isFocused prop becomes true (for split view navigation)
+  useEffect(() => {
+    if (isFocused && termRef.current && isVisible) {
+      // Small delay to ensure state updates complete
+      const timer = setTimeout(() => {
+        termRef.current?.focus();
+        console.log('[Terminal] Focus triggered via isFocused prop, sessionId:', sessionId.slice(0, 8));
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [isFocused, isVisible, sessionId]);
 
   // Track terminal selection for context menu
   useEffect(() => {

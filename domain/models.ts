@@ -136,6 +136,7 @@ export interface GroupNode {
 export interface SyncConfig {
   gistId: string;
   githubToken: string;
+  gistToken?: string; // Alias for githubToken (deprecated, use githubToken)
   lastSync?: number;
 }
 
@@ -213,6 +214,22 @@ export const matchesKeyBinding = (e: KeyboardEvent, keyStr: string, isMac: boole
     if (!/^[1-9]$/.test(key)) return false;
     // Check modifiers match the base pattern
     const testStr = basePattern + key;
+    return matchesKeyBinding(e, testStr.trim(), isMac);
+  }
+  
+  // Handle arrow key patterns like "arrows"
+  if (keyStr.includes('arrows')) {
+    const basePattern = keyStr.replace('arrows', '');
+    const key = e.key;
+    // Check if it's an arrow key
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return false;
+    // Map arrow key to symbol for matching
+    const arrowSymbol = key === 'ArrowUp' ? '↑' 
+      : key === 'ArrowDown' ? '↓'
+      : key === 'ArrowLeft' ? '←'
+      : '→';
+    // Check modifiers match the base pattern
+    const testStr = basePattern + arrowSymbol;
     return matchesKeyBinding(e, testStr.trim(), isMac);
   }
   
@@ -320,6 +337,7 @@ export interface TerminalSettings {
 
   // Mouse
   rightClickBehavior: RightClickBehavior;
+  copyOnSelect: boolean; // Automatically copy selected text
   middleClickPaste: boolean; // Paste on middle-click
   wordSeparators: string; // Characters for word selection
   linkModifier: LinkModifier; // Modifier key to click links
@@ -339,6 +357,7 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
   altAsMeta: false,
   scrollOnInput: true,
   rightClickBehavior: 'context-menu',
+  copyOnSelect: false,
   middleClickPaste: true,
   wordSeparators: ' ()[]{}\'"',
   linkModifier: 'none',

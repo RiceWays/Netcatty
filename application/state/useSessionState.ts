@@ -4,6 +4,8 @@ import {
 collectSessionIds,
 createWorkspaceFromSessions as createWorkspaceEntity,
 createWorkspaceFromSessionIds,
+FocusDirection,
+getNextFocusSessionId,
 insertPaneIntoWorkspace,
 pruneWorkspaceNode,
 SplitDirection,
@@ -354,6 +356,46 @@ export const useSessionState = () => {
     }));
   }, []);
 
+  // Move focus between panes in a workspace
+  const moveFocusInWorkspace = useCallback((workspaceId: string, direction: FocusDirection): boolean => {
+    console.log('[moveFocusInWorkspace] Called with:', { workspaceId, direction });
+    
+    const workspace = workspaces.find(w => w.id === workspaceId);
+    if (!workspace) {
+      console.log('[moveFocusInWorkspace] Workspace not found');
+      return false;
+    }
+    
+    // Get current focused session, or first session if none focused
+    const sessionIds = collectSessionIds(workspace.root);
+    console.log('[moveFocusInWorkspace] Session IDs:', sessionIds);
+    
+    const currentFocused = workspace.focusedSessionId || sessionIds[0];
+    if (!currentFocused) {
+      console.log('[moveFocusInWorkspace] No current focused session');
+      return false;
+    }
+    console.log('[moveFocusInWorkspace] Current focused:', currentFocused);
+    
+    // Find the next session in the given direction
+    const nextSessionId = getNextFocusSessionId(workspace.root, currentFocused, direction);
+    console.log('[moveFocusInWorkspace] Next session:', nextSessionId);
+    
+    if (!nextSessionId) {
+      console.log('[moveFocusInWorkspace] No next session found');
+      return false;
+    }
+    
+    // Update focused session
+    setWorkspaces(prev => prev.map(ws => {
+      if (ws.id !== workspaceId) return ws;
+      return { ...ws, focusedSessionId: nextSessionId };
+    }));
+    
+    console.log('[moveFocusInWorkspace] Focus updated to:', nextSessionId);
+    return true;
+  }, [workspaces]);
+
   // Run a snippet on multiple target hosts - creates a focus mode workspace
   const runSnippet = useCallback((snippet: Snippet, targetHosts: Host[]) => {
     if (targetHosts.length === 0) return;
@@ -470,6 +512,7 @@ export const useSessionState = () => {
     splitSession,
     toggleWorkspaceViewMode,
     setWorkspaceFocusedSession,
+    moveFocusInWorkspace,
     runSnippet,
     orphanSessions,
     orderedTabs,

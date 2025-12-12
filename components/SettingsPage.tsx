@@ -263,7 +263,7 @@ export default function SettingsPage() {
 
     // Local state
     const [isSyncing, setIsSyncing] = useState(false);
-    const [gistToken, setGistToken] = useState(syncConfig?.gistToken || "");
+    const [gistToken, setGistToken] = useState(syncConfig?.githubToken || "");
     const [gistId, setGistId] = useState(syncConfig?.gistId || "");
     const [importText, setImportText] = useState("");
     const [recordingBindingId, setRecordingBindingId] = useState<string | null>(null);
@@ -277,42 +277,96 @@ export default function SettingsPage() {
     // Helper functions
     const getHslStyle = (hsl: string) => ({ backgroundColor: `hsl(${hsl})` });
 
+    // Cancel recording when clicking outside
+    const cancelRecording = useCallback(() => {
+        setRecordingBindingId(null);
+        setRecordingScheme(null);
+    }, []);
+
+    // Helper to detect special suffix in a key binding
+    const getSpecialSuffix = useCallback((bindingId: string): string | null => {
+        const binding = keyBindings.find(b => b.id === bindingId);
+        if (!binding) return null;
+        const currentKey = hotkeyScheme === 'mac' ? binding.mac : binding.pc;
+        if (currentKey.includes('[1...9]')) return '[1...9]';
+        if (currentKey.includes('arrows')) return 'arrows';
+        return null;
+    }, [keyBindings, hotkeyScheme]);
+
     // Keyboard recording for custom shortcuts
     useEffect(() => {
         if (!recordingBindingId || !recordingScheme) return;
+
+        // Check if this is a special binding that needs suffix handling
+        const specialSuffix = getSpecialSuffix(recordingBindingId);
 
         const handleKeyDown = (e: KeyboardEvent) => {
             e.preventDefault();
             e.stopPropagation();
 
-            // Ignore modifier-only presses
-            if (['Meta', 'Control', 'Alt', 'Shift'].includes(e.key)) return;
-
-            const keyString = keyEventToString(e, recordingScheme === 'mac');
-            updateKeyBinding?.(recordingBindingId, recordingScheme, keyString);
-            setRecordingBindingId(null);
-            setRecordingScheme(null);
-        };
-
-        const handleEscape = (e: KeyboardEvent) => {
+            // Cancel on Escape
             if (e.key === 'Escape') {
-                setRecordingBindingId(null);
-                setRecordingScheme(null);
+                cancelRecording();
+                return;
+            }
+
+            if (specialSuffix) {
+                // For special bindings, we only record modifier keys
+                // Wait for a non-modifier key press to confirm the modifiers
+                if (['Meta', 'Control', 'Alt', 'Shift'].includes(e.key)) return;
+                
+                // Build modifiers string
+                const parts: string[] = [];
+                if (recordingScheme === 'mac') {
+                    if (e.metaKey) parts.push('⌘');
+                    if (e.ctrlKey) parts.push('⌃');
+                    if (e.altKey) parts.push('⌥');
+                    if (e.shiftKey) parts.push('Shift');
+                } else {
+                    if (e.ctrlKey) parts.push('Ctrl');
+                    if (e.altKey) parts.push('Alt');
+                    if (e.shiftKey) parts.push('Shift');
+                    if (e.metaKey) parts.push('Win');
+                }
+                
+                // Combine modifiers with the special suffix
+                const modifierString = parts.length > 0 ? parts.join(' + ') + ' + ' : '';
+                const fullKeyString = modifierString + specialSuffix;
+                
+                updateKeyBinding?.(recordingBindingId, recordingScheme, fullKeyString);
+                cancelRecording();
+            } else {
+                // Regular binding: record the full key combo
+                if (['Meta', 'Control', 'Alt', 'Shift'].includes(e.key)) return;
+
+                const keyString = keyEventToString(e, recordingScheme === 'mac');
+                updateKeyBinding?.(recordingBindingId, recordingScheme, keyString);
+                cancelRecording();
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown, true);
-        window.addEventListener('keydown', handleEscape);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown, true);
-            window.removeEventListener('keydown', handleEscape);
+        // Cancel on click outside
+        const handleClick = () => {
+            cancelRecording();
         };
-    }, [recordingBindingId, recordingScheme, updateKeyBinding]);
+
+        // Add slight delay before adding click listener to avoid immediate cancellation
+        const timer = setTimeout(() => {
+            window.addEventListener('click', handleClick, true);
+        }, 100);
+
+        window.addEventListener('keydown', handleKeyDown, true);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('keydown', handleKeyDown, true);
+            window.removeEventListener('click', handleClick, true);
+        };
+    }, [recordingBindingId, recordingScheme, updateKeyBinding, cancelRecording, getSpecialSuffix]);
 
     // Sync handlers
     const handleSaveGist = async () => {
         if (!gistToken) return alert("Please enter a GitHub token");
-        updateSyncConfig({ gistToken, gistId: gistId || undefined });
+        updateSyncConfig({ githubToken: gistToken, gistId: gistId || undefined });
         setIsSyncing(true);
         try {
             const newId = await syncToGist(
@@ -322,7 +376,7 @@ export default function SettingsPage() {
             );
             if (newId && newId !== gistId) {
                 setGistId(newId);
-                updateSyncConfig({ gistToken, gistId: newId });
+                updateSyncConfig({ githubToken: gistToken, gistId: newId });
                 alert("Synced! Gist ID saved.");
             } else {
                 alert("Synced successfully.");
@@ -705,44 +759,90 @@ export default function SettingsPage() {
                                                     {category}
                                                 </h4>
                                                 <div className="space-y-0 divide-y divide-border rounded-lg border bg-card">
-                                                    {categoryBindings.map((binding) => (
-                                                        <div
-                                                            key={binding.id}
-                                                            className="flex items-center justify-between px-4 py-2"
-                                                        >
-                                                            <span className="text-sm">{binding.label}</span>
-                                                            <div className="flex items-center gap-2">
-                                                                {/* Mac shortcut */}
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setRecordingBindingId(binding.id);
-                                                                        setRecordingScheme("mac");
-                                                                    }}
-                                                                    className={cn(
-                                                                        "px-2 py-1 text-xs font-mono rounded border transition-colors min-w-[80px] text-center",
-                                                                        recordingBindingId === binding.id &&
-                                                                            recordingScheme === "mac"
-                                                                            ? "border-primary bg-primary/10 animate-pulse"
-                                                                            : "border-border hover:border-primary/50"
+                                                    {categoryBindings.map((binding) => {
+                                                        // Get the shortcut for the current scheme
+                                                        const currentKey = hotkeyScheme === 'mac' ? binding.mac : binding.pc;
+                                                        // Check if this is a special binding (with patterns like [1...9] or arrows)
+                                                        const specialSuffix = currentKey.includes('[1...9]') 
+                                                            ? '[1...9]' 
+                                                            : currentKey.includes('arrows') 
+                                                                ? 'arrows' 
+                                                                : null;
+                                                        const isSpecialBinding = !!specialSuffix;
+                                                        
+                                                        // For special bindings, extract the modifier prefix
+                                                        const modifierPrefix = isSpecialBinding 
+                                                            ? currentKey.replace(specialSuffix, '').trim().replace(/\+\s*$/, '').trim()
+                                                            : null;
+                                                        
+                                                        // Check if we're recording this special binding
+                                                        const isRecordingThis = recordingBindingId === binding.id;
+                                                        
+                                                        return (
+                                                            <div
+                                                                key={binding.id}
+                                                                className="flex items-center justify-between px-4 py-2"
+                                                            >
+                                                                <span className="text-sm">{binding.label}</span>
+                                                                <div className="flex items-center gap-2">
+                                                                    {isSpecialBinding ? (
+                                                                        // Special bindings: show editable modifier prefix + fixed suffix
+                                                                        <div className="flex items-center gap-1">
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setRecordingBindingId(binding.id);
+                                                                                    setRecordingScheme(hotkeyScheme === 'mac' ? 'mac' : 'pc');
+                                                                                }}
+                                                                                className={cn(
+                                                                                    "px-2 py-1 text-xs font-mono rounded border transition-colors min-w-[60px] text-center",
+                                                                                    isRecordingThis
+                                                                                        ? "border-primary bg-primary/10 animate-pulse"
+                                                                                        : "border-border hover:border-primary/50"
+                                                                                )}
+                                                                            >
+                                                                                {isRecordingThis
+                                                                                    ? "Press Keys..."
+                                                                                    : modifierPrefix || 'None'}
+                                                                            </button>
+                                                                            <span className="text-xs text-muted-foreground">+</span>
+                                                                            <span className="px-2 py-1 text-xs font-mono rounded border border-border bg-muted/30 text-muted-foreground">
+                                                                                {specialSuffix}
+                                                                            </span>
+                                                                        </div>
+                                                                    ) : (
+                                                                        // Regular bindings: show editable button
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setRecordingBindingId(binding.id);
+                                                                                setRecordingScheme(hotkeyScheme === 'mac' ? 'mac' : 'pc');
+                                                                            }}
+                                                                            className={cn(
+                                                                                "px-2 py-1 text-xs font-mono rounded border transition-colors min-w-[80px] text-center",
+                                                                                isRecordingThis
+                                                                                    ? "border-primary bg-primary/10 animate-pulse"
+                                                                                    : "border-border hover:border-primary/50"
+                                                                            )}
+                                                                        >
+                                                                            {isRecordingThis
+                                                                                ? "Press Keys..."
+                                                                                : currentKey || 'Disabled'}
+                                                                        </button>
                                                                     )}
-                                                                >
-                                                                    {recordingBindingId === binding.id &&
-                                                                        recordingScheme === "mac"
-                                                                        ? "Press keys..."
-                                                                        : binding.mac}
-                                                                </button>
-                                                                <button
-                                                                    onClick={() =>
-                                                                        resetKeyBinding?.(binding.id, "mac")
-                                                                    }
-                                                                    className="p-1 hover:bg-muted rounded"
-                                                                    title="Reset to default"
-                                                                >
-                                                                    <RotateCcw size={12} />
-                                                                </button>
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            resetKeyBinding?.(binding.id, hotkeyScheme === 'mac' ? 'mac' : 'pc')
+                                                                        }
+                                                                        className="p-1 hover:bg-muted rounded"
+                                                                        title="Reset to default"
+                                                                    >
+                                                                        <RotateCcw size={12} />
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         );

@@ -92,6 +92,7 @@ export const createWorkspaceFromSessions = (
   return {
     id: `ws-${crypto.randomUUID()}`,
     title: 'Workspace',
+    focusedSessionId: baseSessionId, // Initialize with the base session focused
     root: {
       id: crypto.randomUUID(),
       type: 'split',
@@ -182,4 +183,223 @@ export const collectSessionIds = (node: WorkspaceNode): string[] => {
     return [node.sessionId];
   }
   return node.children.flatMap(child => collectSessionIds(child));
+};
+
+/**
+ * Find a pane node by session ID in the workspace tree.
+ */
+const findPaneBySessionId = (node: WorkspaceNode, sessionId: string): WorkspaceNode | null => {
+  if (node.type === 'pane') {
+    return node.sessionId === sessionId ? node : null;
+  }
+  for (const child of node.children) {
+    const found = findPaneBySessionId(child, sessionId);
+    if (found) return found;
+  }
+  return null;
+};
+
+/**
+ * Get the path to a session in the workspace tree.
+ * Returns an array of indices representing the path from root to the pane.
+ */
+const getPathToSession = (node: WorkspaceNode, sessionId: string, path: number[] = []): number[] | null => {
+  if (node.type === 'pane') {
+    return node.sessionId === sessionId ? path : null;
+  }
+  for (let i = 0; i < node.children.length; i++) {
+    const result = getPathToSession(node.children[i], sessionId, [...path, i]);
+    if (result) return result;
+  }
+  return null;
+};
+
+/**
+ * Get all panes with their positions for navigation.
+ */
+interface PanePosition {
+  sessionId: string;
+  path: number[];
+  // Calculated bounds (normalized 0-1)
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const collectPanePositions = (
+  node: WorkspaceNode,
+  path: number[] = [],
+  bounds: { x: number; y: number; width: number; height: number } = { x: 0, y: 0, width: 1, height: 1 }
+): PanePosition[] => {
+  if (node.type === 'pane') {
+    return [{
+      sessionId: node.sessionId,
+      path,
+      ...bounds,
+    }];
+  }
+
+  const positions: PanePosition[] = [];
+  const sizes = node.sizes || node.children.map(() => 1 / node.children.length);
+  const totalSize = sizes.reduce((a, b) => a + b, 0) || 1;
+  
+  let offset = 0;
+  for (let i = 0; i < node.children.length; i++) {
+    const sizeRatio = (sizes[i] || 1 / node.children.length) / totalSize;
+    
+    let childBounds: { x: number; y: number; width: number; height: number };
+    if (node.direction === 'horizontal') {
+      // Top/bottom split
+      childBounds = {
+        x: bounds.x,
+        y: bounds.y + bounds.height * offset,
+        width: bounds.width,
+        height: bounds.height * sizeRatio,
+      };
+    } else {
+      // Left/right split
+      childBounds = {
+        x: bounds.x + bounds.width * offset,
+        y: bounds.y,
+        width: bounds.width * sizeRatio,
+        height: bounds.height,
+      };
+    }
+    
+    positions.push(...collectPanePositions(node.children[i], [...path, i], childBounds));
+    offset += sizeRatio;
+  }
+  
+  return positions;
+};
+
+export type FocusDirection = 'up' | 'down' | 'left' | 'right';
+
+/**
+ * Find the next session to focus when moving in a direction.
+ * Returns the session ID to focus, or null if no valid target.
+ */
+export const getNextFocusSessionId = (
+  root: WorkspaceNode,
+  currentSessionId: string,
+  direction: FocusDirection
+): string | null => {
+  const positions = collectPanePositions(root);
+  console.log('[getNextFocusSessionId] All positions:');
+  positions.forEach((p, i) => {
+    console.log(`  [${i}] sessionId: ${p.sessionId.slice(0, 8)}..., x: ${p.x}, y: ${p.y}, w: ${p.width}, h: ${p.height}`);
+  });
+  
+  const current = positions.find(p => p.sessionId === currentSessionId);
+  if (!current) {
+    console.log('[getNextFocusSessionId] Current session not found in positions');
+    return null;
+  }
+  console.log('[getNextFocusSessionId] Current pane:', current.sessionId.slice(0, 8), 'at x:', current.x, 'y:', current.y, 'w:', current.width, 'h:', current.height);
+
+  // Filter candidates based on direction
+  let candidates: PanePosition[] = [];
+  const otherPanes = positions.filter(p => p.sessionId !== currentSessionId);
+  
+  switch (direction) {
+    case 'left':
+      // Find panes to the left
+      candidates = otherPanes.filter(p => 
+        p.x + p.width <= current.x + 0.001 // Allow small epsilon for floating point
+      );
+      // Wraparound: if no pane to the left, find the rightmost pane
+      if (candidates.length === 0 && otherPanes.length > 0) {
+        const maxX = Math.max(...otherPanes.map(p => p.x));
+        candidates = otherPanes.filter(p => p.x >= maxX - 0.001);
+      }
+      break;
+    case 'right':
+      // Find panes to the right
+      candidates = otherPanes.filter(p => 
+        p.x >= current.x + current.width - 0.001
+      );
+      // Wraparound: if no pane to the right, find the leftmost pane
+      if (candidates.length === 0 && otherPanes.length > 0) {
+        const minX = Math.min(...otherPanes.map(p => p.x));
+        candidates = otherPanes.filter(p => p.x <= minX + 0.001);
+      }
+      break;
+    case 'up':
+      // Find panes above
+      candidates = otherPanes.filter(p => 
+        p.y + p.height <= current.y + 0.001
+      );
+      // Wraparound: if no pane above, find the bottommost pane
+      if (candidates.length === 0 && otherPanes.length > 0) {
+        const maxY = Math.max(...otherPanes.map(p => p.y));
+        candidates = otherPanes.filter(p => p.y >= maxY - 0.001);
+      }
+      break;
+    case 'down':
+      // Find panes below
+      candidates = otherPanes.filter(p => 
+        p.y >= current.y + current.height - 0.001
+      );
+      // Wraparound: if no pane below, find the topmost pane
+      if (candidates.length === 0 && otherPanes.length > 0) {
+        const minY = Math.min(...otherPanes.map(p => p.y));
+        candidates = otherPanes.filter(p => p.y <= minY + 0.001);
+      }
+      break;
+  }
+
+  console.log('[getNextFocusSessionId] Direction:', direction, 'Candidates count:', candidates.length, '(wraparound enabled)');
+  candidates.forEach((c, i) => {
+    console.log(`  Candidate[${i}]: ${c.sessionId.slice(0, 8)}... at x: ${c.x}, y: ${c.y}`);
+  });
+
+  if (candidates.length === 0) return null;
+
+  // Calculate center point of current pane for scoring
+  const currentCenterX = current.x + current.width / 2;
+  const currentCenterY = current.y + current.height / 2;
+
+  // Find the closest candidate
+  // For left/right, prefer candidates that overlap vertically
+  // For up/down, prefer candidates that overlap horizontally
+  let best: PanePosition | null = null;
+  let bestScore = Infinity;
+
+  for (const candidate of candidates) {
+    const candidateCenterX = candidate.x + candidate.width / 2;
+    const candidateCenterY = candidate.y + candidate.height / 2;
+    
+    let score: number;
+    
+    if (direction === 'left' || direction === 'right') {
+      // Check vertical overlap
+      const overlapTop = Math.max(current.y, candidate.y);
+      const overlapBottom = Math.min(current.y + current.height, candidate.y + candidate.height);
+      const hasOverlap = overlapBottom > overlapTop;
+      
+      // Distance is horizontal distance, but penalize if no overlap
+      const distance = Math.abs(candidateCenterX - currentCenterX);
+      const verticalPenalty = hasOverlap ? 0 : Math.abs(candidateCenterY - currentCenterY) * 2;
+      score = distance + verticalPenalty;
+    } else {
+      // Check horizontal overlap
+      const overlapLeft = Math.max(current.x, candidate.x);
+      const overlapRight = Math.min(current.x + current.width, candidate.x + candidate.width);
+      const hasOverlap = overlapRight > overlapLeft;
+      
+      // Distance is vertical distance, but penalize if no overlap
+      const distance = Math.abs(candidateCenterY - currentCenterY);
+      const horizontalPenalty = hasOverlap ? 0 : Math.abs(candidateCenterX - currentCenterX) * 2;
+      score = distance + horizontalPenalty;
+    }
+
+    if (score < bestScore) {
+      bestScore = score;
+      best = candidate;
+    }
+  }
+
+  console.log('[getNextFocusSessionId] Best candidate:', best?.sessionId?.slice(0, 8));
+  return best?.sessionId || null;
 };

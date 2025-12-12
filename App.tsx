@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { activeTabStore, useIsVaultActive } from './application/state/activeTabStore';
 import { useSessionState } from './application/state/useSessionState';
 import { useSettingsState } from './application/state/useSettingsState';
@@ -115,6 +115,7 @@ function App() {
     splitSession,
     toggleWorkspaceViewMode,
     setWorkspaceFocusedSession,
+    moveFocusInWorkspace,
     runSnippet,
     orphanSessions,
     orderedTabs,
@@ -123,6 +124,10 @@ function App() {
 
   // isMacClient is used for window controls styling
   const isMacClient = typeof navigator !== 'undefined' && /Mac|Macintosh/.test(navigator.userAgent);
+
+  // Debounce ref for moveFocus to prevent double-triggering when focus switches
+  const lastMoveFocusTimeRef = useRef<number>(0);
+  const MOVE_FOCUS_DEBOUNCE_MS = 200;
 
   // Shared hotkey action handler - used by both global handler and terminal callback
   const executeHotkeyAction = useCallback((action: string, e: KeyboardEvent) => {
@@ -242,20 +247,39 @@ function App() {
         break;
       }
       case 'moveFocus': {
+        // Debounce to prevent double-triggering when focus switches between terminals
+        const now = Date.now();
+        if (now - lastMoveFocusTimeRef.current < MOVE_FOCUS_DEBOUNCE_MS) {
+          console.log('[App] moveFocus debounced, ignoring');
+          break;
+        }
+        lastMoveFocusTimeRef.current = now;
+        
         // Move focus between split panes
+        console.log('[App] moveFocus action triggered, key:', e.key);
         const direction = e.key === 'ArrowUp' ? 'up'
           : e.key === 'ArrowDown' ? 'down'
             : e.key === 'ArrowLeft' ? 'left'
               : e.key === 'ArrowRight' ? 'right'
                 : null;
+        console.log('[App] moveFocus direction:', direction);
         if (direction) {
-          console.log(`[Hotkey] Move focus ${direction}`);
-          // TODO: Implement focus movement in workspace
+          // Find the active workspace
+          const currentId = activeTabStore.getActiveTabId();
+          console.log('[App] Active tab ID:', currentId);
+          const activeWs = workspaces.find(w => w.id === currentId);
+          console.log('[App] Active workspace:', activeWs?.id, activeWs?.title);
+          if (activeWs) {
+            const result = moveFocusInWorkspace(activeWs.id, direction as 'up' | 'down' | 'left' | 'right');
+            console.log('[App] moveFocusInWorkspace result:', result);
+          } else {
+            console.log('[App] No active workspace found');
+          }
         }
         break;
       }
     }
-  }, [orderedTabs, sessions, workspaces, setActiveTabId, closeSession, closeWorkspace, createLocalTerminal, splitSession]);
+  }, [orderedTabs, sessions, workspaces, setActiveTabId, closeSession, closeWorkspace, createLocalTerminal, splitSession, moveFocusInWorkspace]);
 
   // Callback for terminal to invoke app-level hotkey actions
   const handleHotkeyAction = useCallback((action: string, e: KeyboardEvent) => {
