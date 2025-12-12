@@ -70,7 +70,7 @@ export const TerminalSearchBar: React.FC<TerminalSearchBarProps> = ({
 
     return (
         <div
-            className="flex items-center gap-1.5 px-2 pt-1 pb-2 bg-black/50 backdrop-blur-sm"
+            className="flex items-center gap-1.5 px-2 pt-0 pb-2 bg-black/50 backdrop-blur-sm"
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
         >
@@ -100,6 +100,7 @@ export const TerminalSearchBar: React.FC<TerminalSearchBarProps> = ({
             {/* Navigation buttons */}
             <div className="flex items-center gap-0.5 flex-shrink-0">
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30"
@@ -109,12 +110,15 @@ export const TerminalSearchBar: React.FC<TerminalSearchBarProps> = ({
                         onFindPrevious();
                     }}
                     onMouseDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
                     disabled={!searchTerm}
                     title="Previous match (Shift+Enter)"
+                    tabIndex={-1}
                 >
                     <ChevronUp size={14} />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30"
@@ -124,8 +128,10 @@ export const TerminalSearchBar: React.FC<TerminalSearchBarProps> = ({
                         onFindNext();
                     }}
                     onMouseDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
                     disabled={!searchTerm}
                     title="Next match (Enter)"
+                    tabIndex={-1}
                 >
                     <ChevronDown size={14} />
                 </Button>

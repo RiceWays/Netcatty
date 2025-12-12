@@ -506,18 +506,6 @@ const TerminalComponent: React.FC<TerminalProps> = ({
               return false;
             }
 
-            // Handle Escape to close search
-            if (e.key === 'Escape' && e.type === 'keydown') {
-              // Only handle if search is open (check via closure, since state can't be accessed directly)
-              // We'll check if searchAddonRef has an active search
-              if (searchAddonRef.current) {
-                setIsSearchOpen(false);
-                setSearchMatchCount(null);
-                searchAddonRef.current.clearDecorations();
-                searchTermRef.current = '';
-              }
-            }
-
             // Read current values from refs
             const currentScheme = hotkeySchemeRef.current;
             const currentBindings = keyBindingsRef.current;
