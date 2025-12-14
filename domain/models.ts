@@ -567,3 +567,18 @@ export interface ShellHistoryEntry {
   sessionId: string;
   timestamp: number;
 }
+
+// Connection Log - records connection history
+export interface ConnectionLog {
+  id: string;
+  hostId: string; // Host ID (can be empty for local terminal)
+  hostLabel: string; // Display label (e.g., 'Local Terminal' or host label)
+  hostname: string; // Target hostname or 'localhost'
+  username: string; // SSH username or system username
+  protocol: 'ssh' | 'telnet' | 'local' | 'mosh';
+  startTime: number; // Connection start timestamp
+  endTime?: number; // Connection end timestamp (undefined if still active)
+  localUsername: string; // System username of the local user
+  localHostname: string; // Local machine hostname
+  saved: boolean; // Whether this log is bookmarked/saved
+}

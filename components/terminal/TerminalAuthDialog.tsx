@@ -9,7 +9,7 @@ import { SSHKey } from '../../types';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Popover,PopoverContent,PopoverTrigger } from '../ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 export type TerminalAuthMethod = 'password' | 'key';
 
@@ -66,7 +66,7 @@ export const TerminalAuthDialog: React.FC<TerminalAuthDialogProps> = ({
 
     // Show all keys (both regular keys and certificates) when in key mode
     const selectableKeys = keys.filter((k) => k.category === 'key' || Boolean(k.certificate?.trim()));
-    
+
     const [keyDropdownOpen, setKeyDropdownOpen] = React.useState(false);
 
     const selectedKey = authKeyId ? keys.find((k) => k.id === authKeyId) : null;
@@ -167,22 +167,22 @@ export const TerminalAuthDialog: React.FC<TerminalAuthDialogProps> = ({
                                                     <div className={cn(
                                                         "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
                                                         selectedKey.certificate?.trim()
-                                                          ? "bg-emerald-500/20 text-emerald-500"
-                                                          : selectedKey.source === 'biometric' || selectedKey.source === 'fido2'
-                                                            ? "bg-amber-500/20 text-amber-500"
-                                                            : "bg-primary/20 text-primary"
+                                                            ? "bg-emerald-500/20 text-emerald-500"
+                                                            : selectedKey.source === 'biometric' || selectedKey.source === 'fido2'
+                                                                ? "bg-amber-500/20 text-amber-500"
+                                                                : "bg-primary/20 text-primary"
                                                     )}>
-                                                        {selectedKey.certificate?.trim() 
-                                                          ? <BadgeCheck size={14} /> 
-                                                          : selectedKey.source === 'biometric' || selectedKey.source === 'fido2'
-                                                            ? <Fingerprint size={14} />
-                                                            : <Key size={14} />}
+                                                        {selectedKey.certificate?.trim()
+                                                            ? <BadgeCheck size={14} />
+                                                            : selectedKey.source === 'biometric' || selectedKey.source === 'fido2'
+                                                                ? <Fingerprint size={14} />
+                                                                : <Key size={14} />}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="text-sm font-medium truncate">{selectedKey.label}</div>
                                                         <div className="text-xs text-muted-foreground">
-                                                          {selectedKey.certificate?.trim() ? 'Certificate' : selectedKey.type}
-                                                          {(selectedKey.source === 'biometric' || selectedKey.source === 'fido2') && ' · Passkey'}
+                                                            {selectedKey.certificate?.trim() ? 'Certificate' : selectedKey.type}
+                                                            {(selectedKey.source === 'biometric' || selectedKey.source === 'fido2') && ' · Passkey'}
                                                         </div>
                                                     </div>
                                                 </>
@@ -204,30 +204,30 @@ export const TerminalAuthDialog: React.FC<TerminalAuthDialogProps> = ({
                                                             : "hover:bg-secondary/80"
                                                     )}
                                                     onClick={() => {
-                                                      setAuthKeyId(key.id);
-                                                      setAuthPassphrase(key.passphrase || '');
-                                                      setKeyDropdownOpen(false);
+                                                        setAuthKeyId(key.id);
+                                                        setAuthPassphrase(key.passphrase || '');
+                                                        setKeyDropdownOpen(false);
                                                     }}
                                                 >
                                                     <div className={cn(
                                                         "h-7 w-7 rounded-md flex items-center justify-center shrink-0",
                                                         key.certificate?.trim()
-                                                          ? "bg-emerald-500/20 text-emerald-500"
-                                                          : key.source === 'biometric' || key.source === 'fido2'
-                                                            ? "bg-amber-500/20 text-amber-500"
-                                                            : "bg-primary/20 text-primary"
+                                                            ? "bg-emerald-500/20 text-emerald-500"
+                                                            : key.source === 'biometric' || key.source === 'fido2'
+                                                                ? "bg-amber-500/20 text-amber-500"
+                                                                : "bg-primary/20 text-primary"
                                                     )}>
-                                                        {key.certificate?.trim() 
-                                                          ? <BadgeCheck size={12} /> 
-                                                          : key.source === 'biometric' || key.source === 'fido2'
-                                                            ? <Fingerprint size={12} />
-                                                            : <Key size={12} />}
+                                                        {key.certificate?.trim()
+                                                            ? <BadgeCheck size={12} />
+                                                            : key.source === 'biometric' || key.source === 'fido2'
+                                                                ? <Fingerprint size={12} />
+                                                                : <Key size={12} />}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="text-sm font-medium truncate">{key.label}</div>
                                                         <div className="text-xs text-muted-foreground">
-                                                          {key.certificate?.trim() ? 'Certificate' : key.type}
-                                                          {(key.source === 'biometric' || key.source === 'fido2') && ' · Passkey'}
+                                                            {key.certificate?.trim() ? 'Certificate' : key.type}
+                                                            {(key.source === 'biometric' || key.source === 'fido2') && ' · Passkey'}
                                                         </div>
                                                     </div>
                                                 </button>
