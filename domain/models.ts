@@ -134,6 +134,14 @@ export interface Snippet {
   tags?: string[];
   package?: string; // package path
   targets?: string[]; // host ids
+  targetGroups?: string[]; // host group paths for group-level binding
+}
+
+export interface SnippetPackageNode {
+  name: string;
+  path: string;
+  children: Record<string, SnippetPackageNode>;
+  snippets: Snippet[];
 }
 
 export interface TerminalLine {

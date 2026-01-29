@@ -669,7 +669,26 @@ const TerminalLayerInner: React.FC<TerminalLayerProps> = ({
                 host={host}
                 keys={keys}
                 identities={identities}
-                snippets={snippets}
+                snippets={snippets.filter(snippet => {
+                  // 如果代码片段没有设置目标，显示给所有主机
+                  if ((!snippet.targets || snippet.targets.length === 0) && 
+                      (!snippet.targetGroups || snippet.targetGroups.length === 0)) {
+                    return true;
+                  }
+                  
+                  // 检查是否直接绑定到当前主机
+                  if (snippet.targets && snippet.targets.includes(host.id)) {
+                    return true;
+                  }
+                  
+                  // 检查是否绑定到当前主机的分组
+                  if (snippet.targetGroups && host.group && 
+                      snippet.targetGroups.includes(host.group)) {
+                    return true;
+                  }
+                  
+                  return false;
+                })}
                 allHosts={hosts}
                 knownHosts={knownHosts}
                 isVisible={isVisible}

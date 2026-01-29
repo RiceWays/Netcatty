@@ -1528,6 +1528,7 @@ const VaultViewInner: React.FC<VaultViewProps> = ({
             packages={snippetPackages}
             hosts={hosts}
             customGroups={customGroups}
+            hostGroupTree={treeViewGroupTree}
             shellHistory={shellHistory}
             onPackagesChange={onUpdateSnippetPackages}
             onSave={(s) =>

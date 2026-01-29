@@ -1,12 +1,13 @@
-import { Check, ChevronDown, Clock, Copy, Edit2, FileCode, FolderPlus, LayoutGrid, List as ListIcon, Loader2, Package, Play, Plus, Search, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, Clock, Copy, Edit2, FileCode, FolderPlus, LayoutGrid, List as ListIcon, Loader2, Package, Play, Plus, Search, Trash2, TreePine } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../application/i18n/I18nProvider';
 import { useStoredViewMode } from '../application/state/useStoredViewMode';
 import { STORAGE_KEY_VAULT_SNIPPETS_VIEW_MODE } from '../infrastructure/config/storageKeys';
 import { cn } from '../lib/utils';
-import { Host, ShellHistoryEntry, Snippet, SSHKey } from '../types';
+import { Host, ShellHistoryEntry, Snippet, SSHKey, GroupNode } from '../types';
 import { DistroAvatar } from './DistroAvatar';
 import SelectHostPanel from './SelectHostPanel';
+import SnippetPackageTreeView from './SnippetPackageTreeView';
 import { AsidePanel, AsidePanelContent } from './ui/aside-panel';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -23,6 +24,7 @@ interface SnippetsManagerProps {
   packages: string[];
   hosts: Host[];
   customGroups?: string[];
+  hostGroupTree?: GroupNode[]; // 添加主机分组树结构
   shellHistory: ShellHistoryEntry[];
   onSave: (snippet: Snippet) => void;
   onDelete: (id: string) => void;
@@ -34,7 +36,7 @@ interface SnippetsManagerProps {
   onCreateGroup?: (groupPath: string) => void;
 }
 
-type RightPanelMode = 'none' | 'edit-snippet' | 'history' | 'select-targets';
+type RightPanelMode = 'none' | 'edit-snippet' | 'history' | 'select-targets' | 'select-groups';
 
 const HISTORY_PAGE_SIZE = 30;
 
@@ -43,6 +45,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
   packages,
   hosts,
   customGroups = [],
+  hostGroupTree = [],
   shellHistory,
   onSave,
   onDelete,
@@ -60,12 +63,21 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
     command: '',
     package: '',
     targets: [],
+    targetGroups: [],
   });
   const [targetSelection, setTargetSelection] = useState<string[]>([]);
+  const [targetGroupSelection, setTargetGroupSelection] = useState<string[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [newPackageName, setNewPackageName] = useState('');
   const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
+
+  // View mode state - add tree view option
+  const [viewMode, setViewMode] = useStoredViewMode(
+    STORAGE_KEY_VAULT_SNIPPETS_VIEW_MODE,
+    'grid',
+  );
+  const [sortMode, setSortMode] = useState<SortMode>('az');
 
   // Rename package state
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
@@ -73,13 +85,8 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
   const [renamePackageName, setRenamePackageName] = useState('');
   const [renameError, setRenameError] = useState('');
 
-  // Search, sort, and view mode state
+  // Search state
   const [search, setSearch] = useState('');
-  const [viewMode, setViewMode] = useStoredViewMode(
-    STORAGE_KEY_VAULT_SNIPPETS_VIEW_MODE,
-    'grid',
-  );
-  const [sortMode, setSortMode] = useState<SortMode>('az');
 
   // Shell history lazy loading state
   const [historyVisibleCount, setHistoryVisibleCount] = useState(HISTORY_PAGE_SIZE);
@@ -90,14 +97,17 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
     if (snippet) {
       setEditingSnippet(snippet);
       setTargetSelection(snippet.targets || []);
+      setTargetGroupSelection(snippet.targetGroups || []);
     } else {
       setEditingSnippet({
         label: '',
         command: '',
         package: selectedPackage || '',
-        targets: []
+        targets: [],
+        targetGroups: []
       });
       setTargetSelection([]);
+      setTargetGroupSelection([]);
     }
     setRightPanelMode('edit-snippet');
   };
@@ -111,6 +121,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
         tags: editingSnippet.tags || [],
         package: editingSnippet.package || '',
         targets: targetSelection,
+        targetGroups: targetGroupSelection,
       });
       setRightPanelMode('none');
     }
@@ -124,23 +135,47 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
 
   const handleClosePanel = () => {
     setRightPanelMode('none');
-    setEditingSnippet({ label: '', command: '', package: '', targets: [] });
+    setEditingSnippet({ label: '', command: '', package: '', targets: [], targetGroups: [] });
     setTargetSelection([]);
+    setTargetGroupSelection([]);
   };
 
   const targetHosts = useMemo(() => {
-    return targetSelection
+    // Direct host targets
+    const directTargets = targetSelection
       .map((id) => hosts.find((h) => h.id === id))
       .filter((h): h is Host => Boolean(h));
-  }, [targetSelection, hosts]);
+
+    // Group-based targets
+    const groupTargets = targetGroupSelection
+      .flatMap(groupPath => hosts.filter(h => h.group === groupPath));
+
+    // Combine and deduplicate
+    const allTargets = [...directTargets, ...groupTargets];
+    const uniqueTargets = allTargets.filter((host, index, arr) => 
+      arr.findIndex(h => h.id === host.id) === index
+    );
+
+    return uniqueTargets;
+  }, [targetSelection, targetGroupSelection, hosts]);
 
   const openTargetPicker = () => {
     setRightPanelMode('select-targets');
   };
 
+  const openGroupPicker = () => {
+    setRightPanelMode('select-groups');
+  };
+
   const handleTargetSelect = (host: Host) => {
     setTargetSelection((prev) =>
       prev.includes(host.id) ? prev.filter((id) => id !== host.id) : [...prev, host.id]
+    );
+  };
+
+  const handleGroupSelect = (groupPath: string) => {
+    setTargetGroupSelection((prev) =>
+      prev.includes(groupPath) ? prev.filter((path) => path !== groupPath) : [...prev, groupPath]
     );
   };
 
@@ -181,7 +216,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
       
       Array.from(new Set(absoluteRoots)).forEach((name: string) => {
         const path: string = `/${name}`;
-        const displayName: string = `/${name}`; // Show with leading slash to distinguish
+        const displayName: string = name; // Show just the name without leading slash
         const count = snippets.filter((s) => {
           const pkg = s.package || '';
           return pkg === path || pkg.startsWith(path + '/');
@@ -343,9 +378,11 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
   };
 
   const openRenameDialog = (path: string) => {
-    const name = path.split('/').pop() || '';
+    const parts = path.split('/').filter(Boolean);
+    const name = parts[parts.length - 1] || '';
+    
     setRenamingPackagePath(path);
-    setRenamePackageName(name);
+    setRenamePackageName(name); // This correctly shows just the name (e.g., "100" for "/100")
     setRenameError('');
     setIsRenameDialogOpen(true);
   };
@@ -434,6 +471,34 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
     const sn = snippets.find((s) => s.id === id);
     if (!sn) return;
     onSave({ ...sn, package: pkg || '' });
+  };
+
+  // Tree view handlers
+  const handleCopySnippet = (snippet: Snippet) => {
+    handleCopy(snippet.id, snippet.command);
+  };
+
+  const handleMovePackage = (sourcePath: string, targetPath: string) => {
+    movePackage(sourcePath, targetPath);
+  };
+
+  const handleEditPackage = (packagePath: string) => {
+    openRenameDialog(packagePath);
+  };
+
+  const handleDeletePackage = (packagePath: string) => {
+    deletePackage(packagePath);
+  };
+
+  const handleNewPackageInTree = (parentPath?: string) => {
+    setSelectedPackage(parentPath || null);
+    setNewPackageName('');
+    setIsPackageDialogOpen(true);
+  };
+
+  const handleNewSnippetInTree = (packagePath?: string) => {
+    setSelectedPackage(packagePath || null);
+    handleEdit();
   };
 
   // Package options for Combobox
@@ -529,8 +594,65 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
           availableKeys={availableKeys}
           onSaveHost={onSaveHost}
           onCreateGroup={onCreateGroup}
-          title={t('snippets.targets.add')}
+          title={t('snippets.targets.selectHosts')}
         />
+      );
+    }
+
+    if (rightPanelMode === 'select-groups') {
+      // Extract all unique groups from hosts
+      const availableGroups = Array.from(new Set(
+        hosts
+          .map(h => h.group)
+          .filter((group): group is string => Boolean(group))
+      )).sort();
+
+      return (
+        <AsidePanel
+          open={true}
+          onClose={handleTargetPickerBack}
+          title={t('snippets.targets.selectGroups')}
+          showBackButton={true}
+          onBack={handleTargetPickerBack}
+        >
+          <AsidePanelContent>
+            <div className="space-y-2">
+              {availableGroups.map((groupPath) => (
+                <div
+                  key={groupPath}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                    targetGroupSelection.includes(groupPath)
+                      ? "bg-primary/10 border border-primary/20"
+                      : "bg-background/60 border border-border/70 hover:bg-secondary/60"
+                  )}
+                  onClick={() => {
+                    handleGroupSelect(groupPath);
+                    // 移除自动关闭，允许多选
+                  }}
+                >
+                  <Package size={16} className={targetGroupSelection.includes(groupPath) ? "text-primary" : "text-muted-foreground"} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold truncate">{groupPath}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">
+                      {t('snippets.targets.groupHosts', { count: hosts.filter(h => h.group === groupPath).length })}
+                    </div>
+                  </div>
+                  {targetGroupSelection.includes(groupPath) && (
+                    <Check size={16} className="text-primary" />
+                  )}
+                </div>
+              ))}
+              
+              {availableGroups.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Package size={32} className="mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">{t('snippets.targets.noGroups')}</p>
+                </div>
+              )}
+            </div>
+          </AsidePanelContent>
+        </AsidePanel>
       );
     }
 
@@ -595,7 +717,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
             <Card className="p-3 space-y-2 bg-card border-border/80">
               <p className="text-xs font-semibold text-muted-foreground">{t('snippets.field.scriptRequired')}</p>
               <Textarea
-                placeholder="ls -l"
+                placeholder={t('snippets.field.scriptPlaceholder')}
                 className="min-h-[120px] font-mono text-xs"
                 value={editingSnippet.command || ''}
                 onChange={(e) => setEditingSnippet({ ...editingSnippet, command: e.target.value })}
@@ -606,32 +728,100 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
             <Card className="p-3 space-y-3 bg-card border-border/80">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-muted-foreground">{t('snippets.targets.title')}</p>
-                <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary" onClick={openTargetPicker}>
-                  {t('action.edit')}
-                </Button>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary" onClick={openTargetPicker}>
+                    {t('snippets.targets.hosts')}
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary" onClick={openGroupPicker}>
+                    {t('snippets.targets.groups')}
+                  </Button>
+                </div>
               </div>
 
               {targetHosts.length === 0 ? (
-                <Button
-                  variant="secondary"
-                  className="w-full h-10"
-                  onClick={openTargetPicker}
-                >
-                  {t('snippets.targets.add')}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    variant="secondary"
+                    className="w-full h-10"
+                    onClick={openTargetPicker}
+                  >
+                    {t('snippets.targets.addHosts')}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="w-full h-10"
+                    onClick={openGroupPicker}
+                  >
+                    {t('snippets.targets.addGroups')}
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-2">
-                  {targetHosts.map((h) => (
-                    <div key={h.id} className="flex items-center gap-3 px-3 py-2 bg-background/60 border border-border/70 rounded-lg">
-                      <DistroAvatar host={h} fallback={h.os[0].toUpperCase()} className="h-10 w-10" />
+                  {/* Show selected groups */}
+                  {targetGroupSelection.map((groupPath) => (
+                    <div key={groupPath} className="flex items-center gap-3 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg">
+                      <Package size={16} className="text-primary" />
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold truncate">{h.hostname}</div>
+                        <div className="text-sm font-semibold truncate">{groupPath}</div>
                         <div className="text-[11px] text-muted-foreground truncate">
-                          {h.protocol || 'ssh'}, {h.username}
+                          {t('snippets.targets.groupHosts', { count: hosts.filter(h => h.group === groupPath).length })}
                         </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleGroupSelect(groupPath)}
+                      >
+                        ×
+                      </Button>
                     </div>
                   ))}
+                  
+                  {/* Show individual hosts */}
+                  {targetSelection.map((hostId) => {
+                    const host = hosts.find(h => h.id === hostId);
+                    if (!host) return null;
+                    return (
+                      <div key={host.id} className="flex items-center gap-3 px-3 py-2 bg-background/60 border border-border/70 rounded-lg">
+                        <DistroAvatar host={host} fallback={host.os[0].toUpperCase()} className="h-10 w-10" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold truncate">{host.hostname}</div>
+                          <div className="text-[11px] text-muted-foreground truncate">
+                            {host.protocol || 'ssh'}, {host.username}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleTargetSelect(host)}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Add more buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-8"
+                      onClick={openTargetPicker}
+                    >
+                      + {t('snippets.targets.hosts')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-8"
+                      onClick={openGroupPicker}
+                    >
+                      + {t('snippets.targets.groups')}
+                    </Button>
+                  </div>
                 </div>
               )}
             </Card>
@@ -644,7 +834,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
               onClick={handleSubmit}
               disabled={!editingSnippet.label || !editingSnippet.command}
             >
-              {editingSnippet.targets?.length ? t('action.run') : t('common.save')}
+              {t('common.save')}
             </Button>
           </div>
         </AsidePanel>
@@ -747,7 +937,9 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
               <Dropdown>
                 <DropdownTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-10 w-10">
-                    {viewMode === 'grid' ? <LayoutGrid size={16} /> : <ListIcon size={16} />}
+                    {viewMode === 'grid' ? <LayoutGrid size={16} /> : 
+                     viewMode === 'list' ? <ListIcon size={16} /> : 
+                     <TreePine size={16} />}
                     <ChevronDown size={10} className="ml-0.5" />
                   </Button>
                 </DropdownTrigger>
@@ -765,6 +957,13 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
                     onClick={() => setViewMode('list')}
                   >
                     <ListIcon size={14} /> {t('snippets.view.list')}
+                  </Button>
+                  <Button
+                    variant={viewMode === 'tree' ? 'secondary' : 'ghost'}
+                    className="w-full justify-start gap-2 h-9"
+                    onClick={() => setViewMode('tree')}
+                  >
+                    <TreePine size={14} /> {t('snippets.view.tree')}
                   </Button>
                 </DropdownContent>
               </Dropdown>
@@ -799,140 +998,163 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
         )}
 
         <div className="flex-1 space-y-3 overflow-y-auto px-4 pb-4">
-          {displayedPackages.length > 0 && (
+          {viewMode === 'tree' ? (
+            // Tree view
+            <SnippetPackageTreeView
+              packages={packages}
+              snippets={snippets}
+              hosts={hosts}
+              sortMode={sortMode}
+              onEditSnippet={handleEdit}
+              onDeleteSnippet={onDelete}
+              onRunSnippet={onRunSnippet}
+              onNewSnippet={handleNewSnippetInTree}
+              onNewPackage={handleNewPackageInTree}
+              onEditPackage={handleEditPackage}
+              onDeletePackage={handleDeletePackage}
+              onMoveSnippet={moveSnippet}
+              onMovePackage={handleMovePackage}
+              onCopySnippet={handleCopySnippet}
+            />
+          ) : (
+            // Grid/List view (existing logic)
             <>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-muted-foreground">{t('snippets.section.packages')}</h3>
-              </div>
-              <div className={cn(
-                viewMode === 'grid'
-                  ? "grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-                  : "flex flex-col gap-0"
-              )}>
-                {displayedPackages.map((pkg) => (
-                  <ContextMenu key={pkg.path}>
-                    <ContextMenuTrigger>
-                      <div
-                        className={cn(
-                          "group cursor-pointer",
-                          viewMode === 'grid'
-                            ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
-                            : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
-                        )}
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.effectAllowed = 'move';
-                          e.dataTransfer.setData('pkg-path', pkg.path);
-                        }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          const sId = e.dataTransfer.getData('snippet-id');
-                          const pPath = e.dataTransfer.getData('pkg-path');
-                          if (sId) moveSnippet(sId, pkg.path);
-                          if (pPath) movePackage(pPath, pkg.path);
-                        }}
-                        onClick={() => setSelectedPackage(pkg.path)}
-                      >
-                        <div className="flex items-center gap-3 h-full">
-                          <div className="h-11 w-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
-                            <Package size={18} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold truncate">{pkg.name}</div>
-                            <div className="text-[11px] text-muted-foreground">{t('snippets.package.count', { count: pkg.count })}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent>
-                      <ContextMenuItem onClick={() => setSelectedPackage(pkg.path)}>{t('action.open')}</ContextMenuItem>
-                      <ContextMenuItem onClick={() => openRenameDialog(pkg.path)}>{t('common.rename')}</ContextMenuItem>
-                      <ContextMenuItem className="text-destructive" onClick={() => deletePackage(pkg.path)}>{t('action.delete')}</ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
-                ))}
-              </div>
-            </>
-          )}
-
-          {displayedSnippets.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground">{t('snippets.section.snippets')}</h3>
-              <div className={cn(
-                viewMode === 'grid'
-                  ? "grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-                  : "flex flex-col gap-0"
-              )}>
-                {displayedSnippets.map((snippet) => (
-                  <ContextMenu key={snippet.id}>
-                    <ContextMenuTrigger>
-                      <div
-                        className={cn(
-                          "group cursor-pointer",
-                          viewMode === 'grid'
-                            ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
-                            : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
-                        )}
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.effectAllowed = 'move';
-                          e.dataTransfer.setData('snippet-id', snippet.id);
-                        }}
-                        onClick={() => handleEdit(snippet)}
-                      >
-                        <div className="flex items-center gap-3 h-full">
-                          <div className="h-11 w-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
-                            <FileCode size={18} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold truncate">{snippet.label}</div>
-                            <div className="text-[11px] text-muted-foreground font-mono leading-4 truncate">
-                              {snippet.command.replace(/\s+/g, ' ') || t('snippets.commandFallback')}
+              {displayedPackages.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-muted-foreground">{t('snippets.section.packages')}</h3>
+                  </div>
+                  <div className={cn(
+                    viewMode === 'grid'
+                      ? "grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                      : "flex flex-col gap-0"
+                  )}>
+                    {displayedPackages.map((pkg) => (
+                      <ContextMenu key={pkg.path}>
+                        <ContextMenuTrigger>
+                          <div
+                            className={cn(
+                              "group cursor-pointer",
+                              viewMode === 'grid'
+                                ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
+                                : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
+                            )}
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.effectAllowed = 'move';
+                              e.dataTransfer.setData('pkg-path', pkg.path);
+                            }}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const sId = e.dataTransfer.getData('snippet-id');
+                              const pPath = e.dataTransfer.getData('pkg-path');
+                              if (sId) moveSnippet(sId, pkg.path);
+                              if (pPath) movePackage(pPath, pkg.path);
+                            }}
+                            onClick={() => setSelectedPackage(pkg.path)}
+                          >
+                            <div className="flex items-center gap-3 h-full">
+                              <div className="h-11 w-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+                                <Package size={18} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-semibold truncate">{pkg.name}</div>
+                                <div className="text-[11px] text-muted-foreground">{t('snippets.package.count', { count: pkg.count })}</div>
+                              </div>
                             </div>
                           </div>
-                          {viewMode === 'list' && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                              onClick={(e) => { e.stopPropagation(); handleEdit(snippet); }}
-                            >
-                              <Edit2 size={14} />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent>
-                      <ContextMenuItem
-                        onClick={() => {
-                          const targetHostsList = (snippet.targets || [])
-                            .map(id => hosts.find(h => h.id === id))
-                            .filter((h): h is Host => Boolean(h));
-                          if (targetHostsList.length > 0) {
-                            onRunSnippet?.(snippet, targetHostsList);
-                          }
-                        }}
-                        disabled={!snippet.targets?.length}
-                      >
-                        <Play className="mr-2 h-4 w-4" /> {t('action.run')}
-                      </ContextMenuItem>
-                      <ContextMenuSeparator />
-                      <ContextMenuItem onClick={() => handleEdit(snippet)}>
-                        <Edit2 className="mr-2 h-4 w-4" /> {t('action.edit')}
-                      </ContextMenuItem>
-                      <ContextMenuItem onClick={() => handleCopy(snippet.id, snippet.command)}>
-                        <Copy className="mr-2 h-4 w-4" /> {t('action.copy')}
-                      </ContextMenuItem>
-                      <ContextMenuItem className="text-destructive" onClick={() => onDelete(snippet.id)}>
-                        <Trash2 className="mr-2 h-4 w-4" /> {t('action.delete')}
-                      </ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
-                ))}
-              </div>
-            </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem onClick={() => setSelectedPackage(pkg.path)}>{t('action.open')}</ContextMenuItem>
+                          <ContextMenuItem onClick={() => openRenameDialog(pkg.path)}>{t('common.rename')}</ContextMenuItem>
+                          <ContextMenuItem className="text-destructive" onClick={() => deletePackage(pkg.path)}>{t('action.delete')}</ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {displayedSnippets.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground">{t('snippets.section.snippets')}</h3>
+                  <div className={cn(
+                    viewMode === 'grid'
+                      ? "grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                      : "flex flex-col gap-0"
+                  )}>
+                    {displayedSnippets.map((snippet) => (
+                      <ContextMenu key={snippet.id}>
+                        <ContextMenuTrigger>
+                          <div
+                            className={cn(
+                              "group cursor-pointer",
+                              viewMode === 'grid'
+                                ? "soft-card elevate rounded-xl h-[68px] px-3 py-2"
+                                : "h-14 px-3 py-2 hover:bg-secondary/60 rounded-lg transition-colors"
+                            )}
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.effectAllowed = 'move';
+                              e.dataTransfer.setData('snippet-id', snippet.id);
+                            }}
+                            onClick={() => handleEdit(snippet)}
+                          >
+                            <div className="flex items-center gap-3 h-full">
+                              <div className="h-11 w-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+                                <FileCode size={18} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-semibold truncate">{snippet.label}</div>
+                                <div className="text-[11px] text-muted-foreground font-mono leading-4 truncate">
+                                  {snippet.command.replace(/\s+/g, ' ') || t('snippets.commandFallback')}
+                                </div>
+                              </div>
+                              {viewMode === 'list' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                  onClick={(e) => { e.stopPropagation(); handleEdit(snippet); }}
+                                >
+                                  <Edit2 size={14} />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem
+                            onClick={() => {
+                              const targetHostsList = (snippet.targets || [])
+                                .map(id => hosts.find(h => h.id === id))
+                                .filter((h): h is Host => Boolean(h));
+                              if (targetHostsList.length > 0) {
+                                onRunSnippet?.(snippet, targetHostsList);
+                              }
+                            }}
+                            disabled={!snippet.targets?.length}
+                          >
+                            <Play className="mr-2 h-4 w-4" /> {t('action.run')}
+                          </ContextMenuItem>
+                          <ContextMenuSeparator />
+                          <ContextMenuItem onClick={() => handleEdit(snippet)}>
+                            <Edit2 className="mr-2 h-4 w-4" /> {t('action.edit')}
+                          </ContextMenuItem>
+                          <ContextMenuItem onClick={() => handleCopy(snippet.id, snippet.command)}>
+                            <Copy className="mr-2 h-4 w-4" /> {t('action.copy')}
+                          </ContextMenuItem>
+                          <ContextMenuItem className="text-destructive" onClick={() => onDelete(snippet.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> {t('action.delete')}
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -954,7 +1176,7 @@ const SnippetsManager: React.FC<SnippetsManagerProps> = ({
                 onChange={(e) => setNewPackageName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && createPackage()}
                 pattern="^/?([\w-]+(/[\w-]+)*)?/?$"
-                title="Package names can contain letters, numbers, hyphens, underscores, and forward slashes. Can optionally start with /"
+                title={t('snippets.packageDialog.validation')}
               />
               <p className="text-[11px] text-muted-foreground">{t('snippets.packageDialog.hint')}</p>
             </div>
